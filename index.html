@@ -655,8 +655,37 @@
     }
 
   function saveInvoice() {
-    alert("Invoice data saved (this is a placeholder, backend integration can be added).");
+    const invoiceData = {
+      "Invoice Number": document.getElementById("invoiceNo").innerText,
+      "Amount Paid": parseFloat(document.getElementById("amountPaid").value || "0"),
+      "Remaining Balance": document.getElementById("remainingBalance").innerText.replace(/[^0-9.-]+/g, ""),
+      "Total Amount": document.getElementById("grandTotal").innerText.replace(/[^0-9.-]+/g, "")
+    };
+
+  // Loop through item rows and collect quantities
+    document.querySelectorAll("#itemRows tr").forEach(row => {
+      const itemName = row.children[0].querySelector("input").value;
+      const qty = parseFloat(row.children[2].querySelector("input").value || 0);
+      if (itemName && qty > 0) {
+        if (!invoiceData[itemName]) {
+          invoiceData[itemName] = 0;
+        }
+        invoiceData[itemName] += qty;
+      }
+    });
+
+    fetch("YOUR_GOOGLE_APPS_SCRIPT_WEBAPP_URL", {
+      method: "POST",
+      body: JSON.stringify(invoiceData),
+      headers: {
+        "Content-Type": "application/json"
+      }
+    })
+    .then(res => res.text())
+    .then(msg => alert("Invoice saved!"))
+    .catch(err => alert("Error saving invoice: " + err));
   }
+
 
   function newInvoice() {
     location.reload();
@@ -748,7 +777,7 @@
     return inWords(amount);
   }
   
-
+   
 
 
 </script>
