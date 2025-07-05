@@ -656,10 +656,10 @@
 
   function saveInvoice() {
     const invoiceData = {
-      "Invoice Number": document.getElementById("invoiceNo").innerText,
+      "InvoiceNumber": document.getElementById("InvoiceNumber").innerText,
       "Amount Paid": parseFloat(document.getElementById("amountPaid").value || "0"),
       "Remaining Balance": document.getElementById("remainingBalance").innerText.replace(/[^0-9.-]+/g, ""),
-      "Total Amount": document.getElementById("grandTotal").innerText.replace(/[^0-9.-]+/g, "")
+      "Totalamount": document.getElementById("Totalamount").innerText.replace(/[^0-9.-]+/g, "")
     };
 
   // Loop through item rows and collect quantities
@@ -674,7 +674,7 @@
       }
     });
 
-    fetch("https://script.google.com/macros/s/AKfycbx09DIZ392PvQe9k8EpwXAMajL9lwIH5w1jSfT4ofmn4zqNwDCt7JrO4XZ5Lngy3GT2/exec", {
+    fetch("https://script.google.com/macros/s/AKfycbyPi5HRA6bsxwD9NOpuWX02WUBL9aX1C15cUb1_INUHxQiPmMRmer71051Yu8vFKbRM/exec", {
       method: "POST",
       body: JSON.stringify(invoiceData),
       headers: {
