@@ -736,8 +736,8 @@
         Amount: row.amount.toFixed(2),
         GrandTotal: isLast ? runningTotal.toFixed(2) : "0.00",
         AmountPaid: isLast ? amountPaid.toFixed(2) : "0.00",
-        RemainingBalance: isLast ? (runningTotal - amountPaid).toFixed(2) : "0.00"
-        BilledBy: selectedBiller || ''
+        RemainingBalance: isLast ? (runningTotal - amountPaid).toFixed(2) : "0.00",
+        BilledBy: selectedBiller || '',
       });
     });
 
