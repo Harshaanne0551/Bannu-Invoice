@@ -619,16 +619,24 @@
   function initializeInvoice() {
     const dateStr = new Date().toLocaleDateString('en-GB');
     document.getElementById("invoiceDate").innerText = dateStr;
-
-    let lastInvoice = localStorage.getItem("lastInvoiceNo");
-    if (!lastInvoice) {
-      lastInvoice = "00001";
-      localStorage.setItem("lastInvoiceNo", lastInvoice);
-    }
-    document.getElementById("invoiceNo").innerText = lastInvoice;
-
+  
+    fetch("https://script.google.com/macros/s/AKfycbwF_ULpVqdVmws_GU5svU9SaY8K0VCZgqmOTp5HL6ARlbjIrrslO9dqRh4Jq4CBet-tAQ/exec") // ✅ Replace with your deployed Web App URL
+      .then(response => response.json())
+      .then(data => {
+        let last = data.lastInvoice || "00000";
+        let next = (parseInt(last, 10) + 1).toString().padStart(5, '0');
+        document.getElementById("invoiceNo").innerText = next;
+      })
+      .catch(err => {
+        console.error("Failed to fetch invoice number:", err);
+        // Fallback to local
+        let fallback = localStorage.getItem("lastInvoiceNo") || "00001";
+        document.getElementById("invoiceNo").innerText = fallback;
+      });
+  
     addRow();
   }
+
 
   function submitInvoice() {
   // Increment and store invoice number
