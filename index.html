@@ -750,6 +750,22 @@
 
     alert("Invoice saved locally!");
     displaySavedInvoices();
+    // Send data to Google Sheet
+    fetch("https://script.google.com/macros/s/AKfycbwF_ULpVqdVmws_GU5svU9SaY8K0VCZgqmOTp5HL6ARlbjIrrslO9dqRh4Jq4CBet-tAQ/exec", {
+      method: "POST",
+      body: JSON.stringify(items),
+      headers: {
+        "Content-Type": "application/json"
+      }
+    })
+    .then(res => res.text())
+    .then(response => {
+      console.log("Google Sheet response:", response);
+    })
+    .catch(err => {
+      console.error("Error saving to Google Sheets:", err);
+    });
+
   }
 
 
