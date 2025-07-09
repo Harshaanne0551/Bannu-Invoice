@@ -640,9 +640,6 @@
 
   function submitInvoice() {
   // Increment and store invoice number
-    let current = parseInt(localStorage.getItem("lastInvoiceNo") || "1", 10);
-    current++;
-    localStorage.setItem("lastInvoiceNo", current.toString().padStart(5, '0'));
 
   // Hide submit button, show post-submit buttons
     document.getElementById("submitBtn").style.display = "none";
