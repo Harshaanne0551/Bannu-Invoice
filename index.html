@@ -325,6 +325,18 @@
   <div class="total-in-words">
     Total Amount in Rs. <input type="text" id="amountInWords" readonly style="width: 100%;" />
   </div>
+  <div id="staffButtons" style="margin-top: 10px; text-align: center;">
+    <strong>Select Biller:</strong><br />
+    <button onclick="setBiller('Prasad')">Prasad</button>
+    <button onclick="setBiller('Suhas')">Suhas</button>
+    <button onclick="setBiller('Kavitha')">Kavitha</button>
+    <button onclick="setBiller('Sagar')">Sagar</button>
+</div>
+
+<div id="billedBy" style="margin-top: 10px; font-weight: bold; text-align: right; display: none;">
+  Billed by: <span id="billerName"></span>
+</div>
+
 
   <div class="signature">For Bannu Enterprises</div>
 </div>
@@ -445,6 +457,10 @@
     row.appendChild(actionTd);
 
     document.getElementById("itemRows").appendChild(row);
+  }
+  function setBiller(name) {
+    document.getElementById("billerName").innerText = name;
+    document.getElementById("billedBy").style.display = "block";
   }
 
   function showDropdown(input) {
@@ -618,6 +634,8 @@
   // Hide submit button, show post-submit buttons
     document.getElementById("submitBtn").style.display = "none";
     document.getElementById("afterSubmitButtons").style.display = "block";
+    document.getElementById("staffButtons").style.display = "none";
+
 
   // Remove the "Action" column from the table header
     const headerRow = document.querySelector("thead tr");
