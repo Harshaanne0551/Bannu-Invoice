@@ -361,6 +361,8 @@
 </div>
 
 <script>
+  let selectedBiller = '';
+
   const particularOptions = ["Bannu King Size 112pages","Bannu King Size 160pages","Bannu King Size 176pages","Bannu King Size 184pages","Bannu King Size 192pages",
 "Naveena King Size 112pages","Naveena King Size 160pages","Naveena King Size 192pages",
 "Harsha King Size 112pages","Harsha Binding","Harsha King Size 120pages","Harsha King Size 132pages","Harsha King Size 136pages","Harsha King Size 160pages","Harsha King Size 192pages",
@@ -461,6 +463,7 @@
     document.getElementById("itemRows").appendChild(row);
   }
   function setBiller(name) {
+    selectedBiller = name;
     document.getElementById("billerName").innerText = name;
     document.getElementById("billedBy").style.display = "block";
   }
