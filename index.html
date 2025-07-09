@@ -327,10 +327,12 @@
   </div>
   <div id="staffButtons" style="margin-top: 10px; text-align: center;">
     <strong>Select Biller:</strong><br />
+    
+    <button onclick="setBiller('Suhas')">Suhas Anne</button>
+    <button onclick="setBiller('Kavitha')">Kavitha Anne</button>
     <button onclick="setBiller('Prasad')">Prasad</button>
-    <button onclick="setBiller('Suhas')">Suhas</button>
-    <button onclick="setBiller('Kavitha')">Kavitha</button>
     <button onclick="setBiller('Sagar')">Sagar</button>
+    <button onclick="setBiller('Harsha')">Harsha Anne</button>
 </div>
 
 <div id="billedBy" style="margin-top: 10px; font-weight: bold; text-align: right; display: none;">
@@ -683,6 +685,11 @@
           row.appendChild(actionTd);
         }
       });
+      document.getElementById("staffButtons").style.display = "none";
+      if (selectedBiller) {
+        document.getElementById("billerName").innerText = selectedBiller;
+        document.getElementById("billedBy").style.display = "block";
+      }
     }
   function saveInvoice() {
     const invoiceNo = document.getElementById("invoiceNo").innerText;
@@ -730,6 +737,7 @@
         GrandTotal: isLast ? runningTotal.toFixed(2) : "0.00",
         AmountPaid: isLast ? amountPaid.toFixed(2) : "0.00",
         RemainingBalance: isLast ? (runningTotal - amountPaid).toFixed(2) : "0.00"
+        BilledBy: selectedBiller || ''
       });
     });
 
