@@ -620,7 +620,7 @@
     const dateStr = new Date().toLocaleDateString('en-GB');
     document.getElementById("invoiceDate").innerText = dateStr;
   
-    fetch("https://script.google.com/macros/s/AKfycbwF_ULpVqdVmws_GU5svU9SaY8K0VCZgqmOTp5HL6ARlbjIrrslO9dqRh4Jq4CBet-tAQ/exec") // ✅ Replace with your deployed Web App URL
+    fetch("https://script.google.com/macros/s/AKfycbwF_ULpVqdVmws_GU5svU9SaY8K0VCZgqmOTp5HL6ARlbjIrrslO9dqRh4Jq4CBet-tAQ/exec")  // Replace with your actual deployed Apps Script Web App URL
       .then(response => response.json())
       .then(data => {
         let last = data.lastInvoice || "00000";
@@ -628,14 +628,13 @@
         document.getElementById("invoiceNo").innerText = next;
       })
       .catch(err => {
-        console.error("Failed to fetch invoice number:", err);
-        // Fallback to local
-        let fallback = localStorage.getItem("lastInvoiceNo") || "00001";
-        document.getElementById("invoiceNo").innerText = fallback;
+        console.error("Failed to fetch invoice number from Sheet:", err);
+        alert("Failed to fetch invoice number. Please check your internet or try again.");
       });
   
     addRow();
   }
+
 
 
   function submitInvoice() {
