@@ -359,6 +359,66 @@
   <button onclick="clearSavedInvoices()">Clear All</button>
   <div id="savedInvoicesTable" style="margin-top: 10px;"></div>
 </div>
+<!-- Navigation Button -->
+<div style="position: fixed; top: 10px; left: 10px;">
+  <button onclick="toggleMenu()" style="font-size: 22px;">☰</button>
+  <div id="menu" style="display: none; background: #eee; border: 1px solid #ccc; padding: 10px;">
+    <div onclick="showPage('invoicePage')">🧾 Invoice</div>
+    <div onclick="showPage('paymentPage')">💰 Amount Paid / Received</div>
+  </div>
+</div>
+
+<!-- Invoice Page -->
+<div id="invoicePage" class="page">
+  <!-- Your full invoice form remains here -->
+  <h2>Bannu Enterprises</h2>
+  <!-- All existing content -->
+</div>
+
+<!-- Payment Page -->
+<div id="paymentPage" class="page" style="display: none; padding: 20px;">
+  <h2>Bannu Enterprises</h2>
+  <p>GST No: 36XXXXXXXXX1Z5</p>
+  <p>Phone: 90000XXXXX</p>
+
+  <form id="paymentForm">
+    <label>Customer Name:<br><input type="text" name="customerName" required></label><br><br>
+    <label>Address:<br><input type="text" name="address" required></label><br><br>
+    <label>Date:<br><input type="date" name="date" required></label><br><br>
+    
+    <label>Amount Paid:<br><input type="number" name="amountPaid" required></label><br><br>
+    <label>Amount Received:<br><input type="number" name="amountReceived" required></label><br><br>
+
+    <button type="submit">Submit</button>
+    <button type="button" onclick="showPage('invoicePage')">Back to Invoice</button>
+  </form>
+</div>
+
+<script>
+function toggleMenu() {
+  const menu = document.getElementById('menu');
+  menu.style.display = (menu.style.display === 'block') ? 'none' : 'block';
+}
+
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.style.display = 'none');
+  document.getElementById(id).style.display = 'block';
+  toggleMenu();
+}
+
+// Handle submission of Amount Paid/Received
+document.getElementById("paymentForm").addEventListener("submit", function(e) {
+  e.preventDefault();
+  const data = Object.fromEntries(new FormData(e.target).entries());
+
+  console.log("Payment Page Data:", data);
+
+  // TODO: Send to Google Sheet via fetch or Apps Script Web App URL
+  alert("Submitted! (You can now connect this to backend)");
+
+  e.target.reset();
+});
+</script>
 
 <script>
   let selectedBiller = '';
