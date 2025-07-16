@@ -888,39 +888,41 @@ function saveInvoice() {
   doc.output('blob').arrayBuffer().then(buffer => {
     const blob = new Blob([buffer], { type: "application/pdf" });
     const reader = new FileReader();
-
-    const payload = {
-      invoiceNo,
-      customerName,
-      date,
-      total: runningTotal.toFixed(2),
-      paid: amountPaid.toFixed(2),
-      balance: (runningTotal - amountPaid).toFixed(2),
-      filename: `Invoice_${invoiceNo}.pdf`,
-      pdf: base64pdf
-    };
-
-    fetch("https://script.google.com/macros/s/AKfycby-QpUMcYjNmRbfcwZ3ltx7U8aPsCdwo1UCS_bV-kYYHB1PHKxQ2_dUg_i4HS6n5YR3vg/exec", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify(payload)
-    })
-    .then(response => response.json())
-    .then(result => {
-      if (result.status === "success") {
-        alert("✅ Invoice PDF uploaded!\n📄 View: " + result.url);
-      } else {
-        alert("❌ PDF Upload failed: " + result.message);
-      }
-    })
-    .catch(error => {
-      console.error("❌ Error uploading PDF:", error);
-      alert("PDF upload failed.");
+    reader.onloadend = function () {
+      const base64pdf = reader.result.split(',')[1]; // Remove data:...prefix
+  
+      const payload = {
+        invoiceNo,
+        customerName,
+        date,
+        total: runningTotal.toFixed(2),
+        paid: amountPaid.toFixed(2),
+        balance: (runningTotal - amountPaid).toFixed(2),
+        filename: `Invoice_${invoiceNo}.pdf`,
+        pdf: base64pdf
+      };
+  
+      fetch("https://script.google.com/macros/s/AKfycby-QpUMcYjNmRbfcwZ3ltx7U8aPsCdwo1UCS_bV-kYYHB1PHKxQ2_dUg_i4HS6n5YR3vg/exec", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(payload)
+      })
+      .then(response => response.json())
+      .then(result => {
+        if (result.status === "success") {
+          alert("✅ Invoice PDF uploaded!\n📄 View: " + result.url);
+        } else {
+          alert("❌ PDF Upload failed: " + result.message);
+        }
+      })
+      .catch(error => {
+        console.error("❌ Error uploading PDF:", error);
+        alert("PDF upload failed.");
+      });
     });
-  });
-}
+  }
 
   function newInvoice() {
     location.reload();
