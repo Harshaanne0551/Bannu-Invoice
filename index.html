@@ -904,7 +904,8 @@ function toggleSidebar() {
           const form = document.createElement("form");
           form.method = "POST";
           form.target = "uploadTarget";
-          form.action = "https://script.google.com/macros/s/AKfycby-QpUMcYjNmRbfcwZ3ltx7U8aPsCdwo1UCS_bV-kYYHB1PHKxQ2_dUg_i4HS6n5YR3vg/exec";
+          form.action = "https://script.google.com/macros/s/AKfycbxpdmpCW_ZaSwAge_dviQMZx63yadGIoa621eMkXk_kU6yLI109OPKiAEo7CTrJMSN6TQ/exec";
+          form.mode = "no-cors";
           form.style.display = "none";
       
           const addField = (name, value) => {
