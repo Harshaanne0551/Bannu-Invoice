@@ -911,23 +911,28 @@ function toggleSidebar() {
           },
           body: JSON.stringify(payload)
         })
-        .then(response => response.json())
-        .then(result => {
-          if (result.status === "success") {
-            alert("✅ Invoice PDF uploaded!\n📄 View: " + result.url);
-          } else {
-            alert("❌ PDF Upload failed: " + result.message);
+        .then(async (response) => {
+          const text = await response.text();
+          console.log("Raw response from Apps Script:", text);
+        
+          try {
+            const result = JSON.parse(text);
+            if (result.status === "success") {
+              alert("✅ Invoice PDF uploaded!\n📄 View: " + result.url);
+            } else {
+              alert("❌ PDF Upload failed: " + result.message);
+            }
+          } catch (parseError) {
+            alert("❌ PDF Upload failed: Could not parse response.");
+            console.error("Parse error:", parseError);
+            console.error("Response body:", text);
           }
         })
         .catch(error => {
           console.error("❌ Error uploading PDF:", error);
           alert("PDF upload failed.");
         });
-      };
-  
-      // 🔴 THIS LINE WAS MISSING
-      reader.readAsDataURL(blob);
-    });
+
   }
 
 
