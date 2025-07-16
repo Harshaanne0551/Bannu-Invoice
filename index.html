@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -709,6 +710,9 @@ function toggleSidebar() {
   
     addRow();
   }
+
+
+
   function submitInvoice() {
     const customerName = document.getElementById("customerName").value.trim();
     const address = document.getElementById("Address").value.trim();
@@ -849,6 +853,13 @@ function toggleSidebar() {
       console.error("Error:", err);
     });
   }
+
+
+
+
+
+
+
   function newInvoice() {
     location.reload();
   }
@@ -908,6 +919,35 @@ function toggleSidebar() {
     document.getElementById("remainingBalance").innerText = formatIndianCurrency(remaining);
     document.getElementById("amountInWords").value = convertNumberToWords(Math.round(remaining)) + " only";
   }
+
+
+  function displaySavedInvoices() {
+    const data = JSON.parse(localStorage.getItem("savedInvoices") || "[]");
+    const container = document.getElementById("savedInvoicesTable");
+    container.innerHTML = '';
+
+    if (data.length === 0) {
+      container.innerHTML = "<p>No saved invoices yet.</p>";
+      return;
+    }
+
+    let table = '<table border="1" cellpadding="6" cellspacing="0"><tr>';
+    const headers = Object.keys(data[0]);
+    headers.forEach(h => table += `<th>${h}</th>`);
+    table += '</tr>';
+
+    data.forEach(entry => {
+      table += '<tr>';
+      headers.forEach(h => {
+        table += `<td>${entry[h]}</td>`;
+      });
+      table += '</tr>';
+    });
+
+    table += '</table>';
+    container.innerHTML = table;
+  }
+
   function exportToExcel() {
     const data = JSON.parse(localStorage.getItem("savedInvoices") || "[]");
     if (data.length === 0) return alert("No data to export!");
@@ -1011,6 +1051,11 @@ document.addEventListener("click", function (e) {
       document.title = "Invoice - Bannu Enterprises";
     }
   });
+
+  
+
+
+
 </script>
 
 </body>
