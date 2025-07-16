@@ -805,10 +805,11 @@ function toggleSidebar() {
       });
     
       if (validRows.length === 0) {
-        alert("No valid item rows to save.");
+        console.warn("❌ Skipped: No valid item rows. Please enter at least one item with Qty > 0.");
+        alert("No valid item rows to save. Please fill in at least one row with item name, qty, and rate.");
         return;
       }
-    
+          
       let runningTotal = 0;
       const items = [];
     
