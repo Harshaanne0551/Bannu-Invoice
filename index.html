@@ -890,54 +890,48 @@ function toggleSidebar() {
       doc.output('blob').arrayBuffer().then(buffer => {
         const blob = new Blob([buffer], { type: "application/pdf" });
         const reader = new FileReader();
-    
+      
         reader.onloadend = function () {
-          const base64pdf = reader.result.split(',')[1]; // Remove data:...prefix
-    
-          const payload = {
-            invoiceNo,
-            customerName,
-            date,
-            total: runningTotal.toFixed(2),
-            paid: amountPaid.toFixed(2),
-            balance: (runningTotal - amountPaid).toFixed(2),
-            filename: `Invoice_${invoiceNo}.pdf`,
-            pdf: base64pdf
+          const base64pdf = reader.result.split(',')[1]; // Remove prefix
+      
+          // Create hidden form and iframe
+          const iframe = document.createElement("iframe");
+          iframe.name = "hiddenUploadFrame";
+          iframe.style.display = "none";
+          document.body.appendChild(iframe);
+      
+          const form = document.createElement("form");
+          form.action = "https://script.google.com/macros/s/AKfycby-QpUMcYjNmRbfcwZ3ltx7U8aPsCdwo1UCS_bV-kYYHB1PHKxQ2_dUg_i4HS6n5YR3vg/exec";
+          form.method = "POST";
+          form.target = "hiddenUploadFrame";
+          form.style.display = "none";
+      
+          const addInput = (name, value) => {
+            const input = document.createElement("input");
+            input.type = "hidden";
+            input.name = name;
+            input.value = value;
+            form.appendChild(input);
           };
-    
-          fetch("https://script.google.com/macros/s/AKfycby-QpUMcYjNmRbfcwZ3ltx7U8aPsCdwo1UCS_bV-kYYHB1PHKxQ2_dUg_i4HS6n5YR3vg/exec", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json"
-            },
-            body: JSON.stringify(payload)
-          })
-          .then(async (response) => {
-            const text = await response.text();
-            console.log("Raw response from Apps Script:", text);
-    
-            try {
-              const result = JSON.parse(text);
-              if (result.status === "success") {
-                alert("✅ Invoice PDF uploaded!\n📄 View: " + result.url);
-              } else {
-                alert("❌ PDF Upload failed: " + result.message);
-              }
-            } catch (parseError) {
-              alert("❌ PDF Upload failed: Could not parse response.");
-              console.error("Parse error:", parseError);
-              console.error("Response body:", text);
-            }
-          })
-          .catch(error => {
-            console.error("❌ Error uploading PDF:", error);
-            alert("PDF upload failed.");
-          });
+      
+          addInput("invoiceNo", invoiceNo);
+          addInput("customerName", customerName);
+          addInput("date", date);
+          addInput("total", runningTotal.toFixed(2));
+          addInput("paid", amountPaid.toFixed(2));
+          addInput("balance", (runningTotal - amountPaid).toFixed(2));
+          addInput("filename", `Invoice_${invoiceNo}.pdf`);
+          addInput("pdf", base64pdf);
+      
+          document.body.appendChild(form);
+          form.submit();
+      
+          alert("✅ Invoice data and PDF sent!");
         };
-    
-        // 🔥 This line was missing
+      
         reader.readAsDataURL(blob);
       });
+
     }
     
     function newInvoice() {
