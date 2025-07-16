@@ -4,6 +4,8 @@
 <head>
   <meta charset="UTF-8">
   <title>Invoice - Bannu Enterprises</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <style>
     body {
@@ -837,28 +839,72 @@ function toggleSidebar() {
 
     alert("Invoice saved locally!");
     displaySavedInvoices();
-    fetch("https://script.google.com/macros/s/AKfycbwF_ULpVqdVmws_GU5svU9SaY8K0VCZgqmOTp5HL6ARlbjIrrslO9dqRh4Jq4CBet-tAQ/exec", {
-      method: "POST",
-      mode: "no-cors",
-      
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify(items),
-    })
-    .then(() => {
-      console.log("Invoice sent to Google Sheet!");
-    })
-    .catch(err => {
-      console.error("Error:", err);
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    
+    doc.setFontSize(12);
+    doc.text(`Invoice No: ${invoiceNo}`, 10, 10);
+    doc.text(`Date: ${date}`, 10, 20);
+    doc.text(`Customer: ${customerName}`, 10, 30);
+    doc.text(`Address: ${address}`, 10, 40);
+    
+    let y = 50;
+    doc.text("Item", 10, y);
+    doc.text("Qty", 80, y);
+    doc.text("Rate", 100, y);
+    doc.text("Amount", 130, y);
+    y += 10;
+    
+    validRows.forEach(row => {
+      doc.text(row.item, 10, y);
+      doc.text(row.qty.toString(), 80, y);
+      doc.text(row.rate.toFixed(2), 100, y);
+      doc.text(row.amount.toFixed(2), 130, y);
+      y += 10;
+    });
+    
+    doc.text(`Grand Total: ₹${runningTotal.toFixed(2)}`, 10, y + 10);
+    doc.text(`Amount Paid: ₹${amountPaid.toFixed(2)}`, 10, y + 20);
+    doc.text(`Remaining Balance: ₹${(runningTotal - amountPaid).toFixed(2)}`, 10, y + 30);
+    doc.text(`Billed By: ${selectedBiller}`, 10, y + 40);
+    
+    // Convert to base64 and send
+    doc.output('blob').arrayBuffer().then(buffer => {
+      const uint8Array = new Uint8Array(buffer);
+      const base64pdf = btoa(String.fromCharCode(...uint8Array));
+    
+      const payload = {
+        invoiceNo,
+        customerName,
+        date,
+        total: runningTotal.toFixed(2),
+        paid: amountPaid.toFixed(2),
+        balance: (runningTotal - amountPaid).toFixed(2),
+        filename: `Invoice_${invoiceNo}.pdf`,
+        pdf: base64pdf
+      };
+    
+      fetch("https://script.google.com/macros/s/AKfycby-QpUMcYjNmRbfcwZ3ltx7U8aPsCdwo1UCS_bV-kYYHB1PHKxQ2_dUg_i4HS6n5YR3vg/exec", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(payload)
+      })
+      .then(response => response.json())
+      .then(result => {
+        if (result.status === "success") {
+          alert("Invoice PDF uploaded!\nPDF Link:\n" + result.url);
+        } else {
+          alert("PDF Upload failed: " + result.message);
+        }
+      })
+      .catch(error => {
+        console.error("Error uploading PDF:", error);
+        alert("Error uploading PDF.");
+      });
     });
   }
-
-
-
-
-
-
 
   function newInvoice() {
     location.reload();
