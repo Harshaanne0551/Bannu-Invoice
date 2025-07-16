@@ -12,24 +12,45 @@
       padding: 30px;
       background: #fff;
     }
+    .top-bar-toggle {
+      position: fixed;
+      top: 10px;
+      left: 10px;
+      z-index: 1001;
+    }
+    .top-bar-toggle button {
+      padding: 6px 12px;
+      background-color: #003366;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    
+    /* Sidebar */
     .sidebar {
       position: fixed;
-      top: 0; left: 0;
-      width: 200px;
+      top: 0;
+      left: 0;
+      width: 220px;
       height: 100vh;
-      background-color: #003366;
+      background-color: white;
+      color: black;
       padding: 20px 10px;
+      box-shadow: 2px 0 5px rgba(0,0,0,0.1);
       box-sizing: border-box;
-      display: flex;
+      display: none; /* initially hidden */
       flex-direction: column;
+      z-index: 1000;
     }
     .sidebar h3 {
-      color: #fff;
+      color: black;
       text-align: center;
       margin-bottom: 20px;
     }
     .sidebar a {
-      color: #fff;
+      color: black;
       text-decoration: none;
       margin: 8px 0;
       padding: 6px;
@@ -37,7 +58,7 @@
       border-radius: 4px;
     }
     .sidebar a:hover {
-      background: #0055aa;
+      background: #f0f0f0;
     }
     .invoice-box {
       width: 100%;
@@ -263,6 +284,9 @@
   </style>
 </head>
 <body onload="initializeInvoice()">
+  <div class="top-bar-toggle">
+    <button onclick="toggleSidebar()">☰ Menu</button>
+  </div>
   <div class="sidebar">
     <h3>Bannu Invoices</h3>
     <a href="index.html">🧾 Invoice</a>
@@ -390,7 +414,20 @@
   <button onclick="clearSavedInvoices()">Clear All</button>
   <div id="savedInvoicesTable" style="margin-top: 10px;"></div>
 </div>
+<script>
+function toggleSidebar() {
+  const sidebar = document.getElementById("sidebar");
+  const main = document.getElementById("mainContent");
 
+  if (sidebar.style.display === "block") {
+    sidebar.style.display = "none";
+    main.classList.remove("sidebar-open");
+  } else {
+    sidebar.style.display = "block";
+    main.classList.add("sidebar-open");
+  }
+}
+</script>
 <script>
   let selectedBiller = '';
 
