@@ -243,7 +243,20 @@
 
   <div class="signature">For Bannu Enterprises</div>
 </div>
+<script>
+function toggleSidebar() {
+  const sidebar = document.getElementById("sidebar");
+  const main = document.getElementById("mainContent");
 
+  if (sidebar.style.display === "block") {
+    sidebar.style.display = "none";
+    main.classList.remove("sidebar-open");
+  } else {
+    sidebar.style.display = "block";
+    main.classList.add("sidebar-open");
+  }
+}
+</script>
 <script>
   let selectedBiller = "";
 
