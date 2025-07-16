@@ -709,9 +709,6 @@ function toggleSidebar() {
   
     addRow();
   }
-
-
-
   function submitInvoice() {
     const customerName = document.getElementById("customerName").value.trim();
     const address = document.getElementById("Address").value.trim();
@@ -852,13 +849,6 @@ function toggleSidebar() {
       console.error("Error:", err);
     });
   }
-
-
-
-
-
-
-
   function newInvoice() {
     location.reload();
   }
@@ -918,35 +908,6 @@ function toggleSidebar() {
     document.getElementById("remainingBalance").innerText = formatIndianCurrency(remaining);
     document.getElementById("amountInWords").value = convertNumberToWords(Math.round(remaining)) + " only";
   }
-
-
-  function displaySavedInvoices() {
-    const data = JSON.parse(localStorage.getItem("savedInvoices") || "[]");
-    const container = document.getElementById("savedInvoicesTable");
-    container.innerHTML = '';
-
-    if (data.length === 0) {
-      container.innerHTML = "<p>No saved invoices yet.</p>";
-      return;
-    }
-
-    let table = '<table border="1" cellpadding="6" cellspacing="0"><tr>';
-    const headers = Object.keys(data[0]);
-    headers.forEach(h => table += `<th>${h}</th>`);
-    table += '</tr>';
-
-    data.forEach(entry => {
-      table += '<tr>';
-      headers.forEach(h => {
-        table += `<td>${entry[h]}</td>`;
-      });
-      table += '</tr>';
-    });
-
-    table += '</table>';
-    container.innerHTML = table;
-  }
-
   function exportToExcel() {
     const data = JSON.parse(localStorage.getItem("savedInvoices") || "[]");
     if (data.length === 0) return alert("No data to export!");
@@ -1050,6 +1011,75 @@ document.addEventListener("click", function (e) {
       document.title = "Invoice - Bannu Enterprises";
     }
   });
+<!-- Add this inside <head> if not already included -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<!-- Replace or add this script at the bottom before </body> -->
+<script>
+  async function saveInvoiceToSheet() {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+
+    // Collect input values (ensure these IDs exist in your HTML)
+    const invoiceNo = document.getElementById('invoiceNo').value.trim();
+    const customerName = document.getElementById('customerName').value.trim();
+    const total = parseFloat(document.getElementById('totalAmount').value.trim() || 0);
+    const paid = parseFloat(document.getElementById('paidAmount').value.trim() || 0);
+    const balance = total - paid;
+    const date = new Date().toLocaleDateString();
+
+    if (!invoiceNo || !customerName) {
+      alert("Please enter both Invoice No and Customer Name.");
+      return;
+    }
+
+    // Create PDF content
+    doc.setFontSize(12);
+    doc.text(`Invoice No: ${invoiceNo}`, 10, 10);
+    doc.text(`Date: ${date}`, 10, 20);
+    doc.text(`Customer: ${customerName}`, 10, 30);
+    doc.text(`Total Amount: ₹${total}`, 10, 40);
+    doc.text(`Paid Amount: ₹${paid}`, 10, 50);
+    doc.text(`Balance: ₹${balance}`, 10, 60);
+
+    const pdfBlob = doc.output('blob');
+    const reader = new FileReader();
+
+    reader.onloadend = async () => {
+      const base64pdf = reader.result.split(',')[1];
+
+      const payload = {
+        invoiceNo,
+        customerName,
+        date,
+        total,
+        paid,
+        balance,
+        filename: `Invoice_${invoiceNo}.pdf`,
+        pdf: base64pdf
+      };
+
+      try {
+        const response = await fetch("https://script.google.com/macros/s/AKfycbwF_ULpVqdVmws_GU5svU9SaY8K0VCZgqmOTp5HL6ARlbjIrrslO9dqRh4Jq4CBet-tAQ/exec", {
+          method: "POST",
+          body: JSON.stringify(payload),
+          headers: { "Content-Type": "application/json" }
+        });
+
+        const result = await response.json();
+        if (result.status === 'success') {
+          alert("Invoice saved successfully!\nPDF Link:\n" + result.url);
+        } else {
+          alert("Error saving invoice: " + result.message);
+        }
+      } catch (err) {
+        alert("Network or script error: " + err.message);
+      }
+    };
+
+    reader.readAsDataURL(pdfBlob);
+  }
+</script>
 
   
 
