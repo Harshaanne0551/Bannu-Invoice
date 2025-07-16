@@ -887,26 +887,27 @@ function toggleSidebar() {
       doc.text(`Billed By: ${selectedBiller}`, 10, y + 40);
     
       // ✅ Convert to base64 and upload
+      // ✅ Convert to base64 and upload PDF via <form> to Google Apps Script
       doc.output('blob').arrayBuffer().then(buffer => {
         const blob = new Blob([buffer], { type: "application/pdf" });
         const reader = new FileReader();
       
         reader.onloadend = function () {
-          const base64pdf = reader.result.split(',')[1]; // Remove prefix
+          const base64pdf = reader.result.split(',')[1];
       
-          // Create hidden form and iframe
+          // ✅ Create hidden iframe for cross-domain form POST (bypasses CORS)
           const iframe = document.createElement("iframe");
-          iframe.name = "hiddenUploadFrame";
+          iframe.name = "uploadTarget";
           iframe.style.display = "none";
           document.body.appendChild(iframe);
       
           const form = document.createElement("form");
-          form.action = "https://script.google.com/macros/s/AKfycby-QpUMcYjNmRbfcwZ3ltx7U8aPsCdwo1UCS_bV-kYYHB1PHKxQ2_dUg_i4HS6n5YR3vg/exec";
           form.method = "POST";
-          form.target = "hiddenUploadFrame";
+          form.target = "uploadTarget";
+          form.action = "https://script.google.com/macros/s/AKfycby-QpUMcYjNmRbfcwZ3ltx7U8aPsCdwo1UCS_bV-kYYHB1PHKxQ2_dUg_i4HS6n5YR3vg/exec";
           form.style.display = "none";
       
-          const addInput = (name, value) => {
+          const addField = (name, value) => {
             const input = document.createElement("input");
             input.type = "hidden";
             input.name = name;
@@ -914,19 +915,19 @@ function toggleSidebar() {
             form.appendChild(input);
           };
       
-          addInput("invoiceNo", invoiceNo);
-          addInput("customerName", customerName);
-          addInput("date", date);
-          addInput("total", runningTotal.toFixed(2));
-          addInput("paid", amountPaid.toFixed(2));
-          addInput("balance", (runningTotal - amountPaid).toFixed(2));
-          addInput("filename", `Invoice_${invoiceNo}.pdf`);
-          addInput("pdf", base64pdf);
+          addField("invoiceNo", invoiceNo);
+          addField("customerName", customerName);
+          addField("date", date);
+          addField("total", runningTotal.toFixed(2));
+          addField("paid", amountPaid.toFixed(2));
+          addField("balance", (runningTotal - amountPaid).toFixed(2));
+          addField("filename", `Invoice_${invoiceNo}.pdf`);
+          addField("pdf", base64pdf);
       
           document.body.appendChild(form);
           form.submit();
       
-          alert("✅ Invoice data and PDF sent!");
+          alert("✅ Invoice PDF sent to Drive and Sheets.");
         };
       
         reader.readAsDataURL(blob);
