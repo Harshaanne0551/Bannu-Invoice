@@ -713,6 +713,12 @@ function toggleSidebar() {
 
 
   function submitInvoice() {
+    const customerName = document.getElementById("customerName").value.trim();
+    const address = document.getElementById("Address").value.trim();
+  
+    if (!customerName || !address) {
+      alert("Please enter both Customer Name and Address before submitting the invoice.");
+      return;
   // Increment and store invoice number
 
   // Hide submit button, show post-submit buttons
