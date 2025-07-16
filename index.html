@@ -886,8 +886,8 @@ function saveInvoice() {
   doc.text(`Billed By: ${selectedBiller}`, 10, y + 40);
 
   doc.output('blob').arrayBuffer().then(buffer => {
-    const uint8Array = new Uint8Array(buffer);
-    const base64pdf = btoa(String.fromCharCode(...uint8Array));
+    const blob = new Blob([buffer], { type: "application/pdf" });
+    const reader = new FileReader();
 
     const payload = {
       invoiceNo,
