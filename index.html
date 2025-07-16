@@ -1011,11 +1011,6 @@ document.addEventListener("click", function (e) {
       document.title = "Invoice - Bannu Enterprises";
     }
   });
-<!-- Add this inside <head> if not already included -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-
-<!-- Replace or add this script at the bottom before </body> -->
-<script>
   async function saveInvoiceToSheet() {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
@@ -1079,7 +1074,6 @@ document.addEventListener("click", function (e) {
 
     reader.readAsDataURL(pdfBlob);
   }
-</script>
 
   
 
