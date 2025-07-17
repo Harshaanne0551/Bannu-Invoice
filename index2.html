@@ -240,7 +240,17 @@
   <div id="billedBy" style="margin-top: 10px; font-weight: bold; text-align: right; display: none;">
     Billed by: <span id="billerName"></span>
   </div>
+  <div style="margin-top: 20px; text-align: center;" id="submitSection">
+  <button onclick="submitInvoice()">✅ Submit</button>
+</div>
 
+<!-- Action Buttons (hidden initially) -->
+<div style="margin-top: 20px; text-align: center; display: none;" id="actionButtons">
+  <button onclick="printInvoice()">🖨️ Print Invoice</button>
+  <button onclick="saveToGoogleSheet()">💾 Save Invoice</button>
+  <button onclick="location.reload()">🆕 New Invoice</button>
+  <button onclick="editInvoice()">✏️ Back to Edit</button>
+</div>
   <div class="signature">For Bannu Enterprises</div>
 </div>
 <script>
@@ -257,6 +267,98 @@ function toggleSidebar() {
   }
 }
 </script>
+<script>
+function submitInvoice() {
+  // Hide biller buttons and submit button
+  document.getElementById("staffButtons").style.display = "none";
+  document.getElementById("submitSection").style.display = "none";
+
+  // Show print, save, edit, new buttons
+  document.getElementById("actionButtons").style.display = "block";
+
+  // Make all input fields readonly
+  document.querySelectorAll("input").forEach(input => {
+    input.setAttribute("readonly", true);
+    input.style.border = "none";
+    input.style.background = "transparent";
+  });
+}
+
+function editInvoice() {
+  // Show biller buttons and submit button
+  document.getElementById("staffButtons").style.display = "block";
+  document.getElementById("submitSection").style.display = "block";
+
+  // Hide action buttons
+  document.getElementById("actionButtons").style.display = "none";
+
+  // Make input fields editable again
+  document.querySelectorAll("input").forEach(input => {
+    input.removeAttribute("readonly");
+    input.style.border = "";
+    input.style.background = "";
+  });
+}
+
+function printInvoice() {
+  // Hide action buttons before printing
+  document.getElementById("actionButtons").style.display = "none";
+  window.print();
+  // Show them back after short delay
+  setTimeout(() => {
+    document.getElementById("actionButtons").style.display = "block";
+  }, 1000);
+}
+</script>
+<script>
+function saveToGoogleSheet() {
+  const customerName = document.getElementById("customerName").value.trim();
+  const address = document.getElementById("Address").value.trim();
+  const phone = document.getElementById("PhoneNumber").value.trim();
+  
+  const rows = document.querySelectorAll("#itemRows tr");
+  const records = [];
+
+  rows.forEach(row => {
+    const cells = row.querySelectorAll("td");
+    const dateTime = cells[0].querySelector("input")?.value || "";
+    const amountPaid = cells[1].querySelector("input")?.value || "0";
+    const amountReceived = cells[2].querySelector("input")?.value || "0";
+    const balance = cells[3].querySelector("input")?.value || "0";
+    const billedBy = cells[4].textContent.trim();
+
+    records.push([
+      dateTime,
+      customerName,
+      address,
+      phone,
+      amountPaid,
+      amountReceived,
+      balance,
+      billedBy
+    ]);
+  });
+
+  const scriptURL = "https://script.google.com/macros/s/AKfycbxpdmpCW_ZaSwAge_dviQMZx63yadGIoa621eMkXk_kU6yLI109OPKiAEo7CTrJMSN6TQ/exec";
+
+  fetch(scriptURL, {
+    method: 'POST',
+    body: JSON.stringify({
+      targetSheet: "Sheet3", // Add this flag to target Sheet3
+      rows: records
+    }),
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  }).then(res => {
+    alert("Data saved to Google Sheet successfully.");
+  }).catch(err => {
+    console.error(err);
+    alert("Failed to save data.");
+  });
+}
+</script>
+
 <script>
   let selectedBiller = "";
 
