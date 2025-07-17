@@ -1103,12 +1103,12 @@ document.addEventListener("click", function (e) {
           if (result.status === "success") {
             alert("✅ PDF uploaded to Drive!\n📄 View: " + result.url);
           } else {
-            alert("❌ Upload failed: " + result.message);
+
           }
         })
         .catch(err => {
           console.error("❌ Upload error:", err);
-          alert("❌ Error uploading PDF");
+          
         });
       };
 
