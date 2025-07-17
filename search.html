@@ -1,72 +1,156 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Customer Search</title>
+  <meta charset="UTF-8">
+  <title>Customer Search - Bannu Enterprises</title>
   <style>
-    body { font-family: Arial; padding: 20px; }
-    input, button { padding: 10px; font-size: 16px; margin-right: 10px; }
-    table { margin-top: 20px; border-collapse: collapse; width: 100%; }
-    th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
-    a { color: blue; }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      padding: 30px;
+      background: #f9f9f9;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .search-section {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .search-section input {
+      width: 300px;
+      padding: 10px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      outline: none;
+    }
+
+    .search-section button {
+      padding: 10px 20px;
+      font-size: 16px;
+      background-color: #008080;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      margin-left: 10px;
+    }
+
+    .search-section button:hover {
+      background-color: #006666;
+    }
+
+    .results-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+
+    .results-table th, .results-table td {
+      border: 1px solid #ccc;
+      padding: 10px;
+      text-align: left;
+    }
+
+    .results-table th {
+      background-color: #f0f0f0;
+    }
+
+    .pdf-link a {
+      color: #007BFF;
+      text-decoration: none;
+    }
+
+    .pdf-link a:hover {
+      text-decoration: underline;
+    }
+
+    .no-results {
+      text-align: center;
+      color: #cc0000;
+      font-weight: bold;
+      margin-top: 20px;
+    }
+
+    .footer-link {
+      margin-top: 40px;
+      text-align: center;
+    }
+
+    .footer-link a {
+      text-decoration: none;
+      color: #555;
+      font-size: 14px;
+    }
   </style>
 </head>
 <body>
 
-<h2>Search Customer Invoices</h2>
-<input type="text" id="customerName" placeholder="Enter Customer Name">
-<button onclick="searchCustomer()">Search</button>
+  <h1>Search Customer Records - Bannu Enterprises</h1>
 
-<div id="results"></div>
+  <div class="search-section">
+    <input type="text" id="customerName" placeholder="Enter Customer Name">
+    <button onclick="searchCustomer()">Search</button>
+  </div>
 
-<script>
-  const scriptURL = "https://script.google.com/macros/s/AKfycbwjz88BkyHVtVE2LNtH3b339OFvxdoIt7ssJl_HilAYng0q8rkqNLfOXTLh8sZAgX_H2g/exec"; // replace with your actual URL
+  <div id="results"></div>
 
-  async function searchCustomer() {
-    const name = document.getElementById("customerName").value.trim();
-    const resultsDiv = document.getElementById("results");
-    resultsDiv.innerHTML = "";
+  <div class="footer-link">
+    <a href="index.html">&larr; Back to Invoice Page</a>
+  </div>
 
-    if (!name) {
-      alert("Please enter a customer name.");
-      return;
-    }
+  <script>
+    const scriptURL =  "https://script.google.com/macros/s/AKfycbwjz88BkyHVtVE2LNtH3b339OFvxdoIt7ssJl_HilAYng0q8rkqNLfOXTLh8sZAgX_H2g/exec";
+    async function searchCustomer() {
+      const name = document.getElementById("customerName").value.trim();
+      const resultsDiv = document.getElementById("results");
+      resultsDiv.innerHTML = "";
 
-    try {
-      const response = await fetch(`${scriptURL}?customer=${encodeURIComponent(name)}`);
-      const data = await response.json();
-
-      if (!data.length) {
-        resultsDiv.innerHTML = "<p>No records found for this customer.</p>";
+      if (!name) {
+        alert("Please enter a customer name.");
         return;
       }
 
-      let table = "<table><tr>";
-      for (let key in data[0]) {
-        table += `<th>${key}</th>`;
-      }
-      table += "</tr>";
+      try {
+        const response = await fetch(`${scriptURL}?customer=${encodeURIComponent(name)}`);
+        const data = await response.json();
 
-      data.forEach(row => {
-        table += "<tr>";
-        for (let key in row) {
-          if (key.toLowerCase().includes("pdf") && row[key]) {
-            table += `<td><a href="${row[key]}" target="_blank">View PDF</a></td>`;
-          } else {
-            table += `<td>${row[key]}</td>`;
-          }
+        if (!data.length) {
+          resultsDiv.innerHTML = `<div class="no-results">No records found for "${name}".</div>`;
+          return;
         }
-        table += "</tr>";
-      });
 
-      table += "</table>";
-      resultsDiv.innerHTML = table;
+        let table = `<table class="results-table"><thead><tr>`;
+        for (let key in data[0]) {
+          table += `<th>${key}</th>`;
+        }
+        table += `</tr></thead><tbody>`;
 
-    } catch (err) {
-      console.error("Error:", err);
-      resultsDiv.innerHTML = "<p style='color: red;'>Error fetching data.</p>";
+        data.forEach(row => {
+          table += "<tr>";
+          for (let key in row) {
+            if (key.toLowerCase().includes("pdf") && row[key]) {
+              table += `<td class="pdf-link"><a href="${row[key]}" target="_blank">View PDF</a></td>`;
+            } else {
+              table += `<td>${row[key]}</td>`;
+            }
+          }
+          table += "</tr>";
+        });
+
+        table += "</tbody></table>";
+        resultsDiv.innerHTML = table;
+
+      } catch (err) {
+        console.error("Fetch error:", err);
+        resultsDiv.innerHTML = `<div class="no-results">Error fetching data. Check console for details.</div>`;
+      }
     }
-  }
-</script>
+  </script>
 
 </body>
 </html>
