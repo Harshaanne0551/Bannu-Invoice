@@ -283,6 +283,11 @@
         top: 0;
         width: 100%;
       }
+      @media print {
+      .no-print {
+        display: none !important;
+      }
+    }
 
     }
   </style>
@@ -412,7 +417,7 @@
   
 <div style="text-align: center; margin-top: 30px;">
   <button id="submitBtn" onclick="submitInvoice()">Submit Invoice</button>
-  <div id="afterSubmitButtons" style="display: none;">
+  <div id="afterSubmitButtons" class="no-print" ,style="display: none;">
     <button onclick="window.print()">Print Invoice</button>
     <button onclick="enableEditing()">Back to Edit</button>
     <button onclick="saveInvoice()">Save Invoice</button>
@@ -1125,22 +1130,27 @@ document.addEventListener("click", function (e) {
   <script>
   function downloadStyledInvoice() {
     const invoiceElement = document.getElementById('invoiceBox');
-
-    // Get customer name or fallback to 'Invoice'
+  
+    // Temporarily add a class to hide non-print elements
+    invoiceElement.classList.add('print-mode');
+  
     const customerName = document.getElementById('customerName')?.value?.trim() || 'Invoice';
-
     const fileName = `${customerName} Invoice.pdf`;
-
+  
     const opt = {
       margin:       0.3,
       filename:     fileName,
       image:        { type: 'jpeg', quality: 0.98 },
-      html2canvas:  { scale: 2 },
+      html2canvas:  { scale: 2, useCORS: true },
       jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' }
     };
-
-    html2pdf().set(opt).from(invoiceElement).save();
+  
+    html2pdf().set(opt).from(invoiceElement).save().then(() => {
+      // Clean up after PDF is generated
+      invoiceElement.classList.remove('print-mode');
+    });
   }
+
 </script>
 </body>
 </html>
