@@ -5,6 +5,7 @@
   <meta charset="UTF-8">
   <title>Invoice - Bannu Enterprises</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <style>
@@ -416,6 +417,8 @@
     <button onclick="enableEditing()">Back to Edit</button>
     <button onclick="saveInvoice()">Save Invoice</button>
     <button onclick="newInvoice()">New Invoice</button>
+    <button onclick="downloadStyledInvoice()">Download PDF</button>
+
   </div>
 </div>
 <div id="savedInvoicesSection" style="margin-top: 40px;">
@@ -714,6 +717,7 @@ function toggleSidebar() {
   
     addRow();
   }
+
 
 
 
@@ -1118,6 +1122,25 @@ document.addEventListener("click", function (e) {
     });
   }
 </script>
+  <script>
+  function downloadStyledInvoice() {
+    const invoiceElement = document.getElementById('invoiceBox');
 
+    // Get customer name or fallback to 'Invoice'
+    const customerName = document.getElementById('customerName')?.value?.trim() || 'Invoice';
+
+    const fileName = `${customerName} Invoice.pdf`;
+
+    const opt = {
+      margin:       0.3,
+      filename:     fileName,
+      image:        { type: 'jpeg', quality: 0.98 },
+      html2canvas:  { scale: 2 },
+      jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' }
+    };
+
+    html2pdf().set(opt).from(invoiceElement).save();
+  }
+</script>
 </body>
 </html>
