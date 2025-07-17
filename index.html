@@ -424,12 +424,7 @@
 
   </div>
 </div>
-<div id="savedInvoicesSection" style="margin-top: 40px;">
-  <h3>Saved Invoices</h3>
-  <button onclick="exportToExcel()">Export to Excel</button>
-  <button onclick="clearSavedInvoices()">Clear All</button>
-  <div id="savedInvoicesTable" style="margin-top: 10px;"></div>
-</div>
+
 <script>
 function toggleSidebar() {
   const sidebar = document.getElementById("sidebar");
@@ -853,55 +848,7 @@ function toggleSidebar() {
   }
 
 
-  function displaySavedInvoices() {
-    const data = JSON.parse(localStorage.getItem("savedInvoices") || "[]");
-    const container = document.getElementById("savedInvoicesTable");
-    container.innerHTML = '';
-
-    if (data.length === 0) {
-      container.innerHTML = "<p>No saved invoices yet.</p>";
-      return;
-    }
-
-    let table = '<table border="1" cellpadding="6" cellspacing="0"><tr>';
-    const headers = Object.keys(data[0]);
-    headers.forEach(h => table += `<th>${h}</th>`);
-    table += '</tr>';
-
-    data.forEach(entry => {
-      table += '<tr>';
-      headers.forEach(h => {
-        table += `<td>${entry[h]}</td>`;
-      });
-      table += '</tr>';
-    });
-
-    table += '</table>';
-    container.innerHTML = table;
-  }
-
-  function exportToExcel() {
-    const data = JSON.parse(localStorage.getItem("savedInvoices") || "[]");
-    if (data.length === 0) return alert("No data to export!");
-
-    const ws = XLSX.utils.json_to_sheet(data);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Invoices");
-    XLSX.writeFile(wb, "Saved_Invoices.xlsx");
-  }
-
-  function clearSavedInvoices() {
-    if (confirm("Are you sure you want to delete all saved invoices?")) {
-      localStorage.removeItem("savedInvoices");
-      displaySavedInvoices();
-    }
-  }
-
-// Show saved data on page load
-  window.onload = function () {
-    initializeInvoice(); // your existing function
-    displaySavedInvoices();
-  };
+  
   const customerNames = [
   "Sai Krishna", "Meenakshi Enterprises", "Gowtham Traders", "Sri Lakshmi Agencies",
   "Dharani Enterprises", "Shiva Traders", "Sri Venkateshwara Stationery",
