@@ -416,6 +416,12 @@
     <button onclick="newInvoice()">New Invoice</button>
   </div>
 </div>
+<div id="savedInvoicesSection" style="margin-top: 40px;">
+  <h3>Saved Invoices</h3>
+  <button onclick="exportToExcel()">Export to Excel</button>
+  <button onclick="clearSavedInvoices()">Clear All</button>
+  <div id="savedInvoicesTable" style="margin-top: 10px;"></div>
+</div>
 <script>
 function toggleSidebar() {
   const sidebar = document.getElementById("sidebar");
