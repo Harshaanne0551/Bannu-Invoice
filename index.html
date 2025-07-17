@@ -784,99 +784,99 @@ function toggleSidebar() {
       }
     }
     async function saveInvoice() {
-  const invoiceNo = document.getElementById("invoiceNo").innerText;
-  const date = document.getElementById("invoiceDate").innerText;
-  const customerName = document.getElementById("customerName").value.trim();
-  const address = document.getElementById("Address").value.trim();
-  const amountPaid = parseFloat(document.getElementById("amountPaid").value || 0);
-
-  const rawRows = document.querySelectorAll("#itemRows tr");
-  const validRows = [];
-
-  rawRows.forEach(row => {
-    const item = row.children[0]?.querySelector("input")?.value.trim();
-    const qty = parseFloat(row.children[2]?.querySelector("input")?.value || 0);
-    const rate = parseFloat(row.children[3]?.querySelector("input")?.value || 0);
-    const amount = parseFloat((row.children[4]?.querySelector("input")?.value || "0").replace(/,/g, ""));
-
-    if (item && !/^\d+$/.test(item) && qty > 0 && !isNaN(amount)) {
-      validRows.push({ item, qty, rate, amount });
-    }
-  });
-
-  if (validRows.length === 0) {
-    alert("No valid item rows to save.");
-    return;
-  }
-
-  let runningTotal = 0;
-  validRows.forEach(row => runningTotal += row.amount);
-
-  // ✅ Generate PDF with jsPDF
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF();
-  let y = 10;
-
-  doc.setFontSize(12);
-  doc.text(`Invoice No: ${invoiceNo}`, 10, y); y += 10;
-  doc.text(`Date: ${date}`, 10, y); y += 10;
-  doc.text(`Customer: ${customerName}`, 10, y); y += 10;
-  doc.text(`Address: ${address}`, 10, y); y += 10;
-  doc.text("Item     Qty     Rate     Amount", 10, y); y += 10;
-
-  validRows.forEach(row => {
-    doc.text(`${row.item}     ${row.qty}     ${row.rate.toFixed(2)}     ${row.amount.toFixed(2)}`, 10, y);
-    y += 10;
-  });
-
-  doc.text(`Total: ₹${runningTotal.toFixed(2)}`, 10, y + 10);
-  doc.text(`Paid: ₹${amountPaid.toFixed(2)}`, 10, y + 20);
-  doc.text(`Balance: ₹${(runningTotal - amountPaid).toFixed(2)}`, 10, y + 30);
-
-  // ✅ Convert to base64 and upload to Apps Script
-  doc.output('blob').arrayBuffer().then(buffer => {
-    const blob = new Blob([buffer], { type: "application/pdf" });
-    const reader = new FileReader();
-
-    reader.onloadend = function () {
-      const base64pdf = reader.result.split(',')[1]; // Remove prefix
-
-      const payload = {
-        invoiceNo,
-        customerName,
-        date,
-        total: runningTotal.toFixed(2),
-        paid: amountPaid.toFixed(2),
-        balance: (runningTotal - amountPaid).toFixed(2),
-        filename: `Invoice_${invoiceNo}.pdf`,
-        pdf: base64pdf
-      };
-
-      fetch("https://script.google.com/macros/s/AKfycbxq-ifgxz-wcANqWN7NI2ngoxoocNBLsSCV1Db28kSb6fAuo-3h586PhsY6uE9vpUcM0w/exec", {
-        method: "POST",
-        mode:"no-cors",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify(payload)
-      })
-      .then(res => res.json())
-      .then(result => {
-        if (result.status === "success") {
-          alert("✅ PDF uploaded!\nView: " + result.url);
-        } else {
-          alert("❌ Upload failed: " + result.message);
+      const invoiceNo = document.getElementById("invoiceNo").innerText;
+      const date = document.getElementById("invoiceDate").innerText;
+      const customerName = document.getElementById("customerName").value.trim();
+      const address = document.getElementById("Address").value.trim();
+      const amountPaid = parseFloat(document.getElementById("amountPaid").value || 0);
+    
+      const rawRows = document.querySelectorAll("#itemRows tr");
+      const validRows = [];
+    
+      rawRows.forEach(row => {
+        const item = row.children[0]?.querySelector("input")?.value.trim();
+        const qty = parseFloat(row.children[2]?.querySelector("input")?.value || 0);
+        const rate = parseFloat(row.children[3]?.querySelector("input")?.value || 0);
+        const amount = parseFloat((row.children[4]?.querySelector("input")?.value || "0").replace(/,/g, ""));
+    
+        if (item && !/^\d+$/.test(item) && qty > 0 && !isNaN(amount)) {
+          validRows.push({ item, qty, rate, amount });
         }
-      })
-      .catch(err => {
-        console.error("❌ Upload error:", err);
-        alert("❌ Error uploading PDF");
       });
-    };
-
-    reader.readAsDataURL(blob);
-  });
-}
+    
+      if (validRows.length === 0) {
+        alert("No valid item rows to save.");
+        return;
+      }
+    
+      let runningTotal = 0;
+      validRows.forEach(row => runningTotal += row.amount);
+    
+      // ✅ Generate PDF with jsPDF
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+      let y = 10;
+    
+      doc.setFontSize(12);
+      doc.text(`Invoice No: ${invoiceNo}`, 10, y); y += 10;
+      doc.text(`Date: ${date}`, 10, y); y += 10;
+      doc.text(`Customer: ${customerName}`, 10, y); y += 10;
+      doc.text(`Address: ${address}`, 10, y); y += 10;
+      doc.text("Item     Qty     Rate     Amount", 10, y); y += 10;
+    
+      validRows.forEach(row => {
+        doc.text(`${row.item}     ${row.qty}     ${row.rate.toFixed(2)}     ${row.amount.toFixed(2)}`, 10, y);
+        y += 10;
+      });
+    
+      doc.text(`Total: ₹${runningTotal.toFixed(2)}`, 10, y + 10);
+      doc.text(`Paid: ₹${amountPaid.toFixed(2)}`, 10, y + 20);
+      doc.text(`Balance: ₹${(runningTotal - amountPaid).toFixed(2)}`, 10, y + 30);
+    
+      // ✅ Convert to base64 and upload to Apps Script
+      doc.output('blob').arrayBuffer().then(buffer => {
+        const blob = new Blob([buffer], { type: "application/pdf" });
+        const reader = new FileReader();
+    
+        reader.onloadend = function () {
+          const base64pdf = reader.result.split(',')[1]; // Remove prefix
+    
+          const payload = {
+            invoiceNo,
+            customerName,
+            date,
+            total: runningTotal.toFixed(2),
+            paid: amountPaid.toFixed(2),
+            balance: (runningTotal - amountPaid).toFixed(2),
+            filename: `Invoice_${invoiceNo}.pdf`,
+            pdf: base64pdf
+          };
+    
+          fetch("https://script.google.com/macros/s/AKfycbxq-ifgxz-wcANqWN7NI2ngoxoocNBLsSCV1Db28kSb6fAuo-3h586PhsY6uE9vpUcM0w/exec", {
+            method: "POST",
+            mode:"no-cors",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify(payload)
+          })
+          .then(res => res.json())
+          .then(result => {
+            if (result.status === "success") {
+              alert("✅ PDF uploaded!\nView: " + result.url);
+            } else {
+              alert("❌ Upload failed: " + result.message);
+            }
+          })
+          .catch(err => {
+            console.error("❌ Upload error:", err);
+            alert("❌ Error uploading PDF");
+          });
+        };
+    
+        reader.readAsDataURL(blob);
+      });
+    }
 
   
     function newInvoice() {
