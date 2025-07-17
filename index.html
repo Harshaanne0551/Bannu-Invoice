@@ -852,26 +852,34 @@ function toggleSidebar() {
             pdf: base64pdf
           };
     
+          const formData = new FormData();
+          for (let key in payload) {
+            formData.append(key, payload[key]);
+          }
+          
           fetch("https://script.google.com/macros/s/AKfycbxq-ifgxz-wcANqWN7NI2ngoxoocNBLsSCV1Db28kSb6fAuo-3h586PhsY6uE9vpUcM0w/exec", {
             method: "POST",
-          
-            headers: {
-              "Content-Type": "application/json"
-            },
-            body: JSON.stringify(payload)
+            body: formData
           })
-          .then(res => res.json())
-          .then(result => {
-            if (result.status === "success") {
-              alert("✅ PDF uploaded!\nView: " + result.url);
-            } else {
-              alert("❌ Upload failed: " + result.message);
+          .then(res => res.text())
+          .then(text => {
+            try {
+              const result = JSON.parse(text);
+              if (result.status === "success") {
+                alert("✅ PDF uploaded!\nView: " + result.url);
+              } else {
+                alert("❌ Upload failed: " + result.message);
+              }
+            } catch (e) {
+              console.error("❌ JSON parse error:", text);
+              alert("❌ Unexpected response from server.");
             }
           })
           .catch(err => {
             console.error("❌ Upload error:", err);
             alert("❌ Error uploading PDF");
           });
+
         };
     
         reader.readAsDataURL(blob);
