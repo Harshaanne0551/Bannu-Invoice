@@ -1127,30 +1127,31 @@ document.addEventListener("click", function (e) {
     });
   }
 </script>
-  <script>
-  function downloadStyledInvoice() {
-    const invoiceElement = document.getElementById('invoiceBox');
-  
-    // Temporarily add a class to hide non-print elements
-    invoiceElement.classList.add('print-mode');
-  
-    const customerName = document.getElementById('customerName')?.value?.trim() || 'Invoice';
-    const fileName = `${customerName} Invoice.pdf`;
-  
-    const opt = {
-      margin:       0.3,
-      filename:     fileName,
-      image:        { type: 'jpeg', quality: 0.98 },
-      html2canvas:  { scale: 2, useCORS: true },
-      jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' }
-    };
-  
-    html2pdf().set(opt).from(invoiceElement).save().then(() => {
-      // Clean up after PDF is generated
-      invoiceElement.classList.remove('print-mode');
-    });
-  }
 
+<script>
+function downloadStyledInvoice() {
+  const invoiceElement = document.getElementById('invoiceBox');
+  
+  // Hide elements manually
+  const elementsToHide = document.querySelectorAll('.no-print');
+  elementsToHide.forEach(el => el.style.display = 'none');
+
+  const customerName = document.getElementById('customerName')?.value?.trim() || 'Invoice';
+  const fileName = `${customerName} Invoice.pdf`;
+
+  const opt = {
+    margin:       0,
+    filename:     fileName,
+    image:        { type: 'jpeg', quality: 0.98 },
+    html2canvas:  { scale: 2, useCORS: true },
+    jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' }
+  };
+
+  html2pdf().set(opt).from(invoiceElement).save().then(() => {
+    // Restore hidden elements after PDF is generated
+    elementsToHide.forEach(el => el.style.display = '');
+  });
+}
 </script>
 </body>
 </html>
