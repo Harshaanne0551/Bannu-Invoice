@@ -885,6 +885,7 @@ function toggleSidebar() {
         form.method = "POST";
         form.target = "uploadTarget";
         form.action = "https://script.google.com/macros/s/AKfycbxq-ifgxz-wcANqWN7NI2ngoxoocNBLsSCV1Db28kSb6fAuo-3h586PhsY6uE9vpUcM0w/exec";
+        form.mode="no-cors";
         form.style.display = "none";
 
         const addField = (name, value) => {
