@@ -1058,7 +1058,6 @@ async function saveInvoice() {
   }
 }
 </script>
----
 
 
 
@@ -1074,7 +1073,7 @@ function downloadStyledInvoice() {
   const fileName = `${customerName} Invoice.pdf`;
 
   const opt = {
-    margin:       5,
+    margin:       4,
     filename:     fileName,
     image:        { type: 'jpeg', quality: 0.98 },
     html2canvas:  { scale: 2, useCORS: true },
