@@ -783,40 +783,39 @@ function toggleSidebar() {
         document.getElementById("billedBy").style.display = "block";
       }
     }
-    function saveInvoice() {
+    async function saveInvoice() {
       const invoiceNo = document.getElementById("invoiceNo").innerText;
       const date = document.getElementById("invoiceDate").innerText;
       const customerName = document.getElementById("customerName").value.trim();
       const address = document.getElementById("Address").value.trim();
       const amountPaid = parseFloat(document.getElementById("amountPaid").value || 0);
-    
+      const selectedBiller = "Harsha"; // Change as needed
+
       const rawRows = document.querySelectorAll("#itemRows tr");
       const validRows = [];
-    
+
       rawRows.forEach(row => {
         const item = row.children[0]?.querySelector("input")?.value.trim();
         const qty = parseFloat(row.children[2]?.querySelector("input")?.value || 0);
         const rate = parseFloat(row.children[3]?.querySelector("input")?.value || 0);
         const amount = parseFloat((row.children[4]?.querySelector("input")?.value || "0").replace(/,/g, ""));
-    
         if (item && !/^\d+$/.test(item) && qty > 0 && !isNaN(amount)) {
           validRows.push({ item, qty, rate, amount });
         }
       });
-    
+
       if (validRows.length === 0) {
-        console.warn("❌ Skipped: No valid item rows. Please enter at least one item with Qty > 0.");
-        alert("No valid item rows to save. Please fill in at least one row with item name, qty, and rate.");
+        alert("❌ Please enter at least one valid item with quantity.");
         return;
       }
-          
+
       let runningTotal = 0;
       const items = [];
-    
+
       validRows.forEach((row, index) => {
         runningTotal += row.amount;
         const isLast = index === validRows.length - 1;
-    
+
         items.push({
           InvoiceNo: invoiceNo,
           Date: date,
@@ -829,18 +828,17 @@ function toggleSidebar() {
           GrandTotal: isLast ? runningTotal.toFixed(2) : "0.00",
           AmountPaid: isLast ? amountPaid.toFixed(2) : "0.00",
           RemainingBalance: isLast ? (runningTotal - amountPaid).toFixed(2) : "0.00",
-          BilledBy: selectedBiller || '',
+          BilledBy: selectedBiller,
         });
       });
-    
+
+      // ✅ Save in LocalStorage
       const allInvoices = JSON.parse(localStorage.getItem("savedInvoices") || "[]");
       allInvoices.push(...items);
       localStorage.setItem("savedInvoices", JSON.stringify(allInvoices));
-    
-      alert("Invoice saved locally!");
-      displaySavedInvoices();
-    
-      // ✅ Upload row-wise invoice data to MAIN Google Sheet
+      alert("✅ Invoice saved locally!");
+
+      // ✅ Send row-wise data to Google Sheet
       fetch("https://script.google.com/macros/s/AKfycbwF_ULpVqdVmws_GU5svU9SaY8K0VCZgqmOTp5HL6ARlbjIrrslO9dqRh4Jq4CBet-tAQ/exec", {
         method: "POST",
         mode: "no-cors",
@@ -848,94 +846,73 @@ function toggleSidebar() {
           "Content-Type": "application/json"
         },
         body: JSON.stringify(items)
-      })
-      .then(() => {
-        console.log("Invoice rows uploaded to main Google Sheet.");
-      })
-      .catch(error => {
-        console.error("Error uploading to main Google Sheet:", error);
-      });
-    
-      // ✅ Generate PDF and upload it to second Google Apps Script
-      const { jsPDF } = window.jspdf;
-      const doc = new jsPDF();
-    
-      doc.setFontSize(12);
-      doc.text(`Invoice No: ${invoiceNo}`, 10, 10);
-      doc.text(`Date: ${date}`, 10, 20);
-      doc.text(`Customer: ${customerName}`, 10, 30);
-      doc.text(`Address: ${address}`, 10, 40);
-    
-      let y = 50;
-      doc.text("Item", 10, y);
-      doc.text("Qty", 80, y);
-      doc.text("Rate", 100, y);
-      doc.text("Amount", 130, y);
-      y += 10;
-    
-      validRows.forEach(row => {
-        doc.text(row.item, 10, y);
-        doc.text(row.qty.toString(), 80, y);
-        doc.text(row.rate.toFixed(2), 100, y);
-        doc.text(row.amount.toFixed(2), 130, y);
-        y += 10;
-      });
-    
-      doc.text(`Grand Total: ₹${runningTotal.toFixed(2)}`, 10, y + 10);
-      doc.text(`Amount Paid: ₹${amountPaid.toFixed(2)}`, 10, y + 20);
-      doc.text(`Remaining Balance: ₹${(runningTotal - amountPaid).toFixed(2)}`, 10, y + 30);
-      doc.text(`Billed By: ${selectedBiller}`, 10, y + 40);
-    
-      // ✅ Convert to base64 and upload
-      // ✅ Convert to base64 and upload PDF via <form> to Google Apps Script
-      doc.output('blob').arrayBuffer().then(buffer => {
-        const blob = new Blob([buffer], { type: "application/pdf" });
-        const reader = new FileReader();
-      
-        reader.onloadend = function () {
-          const base64pdf = reader.result.split(',')[1];
-      
-          // ✅ Create hidden iframe for cross-domain form POST (bypasses CORS)
-          const iframe = document.createElement("iframe");
-          iframe.name = "uploadTarget";
-          iframe.style.display = "none";
-          document.body.appendChild(iframe);
-      
-          const form = document.createElement("form");
-          form.method = "POST";
-          form.target = "uploadTarget";
-          form.action = "https://script.google.com/macros/s/AKfycbwF9JpxCPCroM7eutmPT-qgkeNMcz-ty1toFJNU7m_j7M63pCDrfhSHAkj5O047l2usQA/exec";
-          form.mode = "no-cors";
-          form.style.display = "none";
-      
-          const addField = (name, value) => {
-            const input = document.createElement("input");
-            input.type = "hidden";
-            input.name = name;
-            input.value = value;
-            form.appendChild(input);
-          };
-      
-          addField("invoiceNo", invoiceNo);
-          addField("customerName", customerName);
-          addField("date", date);
-          addField("total", runningTotal.toFixed(2));
-          addField("paid", amountPaid.toFixed(2));
-          addField("balance", (runningTotal - amountPaid).toFixed(2));
-          addField("filename", `Invoice_${invoiceNo}.pdf`);
-          addField("pdf", base64pdf);
-      
-          document.body.appendChild(form);
-          form.submit();
-      
-          alert("✅ Invoice PDF sent to Drive and Sheets.");
-        };
-      
-        reader.readAsDataURL(blob);
       });
 
+      // ✅ Create PDF and upload via <form> to bypass CORS
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+      let y = 10;
+
+      doc.text(`Invoice No: ${invoiceNo}`, 10, y); y += 10;
+      doc.text(`Date: ${date}`, 10, y); y += 10;
+      doc.text(`Customer: ${customerName}`, 10, y); y += 10;
+      doc.text(`Address: ${address}`, 10, y); y += 10;
+      doc.text(`Item     Qty     Rate     Amount`, 10, y); y += 10;
+
+      validRows.forEach(row => {
+        doc.text(`${row.item}   ${row.qty}   ${row.rate}   ${row.amount.toFixed(2)}`, 10, y);
+        y += 10;
+      });
+
+      doc.text(`Grand Total: ₹${runningTotal.toFixed(2)}`, 10, y); y += 10;
+      doc.text(`Amount Paid: ₹${amountPaid.toFixed(2)}`, 10, y); y += 10;
+      doc.text(`Balance: ₹${(runningTotal - amountPaid).toFixed(2)}`, 10, y); y += 10;
+      doc.text(`Billed By: ${selectedBiller}`, 10, y);
+
+      const pdfBlob = await doc.output('blob');
+      const reader = new FileReader();
+
+      reader.onloadend = function () {
+        const base64pdf = reader.result.split(',')[1];
+
+        // ✅ Hidden iframe + form submit
+        const iframe = document.createElement("iframe");
+        iframe.name = "uploadTarget";
+        iframe.style.display = "none";
+        document.body.appendChild(iframe);
+
+        const form = document.createElement("form");
+        form.method = "POST";
+        form.target = "uploadTarget";
+        form.action = "https://script.google.com/macros/s/AKfycbxq-ifgxz-wcANqWN7NI2ngoxoocNBLsSCV1Db28kSb6fAuo-3h586PhsY6uE9vpUcM0w/exec";
+        form.style.display = "none";
+
+        const addField = (name, value) => {
+          const input = document.createElement("input");
+          input.type = "hidden";
+          input.name = name;
+          input.value = value;
+          form.appendChild(input);
+        };
+
+        addField("invoiceNo", invoiceNo);
+        addField("customerName", customerName);
+        addField("date", date);
+        addField("total", runningTotal.toFixed(2));
+        addField("paid", amountPaid.toFixed(2));
+        addField("balance", (runningTotal - amountPaid).toFixed(2));
+        addField("filename", `Invoice_${invoiceNo}.pdf`);
+        addField("pdf", base64pdf);
+
+        document.body.appendChild(form);
+        form.submit();
+
+        alert("✅ PDF sent to Google Drive & logged to Sheet.");
+      };
+
+      reader.readAsDataURL(pdfBlob);
     }
-    
+  
     function newInvoice() {
       location.reload();
     }
