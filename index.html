@@ -220,6 +220,11 @@
       cursor: pointer;
     }
 
+    /* Cell content handling */
+    .invoice-box td, .invoice-box th {
+      word-wrap: break-word;
+      overflow-wrap: break-word;
+    }
     #afterSubmitButtons {
       display: none;
     }
@@ -1057,6 +1062,18 @@ document.addEventListener("click", function (e) {
 
       // Generate PDF with html2canvas
       const invoiceElement = document.getElementById("invoiceBox");
+      const clone = invoiceElement.cloneNode(true);
+      clone.style.position = 'absolute';
+      clone.style.left = '-9999px';
+      clone.style.width = invoiceElement.offsetWidth + 'px';
+      document.body.appendChild(clone);
+
+      // Special handling for tables to prevent cutoff
+      const tables = clone.querySelectorAll('table');
+      tables.forEach(table => {
+        table.style.width = '100%';
+        table.style.overflow = 'visible';
+      });
       
       // Temporarily hide buttons for clean PDF capture
       const afterSubmitButtons = document.getElementById("afterSubmitButtons");
@@ -1068,26 +1085,38 @@ document.addEventListener("click", function (e) {
         logging: false,
         useCORS: true,
         allowTaint: true
+        scrollX: 0,
+        scrollY: 0,
+        windowWidth: clone.scrollWidth,
+        windowHeight: clone.scrollHeight
       });
 
       // Restore buttons visibility
+      document.body.removeChild(clone);
       afterSubmitButtons.style.display = originalDisplay;
 
       const { jsPDF } = window.jspdf;
       const pdf = new jsPDF({
-        orientation: 'portrait',
+        orientation: clone.offsetWidth > clone.offsetHeight ? 'landscape' : 'portrait',
         unit: 'mm'
       });
 
       // Calculate dimensions to fit the invoice
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const pageHeight = pdf.internal.pageSize.getHeight();
       const imgWidth = 210; // A4 width in mm
       const imgHeight = (canvas.height * imgWidth) / canvas.width;
 
       pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, 0, imgWidth, imgHeight);
+      if (imgHeight > pageHeight - 20) {
+        pdf.addPage();
+        pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 10, -(pageHeight - 20), imgWidth, imgHeight);
+      }
 
       // Upload PDF to Google Drive
       const pdfBlob = pdf.output('blob');
       const reader = new FileReader();
+      
 
       reader.onloadend = async function() {
         const base64pdf = reader.result.split(',')[1];
