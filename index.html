@@ -414,6 +414,8 @@
     <button onclick="enableEditing()">Back to Edit</button>
     <button onclick="saveInvoice()">Save Invoice</button>
     <button onclick="newInvoice()">New Invoice</button>
+    <button id="downloadBtn" class="no-print" onclick="downloadInvoice()">Download Invoice</button>
+
   </div>
 </div>
 <script>
@@ -1107,6 +1109,48 @@ document.addEventListener("click", function (e) {
       submitBtn.innerText = originalBtnText;
       submitBtn.disabled = false;
     }
+  }
+</script>
+<script>
+  async function downloadInvoice() {
+    const invoiceElement = document.getElementById("invoiceBox");
+
+    // Clone invoice to ensure full content is captured (not just visible screen)
+    const clone = invoiceElement.cloneNode(true);
+    clone.style.position = 'fixed';
+    clone.style.top = '0';
+    clone.style.left = '0';
+    clone.style.zIndex = '-1';
+    clone.style.width = '794px'; // A4 width in px @96dpi
+    clone.style.background = '#fff';
+    document.body.appendChild(clone);
+
+    const canvas = await html2canvas(clone, {
+      scale: 2,
+      useCORS: true,
+      backgroundColor: "#ffffff",
+      windowWidth: clone.scrollWidth,
+      windowHeight: clone.scrollHeight
+    });
+
+    document.body.removeChild(clone);
+
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF({
+      orientation: 'portrait',
+      unit: 'mm',
+      format: 'a4'
+    });
+
+    const imgWidth = 210;
+    const imgHeight = (canvas.height * imgWidth) / canvas.width;
+    pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, 0, imgWidth, imgHeight);
+
+    const customerName = document.getElementById("customerName").value.trim() || 'Invoice';
+    const invoiceNo = document.getElementById("invoiceNo").innerText.trim() || '000';
+    const fileName = `${customerName}_Invoice_${invoiceNo}.pdf`;
+
+    pdf.save(fileName);
   }
 </script>
 
