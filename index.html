@@ -1004,9 +1004,20 @@ async function saveInvoice() {
     // Temporarily hide buttons
     const buttonsToHide = document.querySelectorAll('.no-print');
     buttonsToHide.forEach(btn => btn.style.display = 'none');
+    const screenWidth = window.innerWidth;
 
+    let dynamicMargin = 0.2; // Default for desktops
+    
+    if (screenWidth < 768) {
+      // For mobile or smaller tablets
+      dynamicMargin = 0.1;
+    } else if (screenWidth < 1024) {
+      // For medium screens
+      dynamicMargin = 0.15;
+    }
+    
     const opt = {
-      margin:5,
+      margin: dynamicMargin,
       filename: fileName,
       image: { type: 'jpeg', quality: 0.98 },
       html2canvas: { scale: 2, useCORS: true },
