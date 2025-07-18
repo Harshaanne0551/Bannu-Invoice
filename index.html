@@ -938,120 +938,131 @@ document.addEventListener("click", function (e) {
 </script>
 <script>
 async function saveInvoice() {
-  const invoiceNo = document.getElementById("invoiceNo")?.innerText.trim();
-  const date = document.getElementById("invoiceDate")?.innerText.trim();
-  const customerName = document.getElementById("customerName")?.value.trim();
-  const address = document.getElementById("Address")?.value.trim();
-  const amountPaid = parseFloat(document.getElementById("amountPaid")?.value || 0);
+  try {
+    const invoiceNo = document.getElementById("invoiceNo")?.innerText.trim();
+    const date = document.getElementById("invoiceDate")?.innerText.trim();
+    const customerName = document.getElementById("customerName")?.value.trim();
+    const address = document.getElementById("Address")?.value.trim();
+    const amountPaid = parseFloat(document.getElementById("amountPaid")?.value || 0);
 
-  if (!customerName || !invoiceNo) {
-    alert("Please enter customer name and invoice number.");
-    return;
-  }
-
-  const rawRows = document.querySelectorAll("#itemRows tr");
-  const validRows = [];
-  let runningTotal = 0;
-
-  rawRows.forEach(row => {
-    const item = row.children[0]?.querySelector("input")?.value.trim();
-    const qty = parseFloat(row.children[2]?.querySelector("input")?.value || 0);
-    const rate = parseFloat(row.children[3]?.querySelector("input")?.value || 0);
-    const amount = parseFloat((row.children[4]?.querySelector("input")?.value || "0").replace(/,/g, ""));
-
-    if (item && !/^\d+$/.test(item) && qty > 0 && !isNaN(amount)) {
-      runningTotal += amount;
-      validRows.push({ item, qty, rate, amount });
+    if (!customerName || !invoiceNo) {
+      alert("Please enter customer name and invoice number.");
+      return;
     }
-  });
 
-  if (validRows.length === 0) {
-    alert("No valid item rows to save.");
-    return;
-  }
+    const rawRows = document.querySelectorAll("#itemRows tr");
+    const validRows = [];
+    let runningTotal = 0;
 
-  const items = validRows.map((row, index) => {
-    const isLast = index === validRows.length - 1;
-    return {
-      InvoiceNo: invoiceNo,
-      Date: date,
-      CustomerName: customerName,
-      Address: address,
-      Item: row.item,
-      Quantity: row.qty,
-      Price: row.rate,
-      Amount: row.amount.toFixed(2),
-      GrandTotal: isLast ? runningTotal.toFixed(2) : "0.00",
-      AmountPaid: isLast ? amountPaid.toFixed(2) : "0.00",
-      RemainingBalance: isLast ? (runningTotal - amountPaid).toFixed(2) : "0.00",
-      BilledBy: typeof selectedBiller !== 'undefined' ? selectedBiller : ''
-    };
-  });
+    rawRows.forEach(row => {
+      const item = row.children[0]?.querySelector("input")?.value.trim();
+      const qty = parseFloat(row.children[2]?.querySelector("input")?.value || 0);
+      const rate = parseFloat(row.children[3]?.querySelector("input")?.value || 0);
+      const amount = parseFloat((row.children[4]?.querySelector("input")?.value || "0").replace(/,/g, ""));
 
-  // ✅ Upload invoice data to Google Sheet
-  await fetch("https://script.google.com/macros/s/AKfycbyggO5UHpLsJMpb45GizNreGXTRyjrfH82rKFqR59gJGuPblMWTWjgMtMJiPVlSkyUtFw/exec", {
-    method: "POST",
-    mode: "no-cors",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(items)
-  });
+      if (item && !/^\d+$/.test(item) && qty > 0 && !isNaN(amount)) {
+        runningTotal += amount;
+        validRows.push({ item, qty, rate, amount });
+      }
+    });
 
-  // ✅ Create a full-size hidden clone for PDF
-  const original = document.getElementById("invoiceBox");
-  const clone = original.cloneNode(true);
-  clone.style.position = "absolute";
-  clone.style.top = "-9999px";
-  clone.style.left = "0";
-  clone.style.width = "100%";
-  clone.style.maxWidth = "800px"; // Or your invoice layout width
-  document.body.appendChild(clone);
+    if (validRows.length === 0) {
+      alert("No valid item rows to save.");
+      return;
+    }
 
-  const fileName = `${customerName} Invoice.pdf`;
+    const items = validRows.map((row, index) => {
+      const isLast = index === validRows.length - 1;
+      return {
+        InvoiceNo: invoiceNo,
+        Date: date,
+        CustomerName: customerName,
+        Address: address,
+        Item: row.item,
+        Quantity: row.qty,
+        Price: row.rate,
+        Amount: row.amount.toFixed(2),
+        GrandTotal: isLast ? runningTotal.toFixed(2) : "0.00",
+        AmountPaid: isLast ? amountPaid.toFixed(2) : "0.00",
+        RemainingBalance: isLast ? (runningTotal - amountPaid).toFixed(2) : "0.00",
+        BilledBy: typeof selectedBiller !== 'undefined' ? selectedBiller : ''
+      };
+    });
 
-  const opt = {
-    margin: 0,
-    filename: fileName,
-    image: { type: 'jpeg', quality: 0.98 },
-    html2canvas: { scale: 2, useCORS: true },
-    jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
-  };
-
-  const blob = await html2pdf().set(opt).from(clone).outputPdf('blob');
-
-  const reader = new FileReader();
-  reader.onloadend = function () {
-    const base64pdf = reader.result.split(',')[1];
-
-    const payload = {
-      invoiceNo,
-      customerName,
-      date,
-      total: runningTotal.toFixed(2),
-      paid: amountPaid.toFixed(2),
-      balance: (runningTotal - amountPaid).toFixed(2),
-      filename: fileName,
-      pdf: base64pdf
-    };
-
-    fetch("https://script.google.com/macros/s/AKfycbxq-ifgxz-wcANqWN7NI2ngoxoocNBLsSCV1Db28kSb6fAuo-3h586PhsY6uE9vpUcM0w/exec", {
+    // Upload to Google Sheets
+    await fetch("https://script.google.com/macros/s/AKfycbyggO5UHpLsJMpb45GizNreGXTRyjrfH82rKFqR59gJGuPblMWTWjgMtMJiPVlSkyUtFw/exec", {
       method: "POST",
       mode: "no-cors",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload)
-    })
-    .then(() => {
-      alert("✅ Invoice uploaded to Google Drive!");
-    })
-    .catch(err => {
-      console.error("❌ Upload failed:", err);
-      alert("❌ Upload failed.");
+      body: JSON.stringify(items)
     });
-  };
 
-  reader.readAsDataURL(blob);
+    // ✅ Clone the invoiceBox and insert it visibly offscreen
+    const original = document.getElementById("invoiceBox");
+    const clone = original.cloneNode(true);
+    clone.id = "invoiceCloneForPDF";
+    clone.style.position = "absolute";
+    clone.style.top = "0";
+    clone.style.left = "0";
+    clone.style.zIndex = "-1";
+    clone.style.width = "800px";
+    clone.style.background = "white";
+    document.body.appendChild(clone);
 
-  // ✅ Clean up the clone
-  document.body.removeChild(clone);
+    // ✅ Wait for fonts/images/styles to load
+    await new Promise(resolve => setTimeout(resolve, 500));
+
+    const fileName = `${customerName} Invoice.pdf`;
+
+    const opt = {
+      margin: 0.5,
+      filename: fileName,
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: { scale: 2, useCORS: true },
+      jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
+    };
+
+    const blob = await html2pdf().set(opt).from(clone).outputPdf('blob');
+
+    const reader = new FileReader();
+    reader.onloadend = function () {
+      const base64pdf = reader.result.split(',')[1];
+
+      const payload = {
+        invoiceNo,
+        customerName,
+        date,
+        total: runningTotal.toFixed(2),
+        paid: amountPaid.toFixed(2),
+        balance: (runningTotal - amountPaid).toFixed(2),
+        filename: fileName,
+        pdf: base64pdf
+      };
+
+      fetch("https://script.google.com/macros/s/AKfycbxq-ifgxz-wcANqWN7NI2ngoxoocNBLsSCV1Db28kSb6fAuo-3h586PhsY6uE9vpUcM0w/exec", {
+        method: "POST",
+        mode: "no-cors",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      })
+      .then(() => {
+        alert("✅ Invoice uploaded to Google Drive!");
+      })
+      .catch(err => {
+        console.error("❌ Upload failed:", err);
+        alert("❌ Upload failed.");
+      });
+    };
+
+    reader.readAsDataURL(blob);
+
+    // ✅ Remove cloned element
+    document.body.removeChild(clone);
+
+  } catch (err) {
+    console.error("❌ Unexpected error:", err);
+    alert("Something went wrong! Check console.");
+  }
 }
 </script>
 
