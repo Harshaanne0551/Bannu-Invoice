@@ -1006,11 +1006,11 @@ async function saveInvoice() {
     buttonsToHide.forEach(btn => btn.style.display = 'none');
     const screenWidth = window.innerWidth;
 
-    let dynamicMargin = 0.2; // Default for desktops
+    let dynamicMargin = 0.25; // Default for desktops
     
     if (screenWidth < 768) {
       // For mobile or smaller tablets
-      dynamicMargin = 0.1;
+      dynamicMargin = 0.12;
     } else if (screenWidth < 1024) {
       // For medium screens
       dynamicMargin = 0.15;
