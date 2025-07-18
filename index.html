@@ -993,8 +993,8 @@ document.addEventListener("click", function (e) {
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
-<script>
-  async function saveInvoice() {
+  <script>
+async function saveInvoice() {
     // Cache DOM elements
     const submitBtn = document.getElementById("submitBtn");
     const invoiceNo = document.getElementById("invoiceNo").innerText.trim();
@@ -1076,56 +1076,61 @@ document.addEventListener("click", function (e) {
       clone.style.position = 'absolute';
       clone.style.top = '-9999px';
       clone.style.left = '0';
-      clone.style.width = '794px';
+      clone.style.width = '794px'; // A4 width in pixels
       clone.style.background = '#fff';
       document.body.appendChild(clone);
 
-      // Parallel processing: Sheets upload + PDF generation
-      const [sheetsResponse, pdfBlob] = await Promise.all([
-        // 1. Upload to Google Sheets
-        fetch("https://script.google.com/macros/s/AKfycbyggO5UHpLsJMpb45GizNreGXTRyjrfH82rKFqR59gJGuPblMWTWjgMtMJiPVlSkyUtFw/exec", {
-          method: "POST",
-          mode: "no-cors",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(items)
-        }),
-        
-        // 2. Generate PDF
-        (async () => {
-          const canvas = await html2canvas(clone, {
-            scale: 1.25, // Reduced from 2 to 1 for smaller file size
-            useCORS: true,
-            backgroundColor: "#ffffff",
-            windowWidth: clone.scrollWidth,
-            windowHeight: clone.scrollHeight,
-            logging: false,
-            ignoreElements: (el) => {
-              return el.style.display === 'none' || 
-                     el.classList.contains('no-print');
-            }
-          });
-          
-          document.body.removeChild(clone); // Clean up clone
+      // Calculate total height and number of pages needed
+      const pageHeight = 1122; // A4 height in pixels (at 96dpi)
+      const totalHeight = clone.scrollHeight;
+      const numPages = Math.ceil(totalHeight / pageHeight);
 
-          const { jsPDF } = window.jspdf;
-          const pdf = new jsPDF({
-            orientation: 'portrait',
-            unit: 'mm',
-            format: 'a4',
-            compress: true // Enable PDF compression
-          });
+      // Create PDF
+      const { jsPDF } = window.jspdf;
+      const pdf = new jsPDF({
+        orientation: 'portrait',
+        unit: 'px',
+        format: [794, 1122], // A4 dimensions in pixels
+        compress: true
+      });
 
-          const imgWidth = 210;
-          const imgHeight = (canvas.height * imgWidth) / canvas.width;
-          
-          // Use JPEG with quality reduction for smaller files
-          pdf.addImage(canvas.toDataURL('image/jpeg', 0.85), 'JPEG', 0, 0, imgWidth, imgHeight);
-          
-          return pdf.output('blob');
-        })()
-      ]);
+      // Capture each page
+      for (let i = 0; i < numPages; i++) {
+        const canvas = await html2canvas(clone, {
+          scale: 1,
+          useCORS: true,
+          backgroundColor: "#ffffff",
+          windowWidth: clone.scrollWidth,
+          windowHeight: clone.scrollHeight,
+          logging: false,
+          ignoreElements: (el) => el.style.display === 'none' || el.classList.contains('no-print'),
+          y: i * pageHeight,
+          height: pageHeight,
+          scrollY: -i * pageHeight
+        });
+
+        // Add page to PDF (except first page which is automatically created)
+        if (i > 0) {
+          pdf.addPage([794, 1122], 'portrait');
+        }
+
+        // Add image to current page
+        pdf.addImage(canvas.toDataURL('image/jpeg', 0.85), 'JPEG', 0, 0, 794, pageHeight);
+      }
+
+      // Clean up clone
+      document.body.removeChild(clone);
+
+      // Upload to Google Sheets
+      await fetch("https://script.google.com/macros/s/AKfycbyggO5UHpLsJMpb45GizNreGXTRyjrfH82rKFqR59gJGuPblMWTWjgMtMJiPVlSkyUtFw/exec", {
+        method: "POST",
+        mode: "no-cors",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(items)
+      });
 
       // Upload PDF to Google Drive
+      const pdfBlob = pdf.output('blob');
       const reader = new FileReader();
       reader.onloadend = async function() {
         const base64pdf = reader.result.split(',')[1];
@@ -1147,46 +1152,43 @@ document.addEventListener("click", function (e) {
         });
 
         loadingIndicator.innerHTML = `
+          <div style="background:white; padding:20px; border-radius:5px; text-align:center;">
+            <div style="color:green; margin-bottom:10px;">✅ Invoice saved successfully!</div>
+            <button id="closeLoadingBtn" 
+                    style="padding:5px 10px; background:#003366; color:white; border:none; cursor:pointer;">
+              Close
+            </button>
+          </div>
+        `;
+        
+        document.getElementById('closeLoadingBtn').addEventListener('click', function() {
+          document.body.removeChild(loadingIndicator);
+        });
+      };
+      
+      reader.readAsDataURL(pdfBlob);
+
+    } catch (err) {
+      console.error("Error saving invoice:", err);
+      loadingIndicator.innerHTML = `
         <div style="background:white; padding:20px; border-radius:5px; text-align:center;">
-          <div style="color:green; margin-bottom:10px;">✅ Invoice saved successfully!</div>
-          <button id="closeLoadingBtn" 
+          <div style="color:red; margin-bottom:10px;">❌ Error saving invoice</div>
+          <div style="font-size:12px; margin-bottom:10px;">${err.message}</div>
+          <button id="closeErrorBtn" 
                   style="padding:5px 10px; background:#003366; color:white; border:none; cursor:pointer;">
             Close
           </button>
         </div>
       `;
       
-      // Proper event listener for close button
-      document.getElementById('closeLoadingBtn').addEventListener('click', function() {
+      document.getElementById('closeErrorBtn').addEventListener('click', function() {
         document.body.removeChild(loadingIndicator);
       });
-    };
-    
-    reader.readAsDataURL(pdfBlob);
-
-  } catch (err) {
-    console.error("Error saving invoice:", err);
-    loadingIndicator.innerHTML = `
-      <div style="background:white; padding:20px; border-radius:5px; text-align:center;">
-        <div style="color:red; margin-bottom:10px;">❌ Error saving invoice</div>
-        <div style="font-size:12px; margin-bottom:10px;">${err.message}</div>
-        <button id="closeErrorBtn" 
-                style="padding:5px 10px; background:#003366; color:white; border:none; cursor:pointer;">
-          Close
-        </button>
-      </div>
-    `;
-    
-    // Proper event listener for error close button
-    document.getElementById('closeErrorBtn').addEventListener('click', function() {
-      document.body.removeChild(loadingIndicator);
-    });
-  } finally {
-    submitBtn.innerText = originalBtnText;
-    submitBtn.disabled = false;
-  }
+    } finally {
+      submitBtn.innerText = originalBtnText;
+      submitBtn.disabled = false;
+    }
 }
-</script>
 <script>
   async function downloadInvoice() {
     const invoiceElement = document.getElementById("invoiceBox");
