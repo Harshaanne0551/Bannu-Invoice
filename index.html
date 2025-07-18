@@ -1063,6 +1063,88 @@ document.addEventListener("click", function (e) {
       const originalDisplay = afterSubmitButtons.style.display;
       afterSubmitButtons.style.display = "none";
 
+
+<script>
+  async function saveInvoice() {
+    // Show loading indicator
+    const submitBtn = document.getElementById("submitBtn");
+    const originalBtnText = submitBtn.innerText;
+    submitBtn.innerText = "Generating PDF...";
+    submitBtn.disabled = true;
+
+    try {
+      const invoiceNo = document.getElementById("invoiceNo").innerText;
+      const date = document.getElementById("invoiceDate").innerText;
+      const customerName = document.getElementById("customerName").value.trim();
+      const address = document.getElementById("Address").value.trim();
+      const amountPaid = parseFloat(document.getElementById("amountPaid").value || 0);
+
+      // Validate rows
+      const rawRows = document.querySelectorAll("#itemRows tr");
+      const validRows = [];
+
+      rawRows.forEach(row => {
+        const item = row.children[0]?.querySelector("input")?.value.trim();
+        const qty = parseFloat(row.children[2]?.querySelector("input")?.value || 0);
+        const rate = parseFloat(row.children[3]?.querySelector("input")?.value || 0);
+        const amount = parseFloat((row.children[4]?.querySelector("input")?.value || "0").replace(/,/g, ""));
+
+        if (item && !/^\d+$/.test(item) && qty > 0 && !isNaN(amount)) {
+          validRows.push({ item, qty, rate, amount });
+        }
+      });
+
+      if (validRows.length === 0) {
+        alert("No valid item rows to save.");
+        return;
+      }
+
+      // Calculate totals
+      let runningTotal = 0;
+      const items = [];
+
+      validRows.forEach((row, index) => {
+        runningTotal += row.amount;
+        const isLast = index === validRows.length - 1;
+
+        items.push({
+          InvoiceNo: invoiceNo,
+          Date: date,
+          CustomerName: customerName,
+          Address: address,
+          Item: row.item,
+          Quantity: row.qty,
+          Price: row.rate,
+          Amount: row.amount.toFixed(2),
+          GrandTotal: isLast ? runningTotal.toFixed(2) : "0.00",
+          AmountPaid: isLast ? amountPaid.toFixed(2) : "0.00",
+          RemainingBalance: isLast ? (runningTotal - amountPaid).toFixed(2) : "0.00",
+          BilledBy: typeof selectedBiller !== 'undefined' ? selectedBiller : '',
+        });
+      });
+
+      // Save locally
+      const allInvoices = JSON.parse(localStorage.getItem("savedInvoices") || "[]");
+      allInvoices.push(...items);
+      localStorage.setItem("savedInvoices", JSON.stringify(allInvoices));
+      displaySavedInvoices();
+
+      // Upload to Google Sheet
+      await fetch("https://script.google.com/macros/s/AKfycbyggO5UHpLsJMpb45GizNreGXTRyjrfH82rKFqR59gJGuPblMWTWjgMtMJiPVlSkyUtFw/exec", {
+        method: "POST",
+        mode: "no-cors",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(items)
+      });
+
+      // Generate PDF with html2canvas
+      const invoiceElement = document.getElementById("invoiceBox");
+      
+      // Temporarily hide buttons for clean PDF capture
+      const afterSubmitButtons = document.getElementById("afterSubmitButtons");
+      const originalDisplay = afterSubmitButtons.style.display;
+      afterSubmitButtons.style.display = "none";
+
       const canvas = await html2canvas(invoiceElement, {
         scale: 2, // Higher quality
         logging: false,
@@ -1087,50 +1169,47 @@ document.addEventListener("click", function (e) {
 
       // Upload PDF to Google Drive
       const pdfBlob = pdf.output('blob');
-      const reader = new FileReader();
+        const reader = new FileReader();
 
-      reader.onloadend = async function() {
-        const base64pdf = reader.result.split(',')[1];
+        reader.onloadend = async function() {
+          try {
+            const base64pdf = reader.result.split(',')[1];
+            const payload = {
+              invoiceNo: document.getElementById("invoiceNo").innerText,
+              customerName: document.getElementById("customerName").value.trim(),
+              date: document.getElementById("invoiceDate").innerText,
+              total: runningTotal.toFixed(2),
+              paid: amountPaid.toFixed(2),
+              balance: (runningTotal - amountPaid).toFixed(2),
+              filename: `Invoice_${invoiceNo}.pdf`,
+              pdf: base64pdf
+            };
 
-        const payload = {
-          invoiceNo,
-          customerName,
-          date,
-          total: runningTotal.toFixed(2),
-          paid: amountPaid.toFixed(2),
-          balance: (runningTotal - amountPaid).toFixed(2),
-          filename: `Invoice_${invoiceNo}.pdf`,
-          pdf: base64pdf
+            await fetch("https://script.google.com/macros/s/AKfycbxq-ifgxz-wcANqWN7NI2ngoxoocNBLsSCV1Db28kSb6fAuo-3h586PhsY6uE9vpUcM0w/exec", {
+              method: "POST",
+              mode: "no-cors",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(payload)
+            });
+
+            alert("✅ Invoice PDF successfully generated and uploaded!");
+            resolve(true);
+          } catch (uploadError) {
+            console.error("PDF upload error:", uploadError);
+            resolve(false);
+          }
         };
 
-        try {
-          const response = await fetch("https://script.google.com/macros/s/AKfycbxq-ifgxz-wcANqWN7NI2ngoxoocNBLsSCV1Db28kSb6fAuo-3h586PhsY6uE9vpUcM0w/exec", {
-            method: "POST",
-            mode: "no-cors",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(payload)
-          });
+        reader.readAsDataURL(pdfBlob);
 
-          alert("✅ Invoice saved and PDF uploaded to Drive!");
-        } catch (err) {
-          console.error("PDF upload error:", err);
-          alert("Invoice saved locally but PDF upload failed. See console for details.");
-        } finally {
-          submitBtn.innerText = originalBtnText;
-          submitBtn.disabled = false;
-        }
-      };
-
-      reader.readAsDataURL(pdfBlob);
-
-    } catch (error) {
-      console.error("Error in saveInvoice:", error);
-      alert("An error occurred while saving the invoice.");
-      submitBtn.innerText = originalBtnText;
-      submitBtn.disabled = false;
-    }
+      } catch (error) {
+        console.error("Mobile PDF generation failed:", error);
+        resolve(false);
+      }
+    });
   }
 </script>
+
 
 
 </body>
