@@ -1107,7 +1107,7 @@ document.addEventListener("click", function (e) {
             total: runningTotal.toFixed(2),
             paid: amountPaid.toFixed(2),
             balance: (runningTotal - amountPaid).toFixed(2),
-            filename: `Invoice_${invoiceNocustomerName}.pdf`,
+            filename: `Invoice_${invoiceNo}_${customerName}.pdf`,
             pdf: base64pdf
           })
         });
