@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Invoice - Bannu Enterprises</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      font-size: 13px;
+      margin: 0;
+      padding: 30px;
+      background: #fff;
+    }
+
+    .top-bar-toggle {
+      position: fixed;
+      top: 10px;
+      left: 10px;
+      z-index: 1001;
+    }
+
+    .top-bar-toggle button {
+      padding: 6px 12px;
+      background-color: #003366;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    .sidebar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 220px;
+      height: 100vh;
+      background-color: white;
+      color: black;
+      padding: 20px 10px;
+      box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+      box-sizing: border-box;
+      display: none;
+      flex-direction: column;
+      z-index: 1000;
+    }
+
+    .sidebar h3 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .sidebar a {
+      color: black;
+      text-decoration: none;
+      margin: 8px 0;
+      padding: 6px;
+      display: block;
+      border-radius: 4px;
+    }
+
+    .sidebar a:hover {
+      background: #f0f0f0;
+    }
+
+    .invoice-box {
+      width: 100%;
+      margin: auto;
+      border: 2px solid #000;
+      padding: 20px;
+      color: #000;
+      box-sizing: border-box;
+    }
+
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      font-weight: bold;
+      border-bottom: 1px solid #000;
+      padding-bottom: 5px;
+    }
+
+    .title {
+      text-align: center;
+      margin-top: 10px;
+    }
+
+    .title h2 {
+      margin: 5px 0;
+      font-size: 20px;
+      color: #003366;
+    }
+
+    .title p {
+      margin: 2px 0;
+      font-weight: bold;
+    }
+
+    .address {
+      text-align: center;
+    }
+
+    .info-line {
+      margin-top: 20px;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+      font-size: 13px;
+    }
+
+    th, td {
+      border: 1px solid #000;
+      padding: 6px;
+      text-align: center;
+    }
+
+    td input {
+      width: 100%;
+      border: none;
+      text-align: center;
+    }
+
+    button {
+      margin-top: 10px;
+      padding: 6px 12px;
+      background-color: #003366;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    #invoiceDate {
+      font-size: 14px;
+      font-weight: bold;
+    }
+
+    #resultsTable th, #resultsTable td {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    @media screen and (max-width: 768px) {
+      #customerInput {
+        width: 90%;
+      }
+      #resultsTable {
+        font-size: 12px;
+      }
+    }
+  </style>
+</head>
+<body onload="initializeInvoice()">
+
+<!-- Navigation Header -->
+<div class="nav-header">
+  <div class="logo">
+    <i class="fas fa-book-open"></i>
+    <h1>Bannu Enterprises</h1>
+  </div>
+  <div class="nav-links">
+    <a href="dashboard.html">Dashboard</a>
+    <a href="invoice.html">Invoice</a>
+    <a href="payments.html">Payments</a>
+    <a href="SearchCustomer.html">Search Customer</a>
+  </div>
+</div>
+  <div class="invoice-box" id="invoiceBox">
+    <div class="top-bar">
+      <div>GST No: 36AHKPA9847Q1ZI</div>
+      <div>Cell: 9440607963</div>
+    </div>
+
+    <div class="title">
+      <div style="background-color:#003366;color:white;display:inline-block;padding:3px 12px;font-weight:bold;border-radius:4px;">ESTIMATION</div>
+      <h2>BANNU ENTERPRISES</h2>
+      <p>MFGRS OF ALL TYPES OF NOTEBOOKS, LONG BOOKS, REGISTERS</p>
+    </div>
+
+    <div class="address"># 5-2-904, Rasal Abdullah, Osmangunj, Hyderabad.</div>
+
+    <div class="info-line">
+      <div style="font-size:14px;"><strong>Date:</strong> <span id="invoiceDate"></span></div>
+    </div>
+
+    <h2 style="font-size: 14px;">Search Customer Invoices</h2>
+    <input type="text" id="customerInput" placeholder="Enter Customer Name">
+    <button onclick="fetchCustomerData()">Search</button>
+
+    <table id="resultsTable" style="display:none;">
+      <thead>
+        <tr id="tableHeader"></tr>
+      </thead>
+      <tbody id="tableBody"></tbody>
+    </table>
+  </div>
+
+  <script>
+    let globalData = [];
+
+    function toggleSidebar() {
+      const sidebar = document.getElementById("sidebar");
+      sidebar.style.display = sidebar.style.display === "flex" ? "none" : "flex";
+    }
+
+    function initializeInvoice() {
+      const now = new Date();
+      const formatted = now.getFullYear() + '-' +
+        String(now.getMonth() + 1).padStart(2, '0') + '-' +
+        String(now.getDate()).padStart(2, '0') + ' ' +
+        String(now.getHours()).padStart(2, '0') + ':' +
+        String(now.getMinutes()).padStart(2, '0') + ':' +
+        String(now.getSeconds()).padStart(2, '0');
+      document.getElementById('invoiceDate').innerText = formatted;
+    }
+
+    function fetchCustomerData() {
+      const name = document.getElementById('customerInput').value.trim();
+      if (!name) return alert('Please enter a customer name.');
+
+      fetch(`https://script.google.com/macros/s/AKfycbxQxxLHwUgMhz5gX6JQ-Riuc-m906DzXLVAUXrq5LqpTvWTsLqbcOIaN9F2_TYRPPML0A/exec?customer=${encodeURIComponent(name)}`)
+        .then(res => res.json())
+        .then(data => {
+          if (!data.length) {
+            alert("No data found.");
+            return;
+          }
+          globalData = data;
+          renderTable(data);
+        })
+        .catch(err => {
+          console.error(err);
+          alert("Error fetching data.");
+        });
+    }
+
+    function renderTable(data) {
+      document.getElementById('resultsTable').style.display = '';
+      const headers = Object.keys(data[0]);
+      const headerRow = document.getElementById('tableHeader');
+      const body = document.getElementById('tableBody');
+      headerRow.innerHTML = '';
+      body.innerHTML = '';
+
+      headers.forEach(header => {
+        if (header !== 'PDF Link') {
+          const th = document.createElement('th');
+          th.innerText = header;
+          headerRow.appendChild(th);
+        }
+      });
+
+      headerRow.innerHTML += '<th>PDF</th><th>Action</th>';
+
+      data.forEach((row, idx) => {
+        const tr = document.createElement('tr');
+
+        headers.forEach(key => {
+          if (key === 'PDF Link') return;
+
+          const td = document.createElement('td');
+
+          if (key === "Total" || key === "Paid") {
+            td.innerHTML = `<input type="number" id="${key}-${idx}" value="${row[key]}" disabled onchange="updateBalance(${idx})">`;
+          } else if (key === "Balance") {
+            td.id = `Balance-${idx}`;
+            td.innerText = row[key];
+          } else {
+            td.innerText = row[key];
+          }
+
+          tr.appendChild(td);
+        });
+
+        const pdfCell = document.createElement('td');
+        pdfCell.innerHTML = `<button onclick="window.open('${row['PDF Link']}', '_blank')">View</button>`;
+        tr.appendChild(pdfCell);
+
+        const actionCell = document.createElement('td');
+        actionCell.innerHTML = `
+          <button id="editBtn-${idx}" onclick="enableEdit(${idx})">Edit</button>
+          <button id="saveBtn-${idx}" onclick="saveRow(${idx})" style="display:none;">Save</button>`;
+        tr.appendChild(actionCell);
+
+        body.appendChild(tr);
+      });
+    }
+
+    function enableEdit(index) {
+      document.getElementById(`Total-${index}`).disabled = false;
+      document.getElementById(`Paid-${index}`).disabled = false;
+      document.getElementById(`editBtn-${index}`).style.display = "none";
+      document.getElementById(`saveBtn-${index}`).style.display = "inline-block";
+    }
+
+    function updateBalance(index) {
+      const total = parseFloat(document.getElementById(`Total-${index}`).value) || 0;
+      const paid = parseFloat(document.getElementById(`Paid-${index}`).value) || 0;
+      const balance = total - paid;
+
+      globalData[index]["Total"] = total;
+      globalData[index]["Paid"] = paid;
+      globalData[index]["Balance"] = balance;
+
+      document.getElementById(`Balance-${index}`).innerText = balance;
+    }
+
+    function saveRow(index) {
+      const row = globalData[index];
+      row["Total"] = parseFloat(document.getElementById(`Total-${index}`).value) || 0;
+      row["Paid"] = parseFloat(document.getElementById(`Paid-${index}`).value) || 0;
+      row["Balance"] = row["Total"] - row["Paid"];
+
+      fetch("https://script.google.com/macros/s/AKfycbxQxxLHwUgMhz5gX6JQ-Riuc-m906DzXLVAUXrq5LqpTvWTsLqbcOIaN9F2_TYRPPML0A/exec", {
+        method: "POST",
+        mode: "no-cors",
+        body: JSON.stringify(row),
+        headers: {
+          "Content-Type": "application/json"
+        }
+      }).then(() => {
+        alert("Data updated successfully!");
+        fetchCustomerData(); // refresh table
+      }).catch(err => {
+        console.error(err);
+        alert("Failed to save data.");
+      });
+    }
+  </script>
+
+</body>
+</html>
