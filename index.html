@@ -989,7 +989,7 @@ async function saveInvoice() {
       };
     });
 
-    // ✅ Upload data to Google Sheet
+    // ✅ Upload data to Google Sheets
     await fetch("https://script.google.com/macros/s/AKfycbyggO5UHpLsJMpb45GizNreGXTRyjrfH82rKFqR59gJGuPblMWTWjgMtMJiPVlSkyUtFw/exec", {
       method: "POST",
       mode: "no-cors",
@@ -999,19 +999,12 @@ async function saveInvoice() {
 
     console.log("✅ Data saved to Google Sheets.");
 
-    // ✅ Scroll to top and zoom out to capture full invoice
-    const originalScrollY = window.scrollY;
-    const originalZoom = document.body.style.zoom || "100%";
-    window.scrollTo(0, 0);
-    document.body.style.zoom = "80%"; // adjust as needed
-
-    // Wait for layout to stabilize
-    await new Promise(resolve => setTimeout(resolve, 700));
-
-    // ✅ Hide buttons temporarily
+    // ✅ Temporarily hide action buttons
     const buttonsToHide = document.querySelectorAll('.no-print');
     buttonsToHide.forEach(btn => btn.style.visibility = 'hidden');
 
+    // ✅ Generate PDF of invoiceBox only
+    const invoiceElement = document.getElementById('invoiceBox');
     const fileName = `${customerName} Invoice.pdf`;
 
     const opt = {
@@ -1022,9 +1015,9 @@ async function saveInvoice() {
       jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
     };
 
-    const blob = await html2pdf().set(opt).from(document.body).outputPdf('blob');
+    const blob = await html2pdf().set(opt).from(invoiceElement).outputPdf('blob');
 
-    // ✅ Convert to base64 and upload to Google Drive
+    // ✅ Convert PDF to base64 and upload to Google Drive
     const reader = new FileReader();
     reader.onloadend = function () {
       const base64pdf = reader.result.split(',')[1];
@@ -1051,9 +1044,7 @@ async function saveInvoice() {
         console.error("❌ Upload failed:", err);
         alert("❌ Upload failed. Check console.");
       }).finally(() => {
-        // ✅ Restore zoom, scroll, and buttons
-        document.body.style.zoom = originalZoom;
-        window.scrollTo(0, originalScrollY);
+        // ✅ Restore buttons
         buttonsToHide.forEach(btn => btn.style.visibility = '');
       });
     };
@@ -1064,10 +1055,10 @@ async function saveInvoice() {
     console.error("❌ Unexpected error:", err);
     alert("Something went wrong! Check the console.");
     document.querySelectorAll('.no-print').forEach(btn => btn.style.visibility = '');
-    document.body.style.zoom = "100%";
   }
 }
 </script>
+
 
 
 
