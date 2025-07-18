@@ -8,6 +8,9 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <style>
@@ -944,6 +947,7 @@ async function saveInvoice() {
     const customerName = document.getElementById("customerName").value.trim();
     const address = document.getElementById("Address").value.trim();
     const amountPaid = parseFloat(document.getElementById("amountPaid").value || 0);
+
     const invoiceElement = document.getElementById("invoiceBox");
 
     if (!customerName || !invoiceNo) {
@@ -951,35 +955,36 @@ async function saveInvoice() {
       return;
     }
 
-    // Force scroll to invoice element & zoom reset
-    window.scrollTo({ top: invoiceElement.offsetTop, behavior: "auto" });
-    document.body.style.zoom = "100%";
-
-    // Hide buttons (not remove layout)
+    // Temporarily hide UI buttons (but not layout)
     const buttons = document.querySelectorAll(".no-print");
     buttons.forEach(btn => btn.style.visibility = "hidden");
 
-    // Wait a bit to let scroll settle
+    // Force scroll to invoice box and reset zoom
+    window.scrollTo({ top: invoiceElement.offsetTop, behavior: "auto" });
+    document.body.style.zoom = "100%";
+
+    // Wait briefly to ensure everything is visible
     await new Promise(resolve => setTimeout(resolve, 500));
 
-    // Capture full invoice box
+    // Generate canvas of full invoiceBox (not screen viewport)
     const canvas = await html2canvas(invoiceElement, {
       scale: 2,
       useCORS: true,
-      windowWidth: document.documentElement.scrollWidth,
-      windowHeight: document.documentElement.scrollHeight
+      scrollY: -window.scrollY
     });
 
     const imgData = canvas.toDataURL("image/png");
     const pdf = new jsPDF('p', 'mm', 'a4');
+
     const pdfWidth = pdf.internal.pageSize.getWidth();
     const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+
     pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
 
-    // Convert to blob and upload to Google Drive
+    const fileName = `${customerName} Invoice.pdf`;
     const blob = pdf.output('blob');
-    const reader = new FileReader();
 
+    const reader = new FileReader();
     reader.onloadend = function () {
       const base64pdf = reader.result.split(',')[1];
 
@@ -990,7 +995,7 @@ async function saveInvoice() {
         total: "0.00",
         paid: amountPaid.toFixed(2),
         balance: "0.00",
-        filename: `${customerName} Invoice.pdf`,
+        filename: fileName,
         pdf: base64pdf
       };
 
@@ -1001,21 +1006,22 @@ async function saveInvoice() {
         body: JSON.stringify(payload)
       });
 
-      alert("✅ Full invoice uploaded to Drive");
+      alert("✅ Invoice uploaded to Google Drive.");
     };
 
     reader.readAsDataURL(blob);
 
-    // Restore visibility
+    // Restore UI buttons
     buttons.forEach(btn => btn.style.visibility = "visible");
 
   } catch (err) {
-    console.error("❌ Error:", err);
-    alert("❌ Something went wrong. Check console.");
-    document.querySelectorAll('.no-print').forEach(btn => btn.style.visibility = 'visible');
+    console.error("❌ Unexpected Error:", err);
+    alert("❌ Something went wrong. See console.");
+    document.querySelectorAll('.no-print').forEach(btn => btn.style.visibility = "visible");
   }
 }
 </script>
+
 
 
 
