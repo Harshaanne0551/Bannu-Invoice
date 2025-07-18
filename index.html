@@ -982,32 +982,34 @@ document.addEventListener("click", function (e) {
 </script>
 <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+
 <script>
   async function saveInvoice() {
-    // Show loading indicator
     const submitBtn = document.getElementById("submitBtn");
     const originalBtnText = submitBtn.innerText;
     submitBtn.innerText = "Generating PDF...";
     submitBtn.disabled = true;
 
     try {
-      const invoiceNo = document.getElementById("invoiceNo").innerText;
-      const date = document.getElementById("invoiceDate").innerText;
+      const invoiceNo = document.getElementById("invoiceNo").innerText.trim();
+      const date = document.getElementById("invoiceDate").innerText.trim();
       const customerName = document.getElementById("customerName").value.trim();
       const address = document.getElementById("Address").value.trim();
       const amountPaid = parseFloat(document.getElementById("amountPaid").value || 0);
 
-      // Validate rows
       const rawRows = document.querySelectorAll("#itemRows tr");
       const validRows = [];
+      let runningTotal = 0;
 
       rawRows.forEach(row => {
         const item = row.children[0]?.querySelector("input")?.value.trim();
         const qty = parseFloat(row.children[2]?.querySelector("input")?.value || 0);
         const rate = parseFloat(row.children[3]?.querySelector("input")?.value || 0);
         const amount = parseFloat((row.children[4]?.querySelector("input")?.value || "0").replace(/,/g, ""));
-
         if (item && !/^\d+$/.test(item) && qty > 0 && !isNaN(amount)) {
+          runningTotal += amount;
           validRows.push({ item, qty, rate, amount });
         }
       });
@@ -1017,15 +1019,9 @@ document.addEventListener("click", function (e) {
         return;
       }
 
-      // Calculate totals
-      let runningTotal = 0;
-      const items = [];
-
-      validRows.forEach((row, index) => {
-        runningTotal += row.amount;
+      const items = validRows.map((row, index) => {
         const isLast = index === validRows.length - 1;
-
-        items.push({
+        return {
           InvoiceNo: invoiceNo,
           Date: date,
           CustomerName: customerName,
@@ -1037,17 +1033,11 @@ document.addEventListener("click", function (e) {
           GrandTotal: isLast ? runningTotal.toFixed(2) : "0.00",
           AmountPaid: isLast ? amountPaid.toFixed(2) : "0.00",
           RemainingBalance: isLast ? (runningTotal - amountPaid).toFixed(2) : "0.00",
-          BilledBy: typeof selectedBiller !== 'undefined' ? selectedBiller : '',
-        });
+          BilledBy: typeof selectedBiller !== 'undefined' ? selectedBiller : ''
+        };
       });
 
-      // Save locally
-      const allInvoices = JSON.parse(localStorage.getItem("savedInvoices") || "[]");
-      allInvoices.push(...items);
-      localStorage.setItem("savedInvoices", JSON.stringify(allInvoices));
-      displaySavedInvoices();
-
-      // Upload to Google Sheet
+      // ✅ Upload to Google Sheets
       await fetch("https://script.google.com/macros/s/AKfycbyggO5UHpLsJMpb45GizNreGXTRyjrfH82rKFqR59gJGuPblMWTWjgMtMJiPVlSkyUtFw/exec", {
         method: "POST",
         mode: "no-cors",
@@ -1055,160 +1045,77 @@ document.addEventListener("click", function (e) {
         body: JSON.stringify(items)
       });
 
-      // Generate PDF with html2canvas
+      // ✅ Full invoice capture using cloned node (so screen position doesn’t matter)
       const invoiceElement = document.getElementById("invoiceBox");
-      
-      // Temporarily hide buttons for clean PDF capture
-      const afterSubmitButtons = document.getElementById("afterSubmitButtons");
-      const originalDisplay = afterSubmitButtons.style.display;
-      afterSubmitButtons.style.display = "none";
+      const clone = invoiceElement.cloneNode(true);
+      clone.style.position = 'fixed';
+      clone.style.top = '0';
+      clone.style.left = '0';
+      clone.style.zIndex = '-1';
+      clone.style.width = '794px'; // exact width of A4 in pixels @ 96dpi
+      clone.style.background = '#fff';
+      document.body.appendChild(clone);
 
-
-<script>
-  async function saveInvoice() {
-    // Show loading indicator
-    const submitBtn = document.getElementById("submitBtn");
-    const originalBtnText = submitBtn.innerText;
-    submitBtn.innerText = "Generating PDF...";
-    submitBtn.disabled = true;
-
-    try {
-      const invoiceNo = document.getElementById("invoiceNo").innerText;
-      const date = document.getElementById("invoiceDate").innerText;
-      const customerName = document.getElementById("customerName").value.trim();
-      const address = document.getElementById("Address").value.trim();
-      const amountPaid = parseFloat(document.getElementById("amountPaid").value || 0);
-
-      // Validate rows
-      const rawRows = document.querySelectorAll("#itemRows tr");
-      const validRows = [];
-
-      rawRows.forEach(row => {
-        const item = row.children[0]?.querySelector("input")?.value.trim();
-        const qty = parseFloat(row.children[2]?.querySelector("input")?.value || 0);
-        const rate = parseFloat(row.children[3]?.querySelector("input")?.value || 0);
-        const amount = parseFloat((row.children[4]?.querySelector("input")?.value || "0").replace(/,/g, ""));
-
-        if (item && !/^\d+$/.test(item) && qty > 0 && !isNaN(amount)) {
-          validRows.push({ item, qty, rate, amount });
-        }
-      });
-
-      if (validRows.length === 0) {
-        alert("No valid item rows to save.");
-        return;
-      }
-
-      // Calculate totals
-      let runningTotal = 0;
-      const items = [];
-
-      validRows.forEach((row, index) => {
-        runningTotal += row.amount;
-        const isLast = index === validRows.length - 1;
-
-        items.push({
-          InvoiceNo: invoiceNo,
-          Date: date,
-          CustomerName: customerName,
-          Address: address,
-          Item: row.item,
-          Quantity: row.qty,
-          Price: row.rate,
-          Amount: row.amount.toFixed(2),
-          GrandTotal: isLast ? runningTotal.toFixed(2) : "0.00",
-          AmountPaid: isLast ? amountPaid.toFixed(2) : "0.00",
-          RemainingBalance: isLast ? (runningTotal - amountPaid).toFixed(2) : "0.00",
-          BilledBy: typeof selectedBiller !== 'undefined' ? selectedBiller : '',
-        });
-      });
-
-      // Save locally
-      const allInvoices = JSON.parse(localStorage.getItem("savedInvoices") || "[]");
-      allInvoices.push(...items);
-      localStorage.setItem("savedInvoices", JSON.stringify(allInvoices));
-      displaySavedInvoices();
-
-      // Upload to Google Sheet
-      await fetch("https://script.google.com/macros/s/AKfycbyggO5UHpLsJMpb45GizNreGXTRyjrfH82rKFqR59gJGuPblMWTWjgMtMJiPVlSkyUtFw/exec", {
-        method: "POST",
-        mode: "no-cors",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(items)
-      });
-
-      // Generate PDF with html2canvas
-      const invoiceElement = document.getElementById("invoiceBox");
-      
-      // Temporarily hide buttons for clean PDF capture
-      const afterSubmitButtons = document.getElementById("afterSubmitButtons");
-      const originalDisplay = afterSubmitButtons.style.display;
-      afterSubmitButtons.style.display = "none";
-
-      const canvas = await html2canvas(invoiceElement, {
-        scale: 2, // Higher quality
-        logging: false,
+      const canvas = await html2canvas(clone, {
+        scale: 2,
         useCORS: true,
-        allowTaint: true
+        backgroundColor: "#ffffff",
+        windowWidth: clone.scrollWidth,
+        windowHeight: clone.scrollHeight
       });
 
-      // Restore buttons visibility
-      afterSubmitButtons.style.display = originalDisplay;
+      document.body.removeChild(clone); // Clean up
 
       const { jsPDF } = window.jspdf;
       const pdf = new jsPDF({
         orientation: 'portrait',
-        unit: 'mm'
+        unit: 'mm',
+        format: 'a4'
       });
 
-      // Calculate dimensions to fit the invoice
-      const imgWidth = 210; // A4 width in mm
+      const imgWidth = 210;
       const imgHeight = (canvas.height * imgWidth) / canvas.width;
-
       pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, 0, imgWidth, imgHeight);
 
-      // Upload PDF to Google Drive
       const pdfBlob = pdf.output('blob');
-        const reader = new FileReader();
+      const reader = new FileReader();
 
-        reader.onloadend = async function() {
-          try {
-            const base64pdf = reader.result.split(',')[1];
-            const payload = {
-              invoiceNo: document.getElementById("invoiceNo").innerText,
-              customerName: document.getElementById("customerName").value.trim(),
-              date: document.getElementById("invoiceDate").innerText,
-              total: runningTotal.toFixed(2),
-              paid: amountPaid.toFixed(2),
-              balance: (runningTotal - amountPaid).toFixed(2),
-              filename: `Invoice_${invoiceNo}.pdf`,
-              pdf: base64pdf
-            };
+      reader.onloadend = async function () {
+        const base64pdf = reader.result.split(',')[1];
 
-            await fetch("https://script.google.com/macros/s/AKfycbxq-ifgxz-wcANqWN7NI2ngoxoocNBLsSCV1Db28kSb6fAuo-3h586PhsY6uE9vpUcM0w/exec", {
-              method: "POST",
-              mode: "no-cors",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify(payload)
-            });
-
-            alert("✅ Invoice PDF successfully generated and uploaded!");
-            resolve(true);
-          } catch (uploadError) {
-            console.error("PDF upload error:", uploadError);
-            resolve(false);
-          }
+        const payload = {
+          invoiceNo,
+          customerName,
+          date,
+          total: runningTotal.toFixed(2),
+          paid: amountPaid.toFixed(2),
+          balance: (runningTotal - amountPaid).toFixed(2),
+          filename: `Invoice_${invoiceNo}.pdf`,
+          pdf: base64pdf
         };
 
-        reader.readAsDataURL(pdfBlob);
+        await fetch("https://script.google.com/macros/s/AKfycbxq-ifgxz-wcANqWN7NI2ngoxoocNBLsSCV1Db28kSb6fAuo-3h586PhsY6uE9vpUcM0w/exec", {
+          method: "POST",
+          mode: "no-cors",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
 
-      } catch (error) {
-        console.error("Mobile PDF generation failed:", error);
-        resolve(false);
-      }
-    });
+        alert("✅ Invoice saved & uploaded to Google Drive!");
+      };
+
+      reader.readAsDataURL(pdfBlob);
+
+    } catch (err) {
+      console.error("❌ Error:", err);
+      alert("An error occurred. See console.");
+    } finally {
+      submitBtn.innerText = originalBtnText;
+      submitBtn.disabled = false;
+    }
   }
 </script>
+
 
 
 
