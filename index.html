@@ -993,201 +993,201 @@ document.addEventListener("click", function (e) {
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
-  <script>
+<script>
 async function saveInvoice() {
     // Cache DOM elements
-    const submitBtn = document.getElementById("submitBtn");
-    const invoiceNo = document.getElementById("invoiceNo").innerText.trim();
-    const date = document.getElementById("invoiceDate").innerText.trim();
-    const customerName = document.getElementById("customerName").value.trim();
-    const address = document.getElementById("Address").value.trim();
-    const amountPaid = parseFloat(document.getElementById("amountPaid").value || 0);
-    
-    // UI State Management
-    const originalBtnText = submitBtn.innerText;
-    submitBtn.innerText = "Generating PDF...";
-    submitBtn.disabled = true;
-
-    // Create loading overlay
-    const loadingIndicator = document.createElement('div');
-    loadingIndicator.style.position = 'fixed';
-    loadingIndicator.style.top = '0';
-    loadingIndicator.style.left = '0';
-    loadingIndicator.style.width = '100%';
-    loadingIndicator.style.height = '100%';
-    loadingIndicator.style.backgroundColor = 'rgba(0,0,0,0.5)';
-    loadingIndicator.style.display = 'flex';
-    loadingIndicator.style.justifyContent = 'center';
-    loadingIndicator.style.alignItems = 'center';
-    loadingIndicator.style.zIndex = '9999';
-    loadingIndicator.innerHTML = `
-      <div style="background:white; padding:20px; border-radius:5px; text-align:center;">
-        <div style="margin-bottom:10px;">Processing invoice, please wait...</div>
-        <div class="spinner"></div>
-      </div>
-    `;
-    document.body.appendChild(loadingIndicator);
-
-    try {
-      // Collect invoice items data
-      const rawRows = document.querySelectorAll("#itemRows tr");
-      const validRows = [];
-      let runningTotal = 0;
-
-      rawRows.forEach(row => {
-        const item = row.children[0]?.querySelector("input")?.value.trim();
-        const qty = parseFloat(row.children[2]?.querySelector("input")?.value || 0);
-        const rate = parseFloat(row.children[3]?.querySelector("input")?.value || 0);
-        const amount = parseFloat((row.children[4]?.querySelector("input")?.value || "0").replace(/,/g, ""));
-        
-        if (item && !/^\d+$/.test(item) && qty > 0 && !isNaN(amount)) {
-          runningTotal += amount;
-          validRows.push({ item, qty, rate, amount });
-        }
-      });
-
-      if (validRows.length === 0) {
-        alert("No valid item rows to save.");
-        return;
+  const submitBtn = document.getElementById("submitBtn");
+  const invoiceNo = document.getElementById("invoiceNo").innerText.trim();
+  const date = document.getElementById("invoiceDate").innerText.trim();
+  const customerName = document.getElementById("customerName").value.trim();
+  const address = document.getElementById("Address").value.trim();
+  const amountPaid = parseFloat(document.getElementById("amountPaid").value || 0);
+  
+  // UI State Management
+  const originalBtnText = submitBtn.innerText;
+  submitBtn.innerText = "Generating PDF...";
+  submitBtn.disabled = true;
+  
+  // Create loading overlay
+  const loadingIndicator = document.createElement('div');
+  loadingIndicator.style.position = 'fixed';
+  loadingIndicator.style.top = '0';
+  loadingIndicator.style.left = '0';
+  loadingIndicator.style.width = '100%';
+  loadingIndicator.style.height = '100%';
+  loadingIndicator.style.backgroundColor = 'rgba(0,0,0,0.5)';
+  loadingIndicator.style.display = 'flex';
+  loadingIndicator.style.justifyContent = 'center';
+  loadingIndicator.style.alignItems = 'center';
+  loadingIndicator.style.zIndex = '9999';
+  loadingIndicator.innerHTML = `
+    <div style="background:white; padding:20px; border-radius:5px; text-align:center;">
+      <div style="margin-bottom:10px;">Processing invoice, please wait...</div>
+      <div class="spinner"></div>
+    </div>
+  `;
+  document.body.appendChild(loadingIndicator);
+  
+  try {
+    // Collect invoice items data
+    const rawRows = document.querySelectorAll("#itemRows tr");
+    const validRows = [];
+    let runningTotal = 0;
+  
+    rawRows.forEach(row => {
+      const item = row.children[0]?.querySelector("input")?.value.trim();
+      const qty = parseFloat(row.children[2]?.querySelector("input")?.value || 0);
+      const rate = parseFloat(row.children[3]?.querySelector("input")?.value || 0);
+      const amount = parseFloat((row.children[4]?.querySelector("input")?.value || "0").replace(/,/g, ""));
+      
+      if (item && !/^\d+$/.test(item) && qty > 0 && !isNaN(amount)) {
+        runningTotal += amount;
+        validRows.push({ item, qty, rate, amount });
       }
-
-      // Prepare data for Google Sheets
-      const items = validRows.map((row, index) => {
-        const isLast = index === validRows.length - 1;
-        return {
-          InvoiceNo: invoiceNo,
-          Date: date,
-          CustomerName: customerName,
-          Address: address,
-          Item: row.item,
-          Quantity: row.qty,
-          Price: row.rate,
-          Amount: row.amount.toFixed(2),
-          GrandTotal: isLast ? runningTotal.toFixed(2) : "0.00",
-          AmountPaid: isLast ? amountPaid.toFixed(2) : "0.00",
-          RemainingBalance: isLast ? (runningTotal - amountPaid).toFixed(2) : "0.00",
-          BilledBy: typeof selectedBiller !== 'undefined' ? selectedBiller : ''
-        };
+    });
+  
+    if (validRows.length === 0) {
+      alert("No valid item rows to save.");
+      return;
+    }
+  
+    // Prepare data for Google Sheets
+    const items = validRows.map((row, index) => {
+      const isLast = index === validRows.length - 1;
+      return {
+        InvoiceNo: invoiceNo,
+        Date: date,
+        CustomerName: customerName,
+        Address: address,
+        Item: row.item,
+        Quantity: row.qty,
+        Price: row.rate,
+        Amount: row.amount.toFixed(2),
+        GrandTotal: isLast ? runningTotal.toFixed(2) : "0.00",
+        AmountPaid: isLast ? amountPaid.toFixed(2) : "0.00",
+        RemainingBalance: isLast ? (runningTotal - amountPaid).toFixed(2) : "0.00",
+        BilledBy: typeof selectedBiller !== 'undefined' ? selectedBiller : ''
+      };
+    });
+  
+    // Clone invoice for PDF generation (off-screen)
+    const invoiceElement = document.getElementById("invoiceBox");
+    const clone = invoiceElement.cloneNode(true);
+    clone.style.position = 'absolute';
+    clone.style.top = '-9999px';
+    clone.style.left = '0';
+    clone.style.width = '794px'; // A4 width in pixels
+    clone.style.background = '#fff';
+    document.body.appendChild(clone);
+  
+    // Calculate total height and number of pages needed
+    const pageHeight = 1122; // A4 height in pixels (at 96dpi)
+    const totalHeight = clone.scrollHeight;
+    const numPages = Math.ceil(totalHeight / pageHeight);
+  
+    // Create PDF
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF({
+      orientation: 'portrait',
+      unit: 'px',
+      format: [794, 1122], // A4 dimensions in pixels
+      compress: true
+    });
+  
+    // Capture each page
+    for (let i = 0; i < numPages; i++) {
+      const canvas = await html2canvas(clone, {
+        scale: 1,
+        useCORS: true,
+        backgroundColor: "#ffffff",
+        windowWidth: clone.scrollWidth,
+        windowHeight: clone.scrollHeight,
+        logging: false,
+        ignoreElements: (el) => el.style.display === 'none' || el.classList.contains('no-print'),
+        y: i * pageHeight,
+        height: pageHeight,
+        scrollY: -i * pageHeight
       });
-
-      // Clone invoice for PDF generation (off-screen)
-      const invoiceElement = document.getElementById("invoiceBox");
-      const clone = invoiceElement.cloneNode(true);
-      clone.style.position = 'absolute';
-      clone.style.top = '-9999px';
-      clone.style.left = '0';
-      clone.style.width = '794px'; // A4 width in pixels
-      clone.style.background = '#fff';
-      document.body.appendChild(clone);
-
-      // Calculate total height and number of pages needed
-      const pageHeight = 1122; // A4 height in pixels (at 96dpi)
-      const totalHeight = clone.scrollHeight;
-      const numPages = Math.ceil(totalHeight / pageHeight);
-
-      // Create PDF
-      const { jsPDF } = window.jspdf;
-      const pdf = new jsPDF({
-        orientation: 'portrait',
-        unit: 'px',
-        format: [794, 1122], // A4 dimensions in pixels
-        compress: true
-      });
-
-      // Capture each page
-      for (let i = 0; i < numPages; i++) {
-        const canvas = await html2canvas(clone, {
-          scale: 1,
-          useCORS: true,
-          backgroundColor: "#ffffff",
-          windowWidth: clone.scrollWidth,
-          windowHeight: clone.scrollHeight,
-          logging: false,
-          ignoreElements: (el) => el.style.display === 'none' || el.classList.contains('no-print'),
-          y: i * pageHeight,
-          height: pageHeight,
-          scrollY: -i * pageHeight
-        });
-
-        // Add page to PDF (except first page which is automatically created)
-        if (i > 0) {
-          pdf.addPage([794, 1122], 'portrait');
-        }
-
-        // Add image to current page
-        pdf.addImage(canvas.toDataURL('image/jpeg', 0.85), 'JPEG', 0, 0, 794, pageHeight);
+  
+      // Add page to PDF (except first page which is automatically created)
+      if (i > 0) {
+        pdf.addPage([794, 1122], 'portrait');
       }
-
-      // Clean up clone
-      document.body.removeChild(clone);
-
-      // Upload to Google Sheets
-      await fetch("https://script.google.com/macros/s/AKfycbyggO5UHpLsJMpb45GizNreGXTRyjrfH82rKFqR59gJGuPblMWTWjgMtMJiPVlSkyUtFw/exec", {
+  
+      // Add image to current page
+      pdf.addImage(canvas.toDataURL('image/jpeg', 0.85), 'JPEG', 0, 0, 794, pageHeight);
+    }
+  
+    // Clean up clone
+    document.body.removeChild(clone);
+  
+    // Upload to Google Sheets
+    await fetch("https://script.google.com/macros/s/AKfycbyggO5UHpLsJMpb45GizNreGXTRyjrfH82rKFqR59gJGuPblMWTWjgMtMJiPVlSkyUtFw/exec", {
+      method: "POST",
+      mode: "no-cors",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(items)
+    });
+  
+    // Upload PDF to Google Drive
+    const pdfBlob = pdf.output('blob');
+    const reader = new FileReader();
+    reader.onloadend = async function() {
+      const base64pdf = reader.result.split(',')[1];
+      
+      await fetch("https://script.google.com/macros/s/AKfycbxq-ifgxz-wcANqWN7NI2ngoxoocNBLsSCV1Db28kSb6fAuo-3h586PhsY6uE9vpUcM0w/exec", {
         method: "POST",
         mode: "no-cors",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(items)
+        body: JSON.stringify({
+          invoiceNo,
+          customerName,
+          date,
+          total: runningTotal.toFixed(2),
+          paid: amountPaid.toFixed(2),
+          balance: (runningTotal - amountPaid).toFixed(2),
+          filename: `Invoice_${invoiceNo}.pdf`,
+          pdf: base64pdf
+        })
       });
-
-      // Upload PDF to Google Drive
-      const pdfBlob = pdf.output('blob');
-      const reader = new FileReader();
-      reader.onloadend = async function() {
-        const base64pdf = reader.result.split(',')[1];
-        
-        await fetch("https://script.google.com/macros/s/AKfycbxq-ifgxz-wcANqWN7NI2ngoxoocNBLsSCV1Db28kSb6fAuo-3h586PhsY6uE9vpUcM0w/exec", {
-          method: "POST",
-          mode: "no-cors",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            invoiceNo,
-            customerName,
-            date,
-            total: runningTotal.toFixed(2),
-            paid: amountPaid.toFixed(2),
-            balance: (runningTotal - amountPaid).toFixed(2),
-            filename: `Invoice_${invoiceNo}.pdf`,
-            pdf: base64pdf
-          })
-        });
-
-        loadingIndicator.innerHTML = `
-          <div style="background:white; padding:20px; border-radius:5px; text-align:center;">
-            <div style="color:green; margin-bottom:10px;">✅ Invoice saved successfully!</div>
-            <button id="closeLoadingBtn" 
-                    style="padding:5px 10px; background:#003366; color:white; border:none; cursor:pointer;">
-              Close
-            </button>
-          </div>
-        `;
-        
-        document.getElementById('closeLoadingBtn').addEventListener('click', function() {
-          document.body.removeChild(loadingIndicator);
-        });
-      };
-      
-      reader.readAsDataURL(pdfBlob);
-
-    } catch (err) {
-      console.error("Error saving invoice:", err);
+  
       loadingIndicator.innerHTML = `
         <div style="background:white; padding:20px; border-radius:5px; text-align:center;">
-          <div style="color:red; margin-bottom:10px;">❌ Error saving invoice</div>
-          <div style="font-size:12px; margin-bottom:10px;">${err.message}</div>
-          <button id="closeErrorBtn" 
+          <div style="color:green; margin-bottom:10px;">✅ Invoice saved successfully!</div>
+          <button id="closeLoadingBtn" 
                   style="padding:5px 10px; background:#003366; color:white; border:none; cursor:pointer;">
             Close
           </button>
         </div>
       `;
       
-      document.getElementById('closeErrorBtn').addEventListener('click', function() {
+      document.getElementById('closeLoadingBtn').addEventListener('click', function() {
         document.body.removeChild(loadingIndicator);
       });
-    } finally {
-      submitBtn.innerText = originalBtnText;
-      submitBtn.disabled = false;
-    }
+    };
+    
+    reader.readAsDataURL(pdfBlob);
+  
+  } catch (err) {
+    console.error("Error saving invoice:", err);
+    loadingIndicator.innerHTML = `
+      <div style="background:white; padding:20px; border-radius:5px; text-align:center;">
+        <div style="color:red; margin-bottom:10px;">❌ Error saving invoice</div>
+        <div style="font-size:12px; margin-bottom:10px;">${err.message}</div>
+        <button id="closeErrorBtn" 
+                style="padding:5px 10px; background:#003366; color:white; border:none; cursor:pointer;">
+          Close
+        </button>
+      </div>
+    `;
+    
+    document.getElementById('closeErrorBtn').addEventListener('click', function() {
+      document.body.removeChild(loadingIndicator);
+    });
+  } finally {
+    submitBtn.innerText = originalBtnText;
+    submitBtn.disabled = false;
+  }
 }
 <script>
   async function downloadInvoice() {
