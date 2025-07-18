@@ -1,0 +1,579 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bannu Enterprises - Dashboard</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --primary-color: #003366;
+      --primary-light: #3a5a8a;
+      --secondary-color: #f8f9fa;
+      --accent-color: #ff6b6b;
+      --text-color: #333;
+      --light-text: #6c757d;
+      --border-color: #dee2e6;
+      --success-color: #28a745;
+      --warning-color: #ffc107;
+      --danger-color: #dc3545;
+      --info-color: #17a2b8;
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    
+    body {
+      background-color: #f5f5f5;
+      color: var(--text-color);
+    }
+    
+    /* Header Styles */
+    header {
+      background-color: var(--primary-color);
+      color: white;
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+    
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .logo h1 {
+      font-size: 1.5rem;
+      font-weight: 600;
+    }
+    
+    .user-menu {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+    
+    .user-menu .avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background-color: white;
+      color: var(--primary-color);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    
+    /* Sidebar Styles */
+    .sidebar {
+      width: 250px;
+      background-color: white;
+      height: calc(100vh - 70px);
+      position: fixed;
+      top: 70px;
+      left: 0;
+      box-shadow: 2px 0 10px rgba(0, 0, 0, 0.05);
+      transition: all 0.3s ease;
+      z-index: 100;
+    }
+    
+    .sidebar-menu {
+      list-style: none;
+      padding: 1rem 0;
+    }
+    
+    .sidebar-menu li {
+      margin-bottom: 5px;
+    }
+    
+    .sidebar-menu a {
+      display: flex;
+      align-items: center;
+      padding: 12px 20px;
+      color: var(--text-color);
+      text-decoration: none;
+      transition: all 0.2s ease;
+    }
+    
+    .sidebar-menu a:hover, 
+    .sidebar-menu a.active {
+      background-color: rgba(0, 51, 102, 0.1);
+      color: var(--primary-color);
+      border-left: 4px solid var(--primary-color);
+    }
+    
+    .sidebar-menu i {
+      margin-right: 10px;
+      width: 20px;
+      text-align: center;
+    }
+    
+    /* Main Content Styles */
+    .main-content {
+      margin-left: 250px;
+      padding: 2rem;
+      transition: all 0.3s ease;
+    }
+    
+    .page-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+    }
+    
+    .page-title h2 {
+      font-size: 1.8rem;
+      color: var(--primary-color);
+    }
+    
+    .page-title p {
+      color: var(--light-text);
+      font-size: 0.9rem;
+    }
+    
+    /* Dashboard Cards */
+    .cards-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 20px;
+      margin-bottom: 2rem;
+    }
+    
+    .card {
+      background-color: white;
+      border-radius: 8px;
+      padding: 1.5rem;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+      transition: transform 0.3s ease;
+    }
+    
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+    
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+    
+    .card-title {
+      font-size: 1rem;
+      color: var(--light-text);
+    }
+    
+    .card-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+    }
+    
+    .card-icon.blue {
+      background-color: var(--primary-color);
+    }
+    
+    .card-icon.green {
+      background-color: var(--success-color);
+    }
+    
+    .card-icon.yellow {
+      background-color: var(--warning-color);
+    }
+    
+    .card-icon.red {
+      background-color: var(--danger-color);
+    }
+    
+    .card-value {
+      font-size: 1.8rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+    
+    .card-footer {
+      font-size: 0.8rem;
+      color: var(--light-text);
+    }
+    
+    /* Recent Invoices */
+    .recent-invoices {
+      background-color: white;
+      border-radius: 8px;
+      padding: 1.5rem;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    }
+    
+    .invoices-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--border-color);
+    }
+    
+    .invoices-title {
+      font-size: 1.2rem;
+      font-weight: 600;
+    }
+    
+    .invoices-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    
+    .invoices-table th, 
+    .invoices-table td {
+      padding: 12px 15px;
+      text-align: left;
+      border-bottom: 1px solid var(--border-color);
+    }
+    
+    .invoices-table th {
+      background-color: var(--primary-color);
+      color: white;
+      font-weight: 500;
+    }
+    
+    .invoices-table tr:hover {
+      background-color: rgba(0, 51, 102, 0.03);
+    }
+    
+    .status-paid {
+      color: var(--success-color);
+      font-weight: 500;
+    }
+    
+    .status-pending {
+      color: var(--warning-color);
+      font-weight: 500;
+    }
+    
+    /* Button Styles */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.75rem 1.5rem;
+      border: none;
+      border-radius: 4px;
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      gap: 8px;
+    }
+    
+    .btn i {
+      font-size: 0.9rem;
+    }
+    
+    .btn-primary {
+      background-color: var(--primary-color);
+      color: white;
+    }
+    
+    .btn-primary:hover {
+      background-color: var(--primary-light);
+    }
+    
+    .btn-secondary {
+      background-color: var(--secondary-color);
+      color: var(--text-color);
+      border: 1px solid var(--border-color);
+    }
+    
+    .btn-secondary:hover {
+      background-color: #e9ecef;
+    }
+    
+    /* Mobile Responsiveness */
+    @media (max-width: 768px) {
+      .sidebar {
+        transform: translateX(-100%);
+      }
+      
+      .sidebar.active {
+        transform: translateX(0);
+      }
+      
+      .main-content {
+        margin-left: 0;
+        padding: 1rem;
+      }
+      
+      .cards-container {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header>
+    <div class="logo">
+      <i class="fas fa-book-open"></i>
+      <h1>Bannu Enterprises</h1>
+    </div>
+    <div class="user-menu">
+      <span>Welcome, Admin</span>
+      <div class="avatar">A</div>
+    </div>
+  </header>
+  
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <ul class="sidebar-menu">
+      <li><a href="index.html" class="active"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+      <li><a href="invoice.html"><i class="fas fa-file-invoice"></i> Create Invoice</a></li>
+      <li><a href="payments.html"><i class="fas fa-money-bill-wave"></i> Payments</a></li>
+      <li><a href="SearchCustomer.html"><i class="fas fa-search"></i> Customer Search</a></li>
+      <li><a href="reports.html"><i class="fas fa-chart-bar"></i> Reports</a></li>
+    </ul>
+  </div>
+  
+  <!-- Main Content -->
+  <div class="main-content">
+    <div class="page-header">
+      <div class="page-title">
+        <h2>Dashboard</h2>
+        <p>Overview of your business performance</p>
+      </div>
+ <div>
+  <label for="datePicker">Select Date: </label>
+  <input type="date" id="datePicker" 
+         onchange="updateDateDisplay(this.value)"
+         style="font-family: Arial, sans-serif;">
+</div>
+<div id="dateDisplay" style="margin-top: 5px; font-weight: bold;">
+  ${new Date().toLocaleDateString('en-GB')}
+</div>
+    </div>
+    
+    <!-- Dashboard Cards -->
+    <div class="cards-container">
+      <div class="card" onclick="window.location.href='daysales.html?date=' + document.getElementById('datePicker').value;">
+    <div class="card-header">
+      <div class="card-title">Day's Sales</div>
+      <div class="card-icon blue">
+        <i class="fas fa-rupee-sign"></i>
+      </div>
+    </div>
+    <div class="card-value" id="todaySales">₹0.00</div>
+    <div class="card-footer" id="todaySalesChange">Loading...</div>
+  </div>
+      
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Amount Received</div>
+          <div class="card-icon green">
+            <i class="fas fa-hand-holding-usd"></i>
+          </div>
+        </div>
+        <div class="card-value" id="amountReceived">₹0.00</div>
+        <div class="card-footer">Today's payments</div>
+      </div>
+      
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Pending Balance</div>
+          <div class="card-icon yellow">
+            <i class="fas fa-clock"></i>
+          </div>
+        </div>
+        <div class="card-value" id="pendingBalance">₹0.00</div>
+        <div class="card-footer">Unpaid invoices</div>
+      </div>
+      
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Recent Invoices</div>
+          <div class="card-icon red">
+            <i class="fas fa-file-invoice"></i>
+          </div>
+        </div>
+        <div class="card-value" id="invoiceCount">0</div>
+        <div class="card-footer">Generated today</div>
+      </div>
+    </div>
+    
+    <!-- Recent Invoices -->
+    <div class="recent-invoices">
+      <div class="invoices-header">
+        <div class="invoices-title">Recent Invoices</div>
+        <a href="invoice.html" class="btn btn-primary">
+          <i class="fas fa-plus"></i> New Invoice
+        </a>
+      </div>
+      <table class="invoices-table">
+        <thead>
+          <tr>
+            <th>Invoice No</th>
+            <th>Customer</th>
+            <th>Date</th>
+            <th>Amount</th>
+            <th>Paid</th>
+            <th>Balance</th>
+            <th>Status</th>
+	    <th>Action</th>
+          </tr>
+        </thead>
+        <tbody id="recentInvoicesBody">
+          <!-- Will be populated by JavaScript -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+<script>
+// Set current date
+// Format date for display (dd/mm/yyyy)
+function formatDisplayDate(dateString) {
+  const date = new Date(dateString);
+  if (isNaN(date)) return 'Invalid Date';
+  
+  const day = String(date.getDate()).padStart(2, '0');
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const year = date.getFullYear();
+  return `${day}/${month}/${year}`;
+}
+
+// Convert date to yyyy-mm-dd (HTML input format)
+function formatInputDate(date) {
+  const day = String(date.getDate()).padStart(2, '0');
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const year = date.getFullYear();
+  return `${year}-${month}-${day}`;
+}
+
+// Update date display and fetch data
+function updateDateDisplay(isoDate) {
+  const displayDate = formatDisplayDate(isoDate);
+  document.getElementById('dateDisplay').textContent = displayDate;
+  
+  // Convert to dd/MM/yyyy format for the API
+  const parts = isoDate.split('-');
+  const apiDate = `${parts[2]}/${parts[1]}/${parts[0]}`;
+  fetchDashboardData(apiDate);
+}
+// Initialize with today's date in correct format
+function initializeDatePicker() {
+  const today = new Date();
+  const todayFormatted = formatInputDate(today);
+  document.getElementById('datePicker').value = todayFormatted;
+  document.getElementById('dateDisplay').textContent = formatDisplayDate(todayFormatted);
+  return todayFormatted;
+}
+// Format currency with Indian numbering system
+function formatCurrency(amount) {
+  return new Intl.NumberFormat('en-IN', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  }).format(amount);
+}
+
+async function fetchDashboardData(selectedDate) {
+  try {
+    // Show loading state
+    document.getElementById('todaySales').textContent = 'Loading...';
+    document.getElementById('amountReceived').textContent = 'Loading...';
+    document.getElementById('pendingBalance').textContent = 'Loading...';
+    document.getElementById('invoiceCount').textContent = '...';
+    
+    // Fetch data for selected date
+    const response = await fetch(`https://script.google.com/macros/s/AKfycbw1LzjVQSiLVTePQVSOKL23pQ93tUZE1LRIfJ_58JNNuS8eIypjqWk8OOhT9ys4JpHp5w/exec?date=${selectedDate}`);
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    
+    const data = await response.json();
+    console.log("Dashboard data:", data); // For debugging
+    
+    if (data.status === "success") {
+      // Update the dashboard cards
+      document.getElementById('todaySales').textContent = `₹${formatCurrency(data.data.todaySales)}`;
+      document.getElementById('amountReceived').textContent = `₹${formatCurrency(data.data.amountReceived)}`;
+      document.getElementById('pendingBalance').textContent = `₹${formatCurrency(data.data.pendingBalance)}`;
+      document.getElementById('invoiceCount').textContent = data.data.invoiceCount;
+      document.getElementById('todaySalesChange').textContent = `${new Date(selectedDate).toLocaleDateString('en-GB')} sales`;
+      
+      // Update recent invoices table
+      const tbody = document.getElementById('recentInvoicesBody');
+      tbody.innerHTML = '';
+      
+      if (data.data.recentInvoices.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="8" class="text-center">No invoices found for selected date</td></tr>';
+      } else {
+        data.data.recentInvoices.forEach(invoice => {
+          const row = document.createElement('tr');
+          row.innerHTML = `
+            <td>${invoice.invoiceNo}</td>
+            <td>${invoice.customerName}</td>
+            <td>${invoice.date}</td>
+            <td>₹${formatCurrency(invoice.total)}</td>
+            <td>₹${formatCurrency(invoice.paid)}</td>
+            <td>₹${formatCurrency(invoice.balance)}</td>
+            <td class="${invoice.balance > 0 ? 'status-pending' : 'status-paid'}">
+              ${invoice.balance > 0 ? 'Pending' : 'Paid'}
+            </td>
+            <td>
+              <button class="btn btn-secondary btn-sm" 
+                   onclick="window.open('${invoice.pdfUrl}', '_blank')"
+                   ${!invoice.pdfUrl ? 'disabled' : ''}>
+                <i class="fas fa-eye"></i> View
+              </button>
+            </td>
+          `;
+          tbody.appendChild(row);
+        });
+      }
+    } else {
+      throw new Error(data.message || 'Unknown server error');
+    }
+  } catch (error) {
+    console.error('Error fetching dashboard data:', error);
+    // Show error to user
+    document.getElementById('todaySales').textContent = 'Error';
+    document.getElementById('amountReceived').textContent = 'Error';
+    document.getElementById('pendingBalance').textContent = 'Error';
+    document.getElementById('todaySalesChange').textContent = 'Failed to load data';
+    document.getElementById('invoiceCount').textContent = '--';
+  }
+}
+
+// Add event listeners
+document.addEventListener('DOMContentLoaded', function() {
+  // Load data for current date initially
+  const today = initializeDatePicker();
+  fetchDashboardData(today);
+  
+  // Add date picker change handler
+  document.getElementById('datePicker').addEventListener('change', function() {
+    fetchDashboardData(this.value);
+  });
+  
+  // Add click handler for Today's Sales card
+  document.getElementById('todaySales').addEventListener('click', function() {
+    showTodaySales(document.getElementById('datePicker').value);
+  });
+});
+	</script>
+</body>
+</html>
