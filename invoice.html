@@ -290,7 +290,7 @@
     <div><strong>Date:</strong> <span id="invoiceDate"></span></div>
   </div>
 
-  <div class="ms-line">M/s.
+  <div class="ms-line">Name
   <div class="dropdown-container" style="position: relative;">
     <input type="text" id="customerName" placeholder="Customer Name" onfocus="showCustomerDropdown()" oninput="filterCustomerDropdown()" autocomplete="off" />
     <div class="dropdown-list" id="customerDropdown" style="position: absolute; top: 100%; left: 0; width: 100%; max-height: 150px; overflow-y: auto; background: #fff; border: 1px solid #ccc; display: none; z-index: 100;"></div>
@@ -1107,7 +1107,7 @@ document.addEventListener("click", function (e) {
             total: runningTotal.toFixed(2),
             paid: amountPaid.toFixed(2),
             balance: (runningTotal - amountPaid).toFixed(2),
-            filename: `Invoice_${invoiceNo}.pdf`,
+            filename: `Invoice_${invoiceNocustomerName}.pdf`,
             pdf: base64pdf
           })
         });
@@ -1185,6 +1185,7 @@ document.addEventListener("click", function (e) {
     const imgWidth = 210;
     const imgHeight = (canvas.height * imgWidth) / canvas.width;
     pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, 0, imgWidth, imgHeight);
+  </script>
 
     const customerName = document.getElementById("customerName").value.trim() || 'Invoice';
     const invoiceNo = document.getElementById("invoiceNo").innerText.trim() || '000';
