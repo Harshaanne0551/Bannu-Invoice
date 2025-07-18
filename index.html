@@ -939,17 +939,17 @@ document.addEventListener("click", function (e) {
 <script>
 async function saveInvoice() {
   try {
-    const invoiceNo = document.getElementById("invoiceNo")?.innerText.trim();
-    const date = document.getElementById("invoiceDate")?.innerText.trim();
-    const customerName = document.getElementById("customerName")?.value.trim();
-    const amountPaid = parseFloat(document.getElementById("amountPaid")?.value || 0);
+    const invoiceNo = document.getElementById("invoiceNo").innerText.trim();
+    const date = document.getElementById("invoiceDate").innerText.trim();
+    const customerName = document.getElementById("customerName").value.trim();
+    const address = document.getElementById("Address").value.trim();
+    const amountPaid = parseFloat(document.getElementById("amountPaid").value || 0);
 
     if (!customerName || !invoiceNo) {
       alert("Please enter customer name and invoice number.");
       return;
     }
 
-    // Collect item data
     const rawRows = document.querySelectorAll("#itemRows tr");
     const validRows = [];
     let runningTotal = 0;
@@ -977,17 +977,19 @@ async function saveInvoice() {
         InvoiceNo: invoiceNo,
         Date: date,
         CustomerName: customerName,
+        Address: address,
         Item: row.item,
         Quantity: row.qty,
         Price: row.rate,
         Amount: row.amount.toFixed(2),
         GrandTotal: isLast ? runningTotal.toFixed(2) : "0.00",
         AmountPaid: isLast ? amountPaid.toFixed(2) : "0.00",
-        RemainingBalance: isLast ? (runningTotal - amountPaid).toFixed(2) : "0.00"
+        RemainingBalance: isLast ? (runningTotal - amountPaid).toFixed(2) : "0.00",
+        BilledBy: typeof selectedBiller !== 'undefined' ? selectedBiller : ''
       };
     });
 
-    // Upload to Google Sheets
+    // ✅ Upload data to Google Sheet
     await fetch("https://script.google.com/macros/s/AKfycbyggO5UHpLsJMpb45GizNreGXTRyjrfH82rKFqR59gJGuPblMWTWjgMtMJiPVlSkyUtFw/exec", {
       method: "POST",
       mode: "no-cors",
@@ -995,25 +997,34 @@ async function saveInvoice() {
       body: JSON.stringify(items)
     });
 
-    // ✅ Hide controls
-    const controls = document.querySelectorAll(".no-print");
-    controls.forEach(el => el.style.display = "none");
+    console.log("✅ Data saved to Google Sheets.");
 
-    // Wait a bit for layout to stabilize
-    await new Promise(resolve => setTimeout(resolve, 300));
+    // ✅ Scroll to top and zoom out to capture full invoice
+    const originalScrollY = window.scrollY;
+    const originalZoom = document.body.style.zoom || "100%";
+    window.scrollTo(0, 0);
+    document.body.style.zoom = "80%"; // adjust as needed
+
+    // Wait for layout to stabilize
+    await new Promise(resolve => setTimeout(resolve, 700));
+
+    // ✅ Hide buttons temporarily
+    const buttonsToHide = document.querySelectorAll('.no-print');
+    buttonsToHide.forEach(btn => btn.style.visibility = 'hidden');
+
+    const fileName = `${customerName} Invoice.pdf`;
 
     const opt = {
       margin: 0,
-      filename: `${customerName} Invoice.pdf`,
+      filename: fileName,
       image: { type: 'jpeg', quality: 0.98 },
-      html2canvas: { scale: 2, useCORS: true, logging: true },
+      html2canvas: { scale: 2, useCORS: true },
       jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
     };
 
-    // ✅ Generate PDF from full page
     const blob = await html2pdf().set(opt).from(document.body).outputPdf('blob');
 
-    // Convert to Base64 and upload to Drive
+    // ✅ Convert to base64 and upload to Google Drive
     const reader = new FileReader();
     reader.onloadend = function () {
       const base64pdf = reader.result.split(',')[1];
@@ -1025,7 +1036,7 @@ async function saveInvoice() {
         total: runningTotal.toFixed(2),
         paid: amountPaid.toFixed(2),
         balance: (runningTotal - amountPaid).toFixed(2),
-        filename: `${customerName} Invoice.pdf`,
+        filename: fileName,
         pdf: base64pdf
       };
 
@@ -1034,19 +1045,26 @@ async function saveInvoice() {
         mode: "no-cors",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload)
+      }).then(() => {
+        alert("✅ Invoice uploaded to Google Drive!");
+      }).catch(err => {
+        console.error("❌ Upload failed:", err);
+        alert("❌ Upload failed. Check console.");
+      }).finally(() => {
+        // ✅ Restore zoom, scroll, and buttons
+        document.body.style.zoom = originalZoom;
+        window.scrollTo(0, originalScrollY);
+        buttonsToHide.forEach(btn => btn.style.visibility = '');
       });
-
-      alert("✅ Invoice uploaded to Google Drive!");
     };
 
     reader.readAsDataURL(blob);
 
-    // ✅ Show controls again
-    controls.forEach(el => el.style.display = "");
-
   } catch (err) {
-    console.error("❌ Error saving invoice:", err);
-    alert("❌ Something went wrong!");
+    console.error("❌ Unexpected error:", err);
+    alert("Something went wrong! Check the console.");
+    document.querySelectorAll('.no-print').forEach(btn => btn.style.visibility = '');
+    document.body.style.zoom = "100%";
   }
 }
 </script>
