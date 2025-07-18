@@ -988,76 +988,73 @@ async function saveInvoice() {
     };
   });
 
-  const buttonsToHide = document.querySelectorAll('.no-print');
-  buttonsToHide.forEach(btn => btn.style.display = 'none'); // Hide buttons
+  // ✅ Upload invoice data to Google Sheet
+  await fetch("https://script.google.com/macros/s/AKfycbyggO5UHpLsJMpb45GizNreGXTRyjrfH82rKFqR59gJGuPblMWTWjgMtMJiPVlSkyUtFw/exec", {
+    method: "POST",
+    mode: "no-cors",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(items)
+  });
 
-  try {
-    // Upload data to Google Sheets
-    await fetch("https://script.google.com/macros/s/AKfycbyggO5UHpLsJMpb45GizNreGXTRyjrfH82rKFqR59gJGuPblMWTWjgMtMJiPVlSkyUtFw/exec", {
+  // ✅ Create a full-size hidden clone for PDF
+  const original = document.getElementById("invoiceBox");
+  const clone = original.cloneNode(true);
+  clone.style.position = "absolute";
+  clone.style.top = "-9999px";
+  clone.style.left = "0";
+  clone.style.width = "100%";
+  clone.style.maxWidth = "800px"; // Or your invoice layout width
+  document.body.appendChild(clone);
+
+  const fileName = `${customerName} Invoice.pdf`;
+
+  const opt = {
+    margin: 0,
+    filename: fileName,
+    image: { type: 'jpeg', quality: 0.98 },
+    html2canvas: { scale: 2, useCORS: true },
+    jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
+  };
+
+  const blob = await html2pdf().set(opt).from(clone).outputPdf('blob');
+
+  const reader = new FileReader();
+  reader.onloadend = function () {
+    const base64pdf = reader.result.split(',')[1];
+
+    const payload = {
+      invoiceNo,
+      customerName,
+      date,
+      total: runningTotal.toFixed(2),
+      paid: amountPaid.toFixed(2),
+      balance: (runningTotal - amountPaid).toFixed(2),
+      filename: fileName,
+      pdf: base64pdf
+    };
+
+    fetch("https://script.google.com/macros/s/AKfycbxq-ifgxz-wcANqWN7NI2ngoxoocNBLsSCV1Db28kSb6fAuo-3h586PhsY6uE9vpUcM0w/exec", {
       method: "POST",
       mode: "no-cors",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(items)
+      body: JSON.stringify(payload)
+    })
+    .then(() => {
+      alert("✅ Invoice uploaded to Google Drive!");
+    })
+    .catch(err => {
+      console.error("❌ Upload failed:", err);
+      alert("❌ Upload failed.");
     });
+  };
 
-    // Generate PDF
-    const invoiceElement = document.getElementById('invoiceBox');
-    const fileName = `${customerName} Invoice.pdf`;
+  reader.readAsDataURL(blob);
 
-    const screenWidth = window.innerWidth;
-    let dynamicMargin = screenWidth < 768 ? 0.12 : screenWidth < 1024 ? 0.15 : 0.25;
-
-    const opt = {
-      margin: dynamicMargin,
-      filename: fileName,
-      image: { type: 'jpeg', quality: 0.98 },
-      html2canvas: { scale: 2, useCORS: true },
-      jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
-    };
-
-    const blob = await html2pdf().set(opt).from(invoiceElement).outputPdf('blob');
-
-    const reader = new FileReader();
-    reader.onloadend = function () {
-      const base64pdf = reader.result.split(',')[1];
-
-      const payload = {
-        invoiceNo,
-        customerName,
-        date,
-        total: runningTotal.toFixed(2),
-        paid: amountPaid.toFixed(2),
-        balance: (runningTotal - amountPaid).toFixed(2),
-        filename: fileName,
-        pdf: base64pdf
-      };
-
-      fetch("https://script.google.com/macros/s/AKfycbxq-ifgxz-wcANqWN7NI2ngoxoocNBLsSCV1Db28kSb6fAuo-3h586PhsY6uE9vpUcM0w/exec", {
-        method: "POST",
-        mode: "no-cors",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
-      })
-      .then(() => {
-        alert("✅ Invoice uploaded to Google Drive!");
-      })
-      .catch(err => {
-        console.error("❌ Upload error:", err);
-        alert("❌ Upload failed.");
-      });
-    };
-
-    reader.readAsDataURL(blob);
-
-  } catch (err) {
-    console.error("❌ Unexpected error:", err);
-    alert("❌ Something went wrong. Check the console.");
-  } finally {
-    // ✅ Always restore buttons
-    buttonsToHide.forEach(btn => btn.style.display = '');
-  }
+  // ✅ Clean up the clone
+  document.body.removeChild(clone);
 }
 </script>
+
 
 </body>
 </html>
