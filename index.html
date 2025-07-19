@@ -401,6 +401,9 @@
   </style>
 </head>
 <body>
+	<button class="mobile-menu-toggle" onclick="toggleSidebar()">
+  <i class="fas fa-bars"></i>
+</button>
   <!-- Header -->
   <header>
     <div class="logo">
@@ -650,5 +653,10 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 });
 	</script>
+<script>
+  function toggleSidebar() {
+    document.querySelector('.sidebar').classList.toggle('active');
+  }
+</script>
 </body>
 </html>
