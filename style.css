@@ -1,0 +1,242 @@
+/* style.css - Unified styles for Bannu Enterprises */
+
+/* Color Variables */
+:root {
+  --primary-color: #003366;
+  --primary-light: #3a5a8a;
+  --primary-dark: #001a33;
+  --secondary-color: #f8f9fa;
+  --text-color: #333;
+  --light-text: #6c757d;
+  --border-color: #dee2e6;
+  --white: #ffffff;
+  --light-gray: #f5f5f5;
+}
+
+/* Base Styles */
+body {
+  font-family: 'Arial', sans-serif;
+  font-size: 13px;
+  margin: 0;
+  padding: 30px;
+  background: var(--light-gray);
+  color: var(--text-color);
+}
+
+/* Header Styles */
+.header {
+  background-color: var(--primary-color);
+  color: var(--white);
+  padding: 10px 20px;
+  margin-bottom: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.header h1 {
+  font-size: 18px;
+  margin: 0;
+}
+
+.header-info {
+  font-size: 12px;
+  text-align: right;
+}
+
+/* Original Invoice Box Styles (Preserved exactly) */
+.invoice-box {
+  width: 100%;
+  margin: auto;
+  border: 2px solid #000;
+  padding: 20px;
+  color: #000;
+  box-sizing: border-box;
+  background: var(--white);
+}
+
+.top-bar {
+  display: flex;
+  justify-content: space-between;
+  font-weight: bold;
+  border-bottom: 1px solid #000;
+  padding-bottom: 5px;
+}
+
+.title {
+  text-align: center;
+  margin-top: 10px;
+}
+
+.title h2 {
+  margin: 5px 0;
+  font-size: 20px;
+  color: var(--primary-color);
+}
+
+.title p {
+  margin: 2px 0;
+  font-weight: bold;
+}
+
+.address {
+  text-align: center;
+}
+
+.info-line {
+  margin-top: 20px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.ms-line {
+  margin-top: 10px;
+}
+
+/* Original Table Styles (Preserved exactly) */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 15px;
+  font-size: 13px;
+}
+
+th, td {
+  border: 1px solid #000;
+  padding: 6px;
+  text-align: center;
+}
+
+th {
+  background-color: var(--primary-color);
+  color: var(--white);
+}
+
+td input {
+  width: 100%;
+  border: none;
+  text-align: center;
+}
+
+/* Original Button Styles (Preserved exactly) */
+button {
+  margin-top: 10px;
+  padding: 6px 12px;
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+/* Original Totals Section (Preserved exactly) */
+.totals {
+  width: 50%;
+  margin-left: auto;
+  margin-top: -15px;
+}
+
+.totals table {
+  border: 1px solid #000;
+}
+
+.totals td {
+  border: 1px solid #000;
+  text-align: right;
+  padding: 6px 10px;
+  font-family: 'Arial', sans-serif;
+}
+
+.total-in-words {
+  margin-top: -10px;
+  font-weight: bold;
+}
+
+.signature {
+  margin-top: 30px;
+  text-align: right;
+  font-weight: bold;
+}
+
+/* Print Styles (Preserved exactly) */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  #invoiceBox, #invoiceBox * {
+    visibility: visible;
+  }
+  #invoiceBox {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+  }
+}
+
+  /* Navigation Header */
+  .nav-header {
+    background-color: #003366;
+    color: white;
+    padding: 1rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+  }
+  
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  
+  .logo h1 {
+    font-size: 1.5rem;
+    font-weight: 600;
+  }
+  
+  .nav-links {
+    display: flex;
+    gap: 20px;
+  }
+  
+  .nav-links a {
+    color: white;
+    text-decoration: none;
+    font-weight: 500;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+  }
+  
+  .nav-links a:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+  }
+  
+  .nav-links a.active {
+    background-color: rgba(255, 255, 255, 0.2);
+  }
+  
+  /* Hide navigation when printing */
+  @media print {
+    .nav-header {
+      display: none;
+    }
+  }
+</style>
+/* Responsive Adjustments */
+@media screen and (max-width: 768px) {
+  body {
+    padding: 15px;
+  }
+  
+  .invoice-box {
+    padding: 15px;
+  }
+  
+  .totals {
+    width: 100%;
+  }
+}
