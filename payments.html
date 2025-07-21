@@ -1,72 +1,28 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <link rel="stylesheet" href="style.css">
-  <title>Invoice - Bannu Enterprises</title>
+  <title>Payments - Bannu Enterprises</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
   <style>
     body {
-      font-family: Arial, sans-serif;
+      font-family: 'Arial', sans-serif;
       font-size: 13px;
       margin: 0;
       padding: 30px;
       background: #fff;
     }
-    .top-bar-toggle {
-      position: fixed;
-      top: 10px;
-      left: 10px;
-      z-index: 1001;
-    }
-    .top-bar-toggle button {
-      padding: 6px 12px;
-      background-color: #003366;
-      color: white;
-      border: none;
-      border-radius: 4px;
-      font-size: 16px;
-      cursor: pointer;
-    }
-    
-    /* Sidebar */
-    .sidebar {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 220px;
-      height: 100vh;
-      background-color: white;
-      color: black;
-      padding: 20px 10px;
-      box-shadow: 2px 0 5px rgba(0,0,0,0.1);
-      box-sizing: border-box;
-      display: none; /* initially hidden */
-      flex-direction: column;
-      z-index: 1000;
-    }
-    .sidebar h3 {
-      color: black;
-      text-align: center;
-      margin-bottom: 20px;
-    }
-    .sidebar a {
-      color: black;
-      text-decoration: none;
-      margin: 8px 0;
-      padding: 6px;
-      display: block;
-      border-radius: 4px;
-    }
-    .sidebar a:hover {
-      background: #f0f0f0;
-    }
+
     .invoice-box {
       width: 100%;
       margin: auto;
+      margin-bottom:-13px;
       border: 2px solid #000;
       padding: 20px;
       color: #000;
+      height: auto;
       box-sizing: border-box;
     }
 
@@ -108,8 +64,8 @@
 
     .ms-line {
       margin-top: 10px;
-      width:50%;
     }
+
     table {
       width: 100%;
       border-collapse: collapse;
@@ -122,39 +78,69 @@
       padding: 6px;
       text-align: center;
     }
-    th{
-      color:white;
-    }
-    .info-fields {
-      display: flex;
-      gap: 20px;
-      margin-top: 10px;
-      flex-wrap: wrap;
+
+    th {
+      background-color: #f0f0f0;
     }
 
-    .input-group {
-      display: flex;
-      align-items: center;
-      gap: 15px;
-    }
-    .input-group input {
-      width: 250px;
+    td input {
+      width: 100%;
     }
 
+    .totals {
+      width: 50%;
+      margin-left: 353px;
+      margin-top: -15px;
+    }
+
+    .totals table {
+      border: 1px solid #000;
+    }
+
+    .totals td {
+      border: 1px solid #000;
+      text-align: right;
+      padding: 6px 10px;
+      font-family: 'Arial', sans-serif;
+    }
+
+    .signature {
+      margin-top: 30px;
+      text-align: right;
+      font-weight: bold;
+    }
 
     input {
       border: none;
-      width: 100%;
       text-align: center;
+    }
+
+    .spinner {
+      border: 4px solid rgba(0, 0, 0, 0.1);
+      border-radius: 50%;
+      border-top: 4px solid #003366;
+      width: 30px;
+      height: 30px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
     }
 
     button {
       margin-top: 10px;
-      padding: 5px 10px;
+      padding: 3px 6px;
       background-color: #003366;
       color: white;
       border: none;
       cursor: pointer;
+    }
+
+    #afterSubmitButtons {
+      display: none;
     }
 
     @media print {
@@ -174,19 +160,6 @@
   </style>
 </head>
 <body onload="initializeInvoice()">
-<!-- Navigation Header -->
-<div class="nav-header">
-  <div class="logo">
-    <i class="fas fa-book-open"></i>
-    <h1>Bannu Enterprises</h1>
-  </div>
-  <div class="nav-links">
-    <a href="index.html">Dashboard</a>
-    <a href="invoice.html">Invoice</a>
-    <a href="payments.html">Payments</a>
-    <a href="SearchCustomer.html">Search Customer</a>
-  </div>
-</div>
 <div class="invoice-box" id="invoiceBox">
   <div class="top-bar">
     <div>GST No: 36AHKPA9847Q1ZI</div>
@@ -194,7 +167,7 @@
   </div>
   <div class="title">
     <div style="background-color:#003366;color:white;display:inline-block;padding:3px 12px;font-weight:bold;border-radius:4px;">
-      ESTIMATION
+      PAYMENT RECEIPT
     </div>
     <h2>BANNU ENTERPRISES</h2>
     <p>MFGRS OF ALL TYPES OF NOTEBOOKS, LONG BOOKS, REGISTERS</p>
@@ -202,34 +175,35 @@
 
   <div class="address"># 5-2-904, Rasal Abdullah, Osmangunj, Hyderabad.</div>
   <div class="info-line">
-    <div><strong>Invoice No:</strong> <span id="invoiceNo"></span></div>
+    <div><strong>Receipt No:</strong> <span id="invoiceNo"></span></div>
     <div><strong>Date:</strong> <span id="invoiceDate"></span></div>
   </div>
 
-  <div class="info-fields">
-  	<div class="input-group">
-   	 M/s. <input type="text" id="customerName" placeholder="Customer Name" />
-  	</div>
-  	<div class="input-group">
-  	  Address <input type="text" id="Address" placeholder="Address" />
- 	 </div>
- 	 <div class="input-group">
-  	  Phone <input type="text" id="PhoneNumber" placeholder="Phone Number" />
- 	 </div>
+  <div class="ms-line">Name
+    <input type="text" id="customerName" placeholder="Customer Name" />
   </div>
 
-  <table>
+  <div class="ms-line">Address <input type="text" id="Address" placeholder="Address" /></div>
+
+  <table border="1" style="width: 100%; border-collapse: collapse;">
     <thead>
       <tr>
-        <th>Date and time</th>
+        <th>Date</th>
         <th>Amount Paid</th>
         <th>Amount Received</th>
-        <th>Total Balance</th>
-        <th>Billed By</th>
+        <th>Balance</th>
         <th>Action</th>
       </tr>
     </thead>
-    <tbody id="itemRows"></tbody>
+    <tbody id="itemRows">
+      <tr>
+        <td><input type="text" id="paymentDate" value="" /></td>
+        <td><input type="number" id="amountPaid" oninput="calculateBalance()" /></td>
+        <td><input type="number" id="amountReceived" oninput="calculateBalance()" /></td>
+        <td><input type="number" id="balance" readonly /></td>
+        <td><button onclick="this.closest('tr').remove()">Remove</button></td>
+      </tr>
+    </tbody>
   </table>
   <button onclick="addRow()">+ Add Row</button>
 
@@ -245,212 +219,265 @@
   <div id="billedBy" style="margin-top: 10px; font-weight: bold; text-align: right; display: none;">
     Billed by: <span id="billerName"></span>
   </div>
-  <div style="margin-top: 20px; text-align: center;" id="submitSection">
-  <button onclick="submitInvoice()">✅ Submit</button>
-</div>
 
-<!-- Action Buttons (hidden initially) -->
-<div style="margin-top: 20px; text-align: center; display: none;" id="actionButtons">
-  <button onclick="printInvoice()">🖨️ Print Invoice</button>
-  <button onclick="saveToGoogleSheet()">💾 Save Invoice</button>
-  <button onclick="location.reload()">🆕 New Invoice</button>
-  <button onclick="editInvoice()">✏️ Back to Edit</button>
-</div>
   <div class="signature">For Bannu Enterprises</div>
 </div>
+
+<div style="text-align: center; margin-top: 30px;">
+  <button id="submitBtn" onclick="submitPayment()">Submit Payment</button>
+  <div id="afterSubmitButtons" style="display: none;">
+    <button onclick="window.print()">Print Receipt</button>
+    <button onclick="enableEditing()">Back to Edit</button>
+    <button onclick="savePayment()">Save Payment</button>
+    <button onclick="newInvoice()">New Payment</button>
+  </div>
+</div>
+
 <script>
-function toggleSidebar() {
-  const sidebar = document.getElementById("sidebar");
-  const main = document.getElementById("mainContent");
+    let selectedBiller = '';
+    let currentInvoiceNumber = 0;
 
-  if (sidebar.style.display === "block") {
-    sidebar.style.display = "none";
-    main.classList.remove("sidebar-open");
-  } else {
-    sidebar.style.display = "block";
-    main.classList.add("sidebar-open");
-  }
-}
-</script>
-<script>
-function submitInvoice() {
-  // Hide biller buttons and submit button
-  document.getElementById("staffButtons").style.display = "none";
-  document.getElementById("submitSection").style.display = "none";
+    function initializeInvoice() {
+      const dateStr = new Date().toLocaleDateString('en-GB');
+      document.getElementById("invoiceDate").innerText = dateStr;
+      document.getElementById("paymentDate").value = dateStr;
+    
+      fetch("https://script.google.com/macros/s/AKfycby0HHiIcLBgr5pXWdBZ1Bx4A9XYJzQ5a3_KYnemPoF637CApvTaz17Y_EpomPQ19b5M-g/exec")
+        .then(response => response.json())
+        .then(data => {
+          currentInvoiceNumber = parseInt(data.lastInvoice || "0");
+          const nextInvoiceNumber = (currentInvoiceNumber + 1).toString().padStart(5, '0');
+          document.getElementById("invoiceNo").innerText = nextInvoiceNumber;
+        })
+        .catch(err => {
+          console.error("Failed to fetch invoice number:", err);
+          document.getElementById("invoiceNo").innerText = "00001";
+        });
+    }
 
-  // Show print, save, edit, new buttons
-  document.getElementById("actionButtons").style.display = "block";
+    function setBiller(name) {
+      selectedBiller = name;
+      document.getElementById("billerName").innerText = name;
+      document.getElementById("billedBy").style.display = "block";
+    }
 
-  // Make all input fields readonly
-  document.querySelectorAll("input").forEach(input => {
-    input.setAttribute("readonly", true);
-    input.style.border = "none";
-    input.style.background = "transparent";
-  });
-}
+    function addRow() {
+      const row = document.createElement("tr");
+      const dateStr = new Date().toLocaleDateString('en-GB');
+      
+      row.innerHTML = `
+        <td><input type="text" value="${dateStr}" /></td>
+        <td><input type="number" oninput="calculateBalance()" /></td>
+        <td><input type="number" oninput="calculateBalance()" /></td>
+        <td><input type="number" readonly /></td>
+        <td><button onclick="this.closest('tr').remove()">Remove</button></td>
+      `;
+      
+      document.getElementById("itemRows").appendChild(row);
+    }
 
-function editInvoice() {
-  // Show biller buttons and submit button
-  document.getElementById("staffButtons").style.display = "block";
-  document.getElementById("submitSection").style.display = "block";
-
-  // Hide action buttons
-  document.getElementById("actionButtons").style.display = "none";
-
-  // Make input fields editable again
-  document.querySelectorAll("input").forEach(input => {
-    input.removeAttribute("readonly");
-    input.style.border = "";
-    input.style.background = "";
-  });
-}
-
-function printInvoice() {
-  // Hide action column and Add Row button
-  const addRowBtn = document.querySelector('button[onclick="addRow()"]');
-  const actionButtons = document.getElementById("actionButtons");
-  
-  // Hide action column (last column in table)
-  const actionHeader = document.querySelector("thead tr th:last-child");
-  const actionCells = document.querySelectorAll("#itemRows td:last-child");
-
-  if (actionHeader) actionHeader.style.display = "none";
-  actionCells.forEach(cell => cell.style.display = "none");
-
-  if (addRowBtn) addRowBtn.style.display = "none";
-  if (actionButtons) actionButtons.style.display = "none";
-
-  // Print
-  window.print();
-
-  // Show again after printing
-  setTimeout(() => {
-    if (actionHeader) actionHeader.style.display = "";
-    actionCells.forEach(cell => cell.style.display = "");
-    if (addRowBtn) addRowBtn.style.display = "";
-    if (actionButtons) actionButtons.style.display = "block";
-  }, 1000);
-}
-
-</script>
-
-  <script>
-    function saveToGoogleSheet() {
-      const customerName = document.getElementById("customerName").value.trim();
-      const address = document.getElementById("Address").value.trim();
-      const phone = document.getElementById("PhoneNumber").value.trim();
+    function calculateBalance() {
       const rows = document.querySelectorAll("#itemRows tr");
-      const dataToSend = [];
-
       rows.forEach(row => {
-        const cells = row.querySelectorAll("td");
-        const date = cells[0].querySelector("input").value || "";
-        const paid = cells[1].querySelector("input").value || "0";
-        const received = cells[2].querySelector("input").value || "0";
-        const balance = cells[3].querySelector("input").value || "0";
-        const billedBy = cells[4].textContent.trim();
-
-        dataToSend.push([
-          date,
-          customerName,
-          address,
-          phone,
-          paid,
-          received,
-          balance,
-          billedBy
-        ]);
-      });
-
-      const scriptURL = "https://script.google.com/macros/s/AKfycbwF9JpxCPCroM7eutmPT-qgkeNMcz-ty1toFJNU7m_j7M63pCDrfhSHAkj5O047l2usQA/exec";
-
-      fetch(scriptURL, {
-        method: 'POST',
-        mode:"no-cors",
-        body: JSON.stringify({ rows: dataToSend }),
-        headers: { 'Content-Type': 'application/json' }
-      })
-      .then(res => res.text())
-      .then(response => {
-        alert("Saved: " + response);
-      })
-      .catch(err => {
-        console.error("Error!", err.message);
-        alert("Failed to save data.");
+        const paid = parseFloat(row.querySelector("td:nth-child(2) input").value) || 0;
+        const received = parseFloat(row.querySelector("td:nth-child(3) input").value) || 0;
+        const balance = paid - received;
+        row.querySelector("td:nth-child(4) input").value = balance.toFixed(2);
       });
     }
-  </script>
 
-
-<script>
-  let selectedBiller = "";
-
-  function initializeInvoice() {
-    const dateStr = new Date().toLocaleDateString('en-GB');
-    document.getElementById("invoiceDate").innerText = dateStr;
-    document.getElementById("invoiceNo").innerText = "00001"; // Static or can be dynamic
-    addRow();
-  }
-
-  function setBiller(name) {
-    selectedBiller = name;
-    document.getElementById("billerName").innerText = name;
-    document.getElementById("billedBy").style.display = "block";
-
-    const rows = document.querySelectorAll("#itemRows tr");
-    rows.forEach(row => {
-      if (row.children.length >= 5) {
-        row.children[4].textContent = name;
+    function submitPayment() {
+      const customerName = document.getElementById("customerName").value.trim();
+      const address = document.getElementById("Address").value.trim();
+    
+      if (!customerName || !address) {
+        alert("Please enter Customer Name and Address before submitting.");
+        return;
       }
-    });
-  }
 
-  function addRow() {
-    const tableBody = document.getElementById("itemRows");
-    const row = document.createElement("tr");
+      document.getElementById("submitBtn").style.display = "none";
+      document.getElementById("afterSubmitButtons").style.display = "block";
+      document.getElementById("staffButtons").style.display = "none";
 
-    const dateCell = document.createElement("td");
-    const paidCell = document.createElement("td");
-    const receivedCell = document.createElement("td");
-    const balanceCell = document.createElement("td");
-    const billedByCell = document.createElement("td");
-    const actionCell = document.createElement("td");
+      document.querySelectorAll("input").forEach(input => {
+        input.setAttribute("readonly", true);
+      });
+    }
 
-    const now = new Date();
-    const dateTime = now.toLocaleDateString('en-GB') + " " + now.toLocaleTimeString('en-GB');
-    dateCell.innerHTML = `<input type="text" value="${dateTime}" readonly />`;
+    function enableEditing() {
+      document.getElementById("submitBtn").style.display = "inline-block";
+      document.getElementById("afterSubmitButtons").style.display = "none";
 
-    const paidInput = document.createElement("input");
-    paidInput.type = "number";
-    paidInput.placeholder = "0";
-    paidCell.appendChild(paidInput);
+      document.querySelectorAll("input").forEach(input => {
+        input.removeAttribute("readonly");
+      });
 
-    const receivedInput = document.createElement("input");
-    receivedInput.type = "number";
-    receivedInput.placeholder = "0";
-    receivedCell.appendChild(receivedInput);
+      document.getElementById("staffButtons").style.display = "block";
+      if (selectedBiller) {
+        document.getElementById("billedBy").style.display = "block";
+      }
+    }
 
-    const balanceInput = document.createElement("input");
-    balanceInput.type = "number";
-    balanceInput.placeholder = "0.00";
-    balanceCell.appendChild(balanceInput);
+    function newInvoice() {
+      location.reload();
+    }
 
-    billedByCell.textContent = selectedBiller || "";
+    async function savePayment() {
+      const customerName = document.getElementById("customerName").value.trim();
+      const address = document.getElementById("Address").value.trim();
+      const invoiceNo = document.getElementById("invoiceNo").innerText.trim();
+      const date = document.getElementById("invoiceDate").innerText.trim();
+      
+      // Show loading indicator
+      const loadingIndicator = document.createElement('div');
+      loadingIndicator.style.position = 'fixed';
+      loadingIndicator.style.top = '0';
+      loadingIndicator.style.left = '0';
+      loadingIndicator.style.width = '100%';
+      loadingIndicator.style.height = '100%';
+      loadingIndicator.style.backgroundColor = 'rgba(0,0,0,0.5)';
+      loadingIndicator.style.display = 'flex';
+      loadingIndicator.style.justifyContent = 'center';
+      loadingIndicator.style.alignItems = 'center';
+      loadingIndicator.style.zIndex = '9999';
+      
+      const loadingId = 'loading-' + Date.now();
+      loadingIndicator.id = loadingId;
+      
+      loadingIndicator.innerHTML = `
+        <div style="background:white; padding:20px; border-radius:5px; text-align:center;">
+          <div style="margin-bottom:10px;">Saving payment, please wait...</div>
+          <div class="spinner"></div>
+        </div>
+      `;
+      document.body.appendChild(loadingIndicator);
+      
+      try {
+        // Collect payment data
+        const rows = document.querySelectorAll("#itemRows tr");
+        const payments = [];
+        let totalPaid = 0;
+        let totalReceived = 0;
+        let balance = 0;
+        
+        rows.forEach(row => {
+          const date = row.querySelector("td:nth-child(1) input").value;
+          const paid = parseFloat(row.querySelector("td:nth-child(2) input").value) || 0;
+          const received = parseFloat(row.querySelector("td:nth-child(3) input").value) || 0;
+          const currentBalance = parseFloat(row.querySelector("td:nth-child(4) input").value) || 0;
+          
+          totalPaid += paid;
+          totalReceived += received;
+          balance += currentBalance;
+          
+          payments.push({
+            date,
+            paid,
+            received,
+            balance: currentBalance
+          });
+        });
+        
+        // Generate PDF
+        const invoiceElement = document.getElementById("invoiceBox");
+        const clone = invoiceElement.cloneNode(true);
+        clone.style.position = 'absolute';
+        clone.style.top = '-9999px';
+        clone.style.left = '0';
+        clone.style.width = '794px';
+        clone.style.background = '#fff';
+        document.body.appendChild(clone);
+        
+        const { jsPDF } = window.jspdf;
+        const pdf = new jsPDF({
+          orientation: 'portrait',
+          unit: 'px',
+          format: [794, 1122],
+          compress: true
+        });
+        
+        const canvas = await html2canvas(clone, {
+          scale: 1,
+          useCORS: true,
+          backgroundColor: "#ffffff",
+          windowWidth: clone.scrollWidth,
+          windowHeight: clone.scrollHeight,
+          logging: false
+        });
+        
+        pdf.addImage(canvas.toDataURL('image/jpeg', 0.85), 'JPEG', 0, 0, 794, 1122);
+        document.body.removeChild(clone);
+        
+        // Convert PDF to base64
+        const pdfBlob = pdf.output('blob');
+        const reader = new FileReader();
+        
+        reader.onloadend = async function() {
+          const base64pdf = reader.result.split(',')[1];
+          
+          // Save to Google Sheets and Drive
+          await fetch("https://script.google.com/macros/s/AKfycbxwA2ZIBHyP9WE9p5V22N7k694RhdUtdGCZGn8CdRKWd3FepuIAlqos-wfw8pHwwtQFkQ/exec", {
+            method: "POST",
+            mode: "no-cors",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              invoiceNo,
+              customerName,
+              date,
+              totalPaid,
+              totalReceived,
+              balance,
+              billedBy: selectedBiller,
+              filename: `Payment_${invoiceNo}_${customerName}.pdf`,
+              pdf: base64pdf,
+              updateInvoiceNumber: true
+            })
+          });
+          
+          const loadingDiv = document.getElementById(loadingId);
+          if (loadingDiv) {
+            loadingDiv.innerHTML = `
+              <div style="background:white; padding:20px; border-radius:5px; text-align:center;">
+                <div style="color:green; margin-bottom:10px;">✅ Payment saved successfully!</div>
+                <button onclick="closeLoading('${loadingId}')" 
+                        style="padding:5px 10px; background:#003366; color:white; border:none; cursor:pointer;">
+                  Close
+                </button>
+                <button onclick="location.reload()" 
+                        style="padding:5px 10px; background:#003366; color:white; border:none; cursor:pointer; margin-left:10px;">
+                  New Payment
+                </button>
+              </div>
+            `;
+          }
+        };
+        
+        reader.readAsDataURL(pdfBlob);
+        
+      } catch (err) {
+        console.error("Error saving payment:", err);
+        const loadingDiv = document.getElementById(loadingId);
+        if (loadingDiv) {
+          loadingDiv.innerHTML = `
+            <div style="background:white; padding:20px; border-radius:5px; text-align:center;">
+              <div style="color:red; margin-bottom:10px;">❌ Error saving payment</div>
+              <div style="font-size:12px; margin-bottom:10px;">${err.message}</div>
+              <button onclick="closeLoading('${loadingId}')" 
+                      style="padding:5px 10px; background:#003366; color:white; border:none; cursor:pointer;">
+                Close
+              </button>
+            </div>
+          `;
+        }
+      }
+    }
 
-    const removeBtn = document.createElement("button");
-    removeBtn.innerText = "Remove";
-    removeBtn.onclick = () => row.remove();
-    actionCell.appendChild(removeBtn);
-
-    row.appendChild(dateCell);
-    row.appendChild(paidCell);
-    row.appendChild(receivedCell);
-    row.appendChild(balanceCell);
-    row.appendChild(billedByCell);
-    row.appendChild(actionCell);
-
-    tableBody.appendChild(row);
-  }
+    function closeLoading(id) {
+      const loadingDiv = document.getElementById(id);
+      if (loadingDiv) {
+        loadingDiv.remove();
+      }
+    }
 </script>
 </body>
 </html>
