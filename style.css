@@ -109,7 +109,7 @@ th, td {
 
 th {
   background-color: var(--primary-color);
-  color: black;
+  color: white;
 }
 
 td input {
