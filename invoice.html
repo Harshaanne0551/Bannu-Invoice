@@ -1152,7 +1152,7 @@ document.addEventListener("click", function (e) {
   async function downloadInvoice() {
     const invoiceElement = document.getElementById("invoiceBox");
 
-    // Clone invoice to ensure full content is captured (not just visible screen)
+    // Clone invoice to ensure full content is captured
     const clone = invoiceElement.cloneNode(true);
     clone.style.position = 'fixed';
     clone.style.top = '0';
@@ -1179,10 +1179,14 @@ document.addEventListener("click", function (e) {
       format: 'a4'
     });
 
-    const imgWidth = 210;
+    const imgWidth = 210; // mm for A4
     const imgHeight = (canvas.height * imgWidth) / canvas.width;
     pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, 0, imgWidth, imgHeight);
+
     const customerName = document.getElementById("customerName").value.trim() || 'Invoice';
     const invoiceNo = document.getElementById("invoiceNo").innerText.trim() || '000';
-    const fileName = `${customerName}
+    const fileName = `${customerName}_Invoice_${invoiceNo}.pdf`;
+
+    pdf.save(fileName);
+  }
 </script>
