@@ -1200,45 +1200,26 @@ document.addEventListener("click", function (e) {
       return;
     }
 
-    const invoiceElement = document.getElementById("invoiceBox");
+    // First generate the PDF (you'll need to implement this part)
+    const pdfUrl = await generatePdfInvoice(); // You need to implement this function
+    
+    // Create the message with the PDF link
+    const message = `Dear Customer, please find your invoice at: ${pdfUrl}`;
+    
+    // Construct WhatsApp share link
+    // For international numbers, we remove the leading 0 and add the country code
+    const formattedNumber = phoneNumber.startsWith('0') ? phoneNumber.substring(1) : phoneNumber;
+    const whatsappURL = `https://wa.me/${formattedNumber}?text=${encodeURIComponent(message)}`;
+    
+    // This will open WhatsApp on mobile devices if installed
+    window.open(whatsappURL, '_blank');
+  }
 
-    // Clone invoice for full capture
-    const clone = invoiceElement.cloneNode(true);
-    clone.style.position = 'fixed';
-    clone.style.top = '0';
-    clone.style.left = '0';
-    clone.style.zIndex = '-1';
-    clone.style.width = '794px';
-    clone.style.background = '#fff';
-    document.body.appendChild(clone);
-
-    const canvas = await html2canvas(clone, {
-      scale: 2,
-      useCORS: true,
-      backgroundColor: "#ffffff",
-      windowWidth: clone.scrollWidth,
-      windowHeight: clone.scrollHeight
-    });
-
-    document.body.removeChild(clone);
-
-    // Convert to image blob
-    canvas.toBlob(function (blob) {
-      const reader = new FileReader();
-      reader.onloadend = function () {
-        const base64data = reader.result;
-        const imgDataUrl = base64data;
-
-        // Since direct file sending is restricted, we use this workaround
-        const message = `Dear Customer, please find your invoice attached. (Preview below 👇)`;
-
-        // Construct WhatsApp share link (text + image link in preview)
-        const whatsappURL = `https://wa.me/91${phoneNumber}?text=${encodeURIComponent(message)}&image=${encodeURIComponent(imgDataUrl)}`;
-
-        // On mobile, this opens WhatsApp app
-        window.open(whatsappURL, '_blank');
-      };
-      reader.readAsDataURL(blob);
-    }, 'image/jpeg');
+  // Example function to generate PDF - you'll need to implement this properly
+  async function generatePdfInvoice() {
+    // This is just a placeholder - implement your actual PDF generation logic
+    // You might use libraries like jsPDF, pdfkit, or a server-side solution
+    // For this example, we'll return a dummy URL
+    return "https://example.com/invoices/your-invoice.pdf";
   }
 </script>
