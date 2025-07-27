@@ -1,0 +1,1244 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Invoice - Bannu Enterprises</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <link rel="stylesheet" href="style.css">
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      font-size: 13px;
+      margin: 0;
+      padding: 30px;
+      background: #fff;
+    }
+
+  /* Navigation Header */
+ 
+
+    .invoice-box {
+      width: 100%;
+      margin: auto;
+      margin-bottom:-13px;
+      border: 2px solid #000;
+      padding: 20px;
+      color: #000;
+      height: auto;
+      box-sizing: border-box;
+    }
+
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      font-weight: bold;
+      border-bottom: 1px solid #000;
+      padding-bottom: 5px;
+    }
+
+    .title {
+      text-align: center;
+      margin-top: 10px;
+    }
+
+    .title h2 {
+      margin: 5px 0;
+      font-size: 20px;
+      color: #003366;
+      text-shadow: 0.5px 0.5px #ccc;
+    }
+
+    .title p {
+      margin: 2px 0;
+      font-weight: bold;
+    }
+
+    .address {
+      text-align: center;
+      font-size: 13px;
+    }
+
+    .info-line {
+      margin-top: 20px;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .ms-line {
+      margin-top: 10px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+      font-size: 13px;
+    }
+
+    th, td {
+      border: 1px solid #000;
+      padding: 6px;
+      text-align: center;
+    }
+
+
+    td input {
+      width: 100%;
+    }
+
+    th:nth-child(1), td:nth-child(1) {
+      width: 50%;
+    }
+
+    th:nth-child(2), td:nth-child(2) {
+      width: 10%;
+    }
+    th:nth-child(3), td:nth-child(3) {
+      width: 12%;
+    }
+    th:nth-child(4), td:nth-child(4) {
+      width: 10%;
+    }
+    th:nth-child(5), td:nth-child(5) {
+      width: 12%;
+    }
+    th:nth-child(6), td:nth-child(6) {
+      width: 10%;
+    }
+
+
+    .totals {
+      width: 50%;
+      margin-left:353px;
+      margin-top: -15px;
+    }
+
+    .totals table {
+      border: 1px solid #000;
+    }
+
+    .totals td {
+      border: 1px solid #000;
+      text-align: right;
+      padding: 6px 10px;
+      
+      font-family: 'Arial', sans-serif;
+    }
+
+
+    .total-in-words {
+      margin-top: -10px;
+      font-weight: bold;
+      margin-left:000px;
+    }
+
+    .signature {
+      margin-top: 30px;
+      text-align: right;
+      font-weight: bold;
+      
+    }
+
+    input {
+      border: none;
+      text-align: center;
+    }
+    .spinner {
+      border: 4px solid rgba(0, 0, 0, 0.1);
+      border-radius: 50%;
+      border-top: 4px solid #003366;
+      width: 30px;
+      height: 30px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto;
+    }
+
+     @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    button {
+      margin-top: 10px;
+      padding: 3px 6px;
+      background-color: #003366;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+
+    .tax-label {
+      float: left;
+    }
+
+    .tax-controls {
+      float: right;
+    }
+
+    .tax-controls button {
+      font-size: 11px;
+      margin-left: 5px;
+      padding: 2px 6px;
+      background-color: #666;
+      color: #fff;
+      border: none;
+      cursor: pointer;
+    }
+
+    #afterSubmitButtons {
+      display: none;
+    }
+    .dropdown-container { position: relative; width: 100%; }
+    .dropdown-list {
+      position: absolute;
+      background: #fff;
+      border: 1px solid #ccc;
+      width: 100%;
+      max-height: 150px;
+      overflow-y: auto;
+      display: none;
+      z-index: 100;
+    }
+    .dropdown-list div {
+      padding: 5px;
+      cursor: pointer;
+    }
+    .dropdown-list div:hover {
+      background-color: #f0f0f0;
+    }
+    .subtype-table {
+      margin-top: 5px;
+      font-size: 11px;
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: fixed;
+    }
+    .subtype-table td {
+      padding: 2px 4px;
+      text-align: center;
+      width: 14.5%;
+    }
+    .subtype-table input {
+      width: 100%;
+      text-align: center;
+    }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+    }
+    th, td {
+      border: 1px solid #000;
+      padding: 6px;
+      text-align: center;
+      vertical-align: top;
+    }
+
+    
+    @media print {
+      body * {
+        visibility: hidden;
+      }
+      #invoiceBox, #invoiceBox * {
+        visibility: visible;
+      }
+      #invoiceBox {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+      }
+
+    }
+  </style>
+</head>
+<body onload="initializeInvoice()">
+
+<!-- Navigation Header -->
+<div class="nav-header">
+  <div class="logo">
+    <i class="fas fa-book-open"></i>
+    <h1>Bannu Enterprises</h1>
+  </div>
+  <div class="nav-links">
+    <a href="index.html">Dashboard</a>
+    <a href="invoice.html">Invoice</a>
+    <a href="payments.html">Payments</a>
+    <a href="SearchCustomer.html">Search Customer</a>
+    <a href="SearchPayments.html">Search Payments</a>
+  </div>
+</div>
+<div class="invoice-box" id="invoiceBox">
+  <div class="top-bar">
+    <div>GST No: 36AHKPA9847Q1ZI</div>
+    <div>Cell: 9440607963</div>
+  </div>
+  <div class="title">
+    <div style="background-color:#003366;color:white;display:inline-block;padding:3px 12px;font-weight:bold;border-radius:4px;">
+      ESTIMATION
+    </div>
+    <h2>BANNU ENTERPRISES</h2>
+    <p>MFGRS OF ALL TYPES OF NOTEBOOKS, LONG BOOKS, REGISTERS</p>
+  </div>
+
+  <div class="address"># 5-2-904, Rasal Abdullah, Osmangunj, Hyderabad.</div>
+  <div class="info-line">
+    <div><strong>Invoice No:</strong> <span id="invoiceNo"></span></div>
+    
+    <div><strong>Date:</strong> <span id="invoiceDate"></span></div>
+  </div>
+
+  <div class="ms-line">Name
+  <div class="dropdown-container" style="position: relative;">
+    <input type="text" id="customerName" placeholder="Customer Name" onfocus="showCustomerDropdown()" oninput="filterCustomerDropdown()" autocomplete="off" />
+    <div class="dropdown-list" id="customerDropdown" style="position: absolute; top: 100%; left: 0; width: 100%; max-height: 150px; overflow-y: auto; background: #fff; border: 1px solid #ccc; display: none; z-index: 100;"></div>
+  </div>
+
+  <div class="ms-line">Address <input type="text" id="Address" placeholder="Address" /></div>
+  <div class="ms-line">Phone Number <input type="tel" id="PhoneNumber" placeholder="Phone Number" /></div>
+  <table border="1" style="width: 100%; border-collapse: collapse;">
+    <thead>
+      <tr>
+        <th>PARTICULARS</th>
+        <th>HSN</th>
+        <th>Qty (Kgs)</th>
+        <th>Rate</th>
+        <th>Amount</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody id="itemRows">
+      <tr>
+   
+       <td class="dropdown-container">
+          <input type="text" onfocus="showDropdown(this)" oninput="filterDropdown(this)" placeholder="Select item" />
+          <div class="dropdown-list"></div>
+        </td>
+        <td><input type="text" /></td>
+        <td><input type="number" oninput="calculateRow(this)" /></td>
+        <td><input type="number" oninput="calculateRow(this)" /></td>
+        <td><input type="text" class="amount" readonly /></td>
+        <td>
+  <button onclick="this.closest('tr').remove(); updateTotals();">Remove</button>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <button onclick="addRow()">+ Add Row</button>
+  <div class="totals">
+    <table>
+      
+      <tr>
+        <tr>
+          <td colspan="1"><strong>GRAND TOTAL</strong></td>
+          <td colspan="5"><strong>&#8377;<span id="grandTotal">0.00</span></strong></td>
+        </tr>
+        <tr>
+  <td><strong>AMOUNT PAID</strong></td>
+  <td colspan="5" style="text-align: right; font-weight: bold;">
+    &#8377;<input
+      type="number"
+      id="amountPaid"
+      value="0.00"
+      oninput="updateRemainingBalance()"
+      style="width: 100px; border: none; outline: none; text-align: right; font-weight: bold; font-size: 13px;"
+    />
+  </td>
+</tr>
+
+
+<tr>
+        <tr>
+          <td colspan="1"><strong>REMAINING BALANCE</strong></td>
+          <td colspan="5"><strong>&#8377;<span id="remainingBalance">0.00</span></strong></td>
+        </tr>
+
+      </tr>
+    </tr>
+    </table>
+  </div>
+  <div class="total-in-words">
+    Total Amount in Rs. <input type="text" id="amountInWords" readonly style="width: 100%;" />
+  </div>
+  <div id="staffButtons" style="margin-top: 10px; text-align: center;">
+    <strong>Select Biller:</strong><br />
+    
+    <button onclick="setBiller('Suhas')">Suhas Anne</button>
+    <button onclick="setBiller('Kavitha')">Kavitha Anne</button>
+    <button onclick="setBiller('Prasad')">Prasad</button>
+    <button onclick="setBiller('Sagar')">Sagar</button>
+    <button onclick="setBiller('Harsha')">Harsha Anne</button>
+</div>
+
+<div id="billedBy" style="margin-top: 10px; font-weight: bold; text-align: right; display: none;">
+  Billed by: <span id="billerName"></span>
+</div>
+
+
+  <div class="signature">For Bannu Enterprises</div>
+</div>
+
+  
+<div style="text-align: center; margin-top: 30px;">
+  <button id="submitBtn" onclick="submitInvoice()">Submit Invoice</button>
+  <div id="afterSubmitButtons" style="display: none;">
+    <button onclick="window.print()">Print Invoice</button>
+    <button onclick="enableEditing()">Back to Edit</button>
+    <button onclick="saveInvoice()">Save Invoice</button>
+    <button onclick="newInvoice()">New Invoice</button>
+    <button id="downloadBtn" class="no-print" onclick="downloadInvoice()">Download Invoice</button>
+    <button onclick="shareInvoiceViaWhatsApp()">Share via WhatsApp</button>
+  </div>
+</div>
+<script>
+function toggleSidebar() {
+  const sidebar = document.getElementById("sidebar");
+  const main = document.getElementById("mainContent");
+
+  if (sidebar.style.display === "block") {
+    sidebar.style.display = "none";
+    main.classList.remove("sidebar-open");
+  } else {
+    sidebar.style.display = "block";
+    main.classList.add("sidebar-open");
+  }
+}
+</script>
+<script>
+  let selectedBiller = '';
+
+  const particularOptions = ["Bannu King Size 112pages","Bannu King Size 160pages","Bannu King Size 176pages","Bannu King Size 184pages","Bannu King Size 192pages",
+"Naveena King Size 112pages","Naveena King Size 160pages","Naveena King Size 192pages",
+"Harsha King Size 112pages","Harsha Binding","Harsha King Size 120pages","Harsha King Size 132pages","Harsha King Size 136pages","Harsha King Size 160pages","Harsha King Size 192pages",
+"Kavitha King Size 112pages","Bannu Notebook","Harsha Notebook","Metro King Size","Divya Chetana King Size","Bannu Special Longbook",
+"Harsha Supreme","Bannu Gold","Bannu Long 160pages","Bannu Friendship","Bannu 240pages small","Bannu 320pages long","Bannu 400pages Long",
+"Bannu Jumbo 144pages","Bannu Jumbo 160pages","Bannu Jumbo 240pages","Bannu Jumbo 320pages","Bannu Jumbo 400pages",
+"Bannu A4 144pages","Bannu A4 160pages","Bannu A4 240pages","Bannu A4 320pages","Bannu A4 400pages",
+"68 Pages Long","100Pages Long",
+"A4 Graph 32pages","A4 graph 68pages","A4 graph 96pages","Drawing Book","Record 96pages","Record 144pages","Record 260pages","96 Page Practical records","144 Page Practical Record",
+"1Q Long Register","2Q Long Register","3Q Long Register","4Q Long Register","5Q Long Register","1Q Attendence Register","2Q Attendence Register","1Q Office Register","2Q Office Register",
+"1Q Short Register","2Q Short Register","3Q Short Register","4Q Short Register","5Q Short Register","1Q Cash RuleLong Register","2Q Cash Rule Long Register","3Q Cash Rule Long Register","4Q Cash Rule Long Register","5Q Cash rule Long Register","1Q Cash Rule Short Register","2Q Cash Rule Short Register","3Q Cash Rule Short Register","4Q Cash Rule Short Register","5Q Cash Rule Short Register",
+"No2 Bill Book","No3 Bill Book","No4 Bill Book","No5 Bill Book","Notepad","Graph Sheets","Maps","A4 Size Paper","King Size Loose Books","Longbook Loose Books","Exam Pads","240 Pages Rough",
+"160pages White Rough","200pages White Rough","300pages White Rough","400pages White Rough","200pages Brown Rough","300pages Brown Rough","400pages Brown Rough",
+"Color Paper","Charts","School Title Kingsize","School Title longbook","A4 Size","Bundle Charge","Citizen Binding","Title Cost","300pages Kingsize","King Size Mix","Rolls","Gift Card","Promisary Note","Bonafide Certificate","Tape 15mm x 1Mts",
+                             "Tape 15mm x 2Mts","Tape 15mm x 5Mts","Tape 20mm x 1Mts","Tape 20mm x 2Mts","Tape 20mm x 5Mts","Tape 12mm x 30Mts","Tape 18mm x 30Mts","Tape 24mm x 30Mts","Tape 48mm x 30Mts Brown","Tape 48mm x 50Mts White","Tape 48mm x 50Mts Brown",
+                             "Tape 72mm x 30Mts Brown","Tape 72mm x 50Mts Brown","Tape 72mm x 50Mts White","Harsha A4","Spiral 120pages Plain","Spiral 220pages Plain","Spiral 220pages S/R","Spiral 320pages Plain","Spiral 420pages Plain","Pocket Size","Finance Book","Ivory Charts","CardBoard","Dot Paper","Exam Paper","School Title Kingsize",    ]
+
+
+  const subtypes = ["S/R", "B/R", "F/R", "D/R", "M/R", "C/R", "U/R", "O/R", "MS/R","BIG C/R"];
+  const productsWithSubtypes = ["Bannu King Size 112pages","Bannu King Size 160pages","Bannu King Size 176pages","Bannu King Size 184pages","Bannu King Size 192pages",
+"Naveena King Size 112pages","Naveena King Size 160pages","Naveena King Size 192pages",
+"Harsha King Size 112pages","Harsha Binding","Harsha King Size 120pages","Harsha King Size 132pages","Harsha King Size 136pages","Harsha King Size 160pages","Harsha King Size 192pages",
+"Kavitha King Size 112pages","School Title A Grade Kingsize","Citizen Binding","Bannu Notebook","Harsha Notebook","Metro King Size","Divya Chetana King Size","School Title Kingsize",];
+  const altSubtypesMap = {
+  "King Size Mix":["B/R+M/R","C/R+F/R","Three rule+F/R","D/R+Three rule","F/R+MS/R"],
+  "300pages Kingsize":["plain","S/R"],
+  "Record 144pages":["Phy","Che"],
+  "Record 96pages":["Phy","Che"],
+  "Record 260pages":["Phy","Che"],
+  "Bannu Special Longbook": ["Plain", "S/R"],
+  "Bannu Gold": ["Plain", "S/R", "B/R", "O/R"],
+  "Harsha Supreme": ["Plain", "S/R"],
+  "Bannu Friendship": ["Plain", "S/R", "B/R", "O/R"],
+  "Bannu Long 160pages": ["Plain", "S/R","B/R","O/R"],
+  "Bannu 240pages small": ["Plain", "S/R"],
+  "Bannu 320pages long": ["Plain", "S/R"],
+  "Bannu Jumbo 144pages": ["Plain", "S/R"],
+  "Bannu Jumbo 160pages": ["Plain", "S/R"],
+  "Bannu Jumbo 240pages": ["Plain", "S/R"],
+  "Bannu Jumbo 320pages": ["Plain", "S/R"],
+  "Bannu A4 144pages": ["Plain", "S/R"],
+  "Bannu A4 240pages": ["Plain", "S/R"],
+  "Bannu A4 320pages": ["Plain", "S/R"],
+  "White Rough 160pages":["Plain","S/R"],
+  "White Rough 200pages":["Plain","S/R"],
+  "White Rough 300pages":["Plain","S/R"],
+  "White Rough 400pages":["Plain","S/R"],
+  "A4 Size":["Plain","S/R","O/R"],
+  "School Title Longbook": ["Plain", "S/R", "B/R", "O/R"],
+  };
+
+  const allProductsWithAltSubtypes = Object.keys(altSubtypesMap);
+
+  function createDropdownCell() {
+    const td = document.createElement('td');
+    td.className = 'dropdown-container';
+
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.className = 'particular-input';
+    input.placeholder = 'Select item';
+    input.addEventListener('focus', function() { showDropdown(input); });
+    input.addEventListener('input', function() { filterDropdown(input); });
+
+    const dropdown = document.createElement('div');
+    dropdown.className = 'dropdown-list';
+
+    td.appendChild(input);
+    td.appendChild(dropdown);
+    return td;
+  }
+
+  function addRow() {
+    const row = document.createElement("tr");
+
+    row.appendChild(createDropdownCell());
+
+    const hsnTd = document.createElement('td');
+    hsnTd.innerHTML = '<input type="text" />';
+    row.appendChild(hsnTd);
+
+    const qtyTd = document.createElement('td');
+    qtyTd.innerHTML = '<input type="number" oninput="calculateRow(this)" />';
+    row.appendChild(qtyTd);
+
+    const rateTd = document.createElement('td');
+    rateTd.innerHTML = '<input type="number" oninput="calculateRow(this)" />';
+    row.appendChild(rateTd);
+
+    const amountTd = document.createElement('td');
+    amountTd.innerHTML = '<input type="text" class="amount" readonly />';
+    row.appendChild(amountTd);
+
+    const actionTd = document.createElement('td');
+    actionTd.innerHTML = '<button onclick="this.closest(\'tr\').remove()">Remove</button>';
+    row.appendChild(actionTd);
+
+    document.getElementById("itemRows").appendChild(row);
+  }
+  function setBiller(name) {
+    selectedBiller = name;
+    document.getElementById("billerName").innerText = name;
+    document.getElementById("billedBy").style.display = "block";
+  }
+
+  function showDropdown(input) {
+    const container = input.parentElement;
+    const dropdown = container.querySelector('.dropdown-list');
+    dropdown.innerHTML = '';
+    particularOptions.forEach(opt => {
+      const item = document.createElement('div');
+      item.textContent = opt;
+      item.onclick = () => {
+        input.value = opt;
+        dropdown.style.display = 'none';
+      
+        if (productsWithSubtypes.includes(opt)) {
+          insertSubtypesTable(container, input);
+        } else if (allProductsWithAltSubtypes.includes(opt)) {
+          insertAltSubtypesTable(container, input, altSubtypesMap[opt]); // âœ… Works now
+        } else {
+          removeSubtypes(container);
+        }
+      };
+      dropdown.appendChild(item);
+    });
+
+    dropdown.style.display = 'block';
+  }
+
+  function filterDropdown(input) {
+    const container = input.parentElement;
+    const dropdown = container.querySelector('.dropdown-list');
+    const filter = input.value.toLowerCase();
+    dropdown.innerHTML = '';
+    particularOptions.filter(opt => opt.toLowerCase().includes(filter)).forEach(opt => {
+      const item = document.createElement('div');
+      item.textContent = opt;
+      item.onclick = () => {
+        input.value = opt;
+        dropdown.style.display = 'none';
+  
+        if (productsWithSubtypes.includes(opt)) {
+          insertSubtypesTable(container, input);
+        } else if (allProductsWithAltSubtypes.includes(opt)) {
+          insertAltSubtypesTable(container, input, altSubtypesMap[opt]); // âœ… Works now
+        } else {
+          removeSubtypes(container);
+        }
+      };
+      dropdown.appendChild(item);
+    });
+
+    dropdown.style.display = 'block';
+  }
+
+  document.addEventListener('click', function (e) {
+    if (!e.target.closest('.dropdown-container')) {
+      document.querySelectorAll('.dropdown-list').forEach(dl => dl.style.display = 'none');
+    }
+  });
+  function insertAltSubtypesTable(container, inputElement, subtypesList) {
+    removeSubtypes(container);
+    const table = document.createElement('table');
+    table.className = 'subtype-table';
+
+    const labelRow = document.createElement('tr');
+    const inputRow = document.createElement('tr');
+
+    subtypesList.forEach(st => {
+      const labelCell = document.createElement('td');
+      labelCell.textContent = st;
+      labelRow.appendChild(labelCell);
+
+      const inputCell = document.createElement('td');
+      const input = document.createElement('input');
+      input.type = 'number';
+      input.min = 0;
+      input.value = 0;
+      input.oninput = () => updateQtyFromSubtypes(container);
+      inputCell.appendChild(input);
+      inputRow.appendChild(inputCell);
+    });
+
+    table.appendChild(labelRow);
+    table.appendChild(inputRow);
+    container.appendChild(table);
+  }
+
+  function insertSubtypesTable(container, inputElement) {
+    removeSubtypes(container);
+    const table = document.createElement('table');
+    table.className = 'subtype-table';
+
+    const row1 = document.createElement('tr');
+    const row2 = document.createElement('tr');
+
+    for (let i = 0; i < 5; i++) {
+      const labelCell = document.createElement('td');
+      labelCell.textContent = subtypes[i];
+      row1.appendChild(labelCell);
+    }
+    for (let i = 0; i < 5; i++) {
+      const inputCell = document.createElement('td');
+      const input = document.createElement('input');
+      input.type = 'number';
+      input.min = 0;
+      input.value = 0;
+      input.oninput = () => updateQtyFromSubtypes(container);
+      inputCell.appendChild(input);
+      row2.appendChild(inputCell);
+    }
+
+    const row3 = document.createElement('tr');
+    const row4 = document.createElement('tr');
+    for (let i = 5; i < 10; i++) {
+      const labelCell = document.createElement('td');
+      labelCell.textContent = subtypes[i];
+      row3.appendChild(labelCell);
+    }
+    for (let i = 5; i < 10; i++) {
+      const inputCell = document.createElement('td');
+      const input = document.createElement('input');
+      input.type = 'number';
+      input.min = 0;
+      input.value = 0;
+      input.oninput = () => updateQtyFromSubtypes(container);
+      inputCell.appendChild(input);
+      row4.appendChild(inputCell);
+    }
+
+    table.appendChild(row1);
+    table.appendChild(row2);
+    table.appendChild(row3);
+    table.appendChild(row4);
+    container.appendChild(table);
+  }
+
+  function removeSubtypes(container) {
+    const existing = container.querySelector('.subtype-table');
+    if (existing) existing.remove();
+  }
+ 
+  function updateQtyFromSubtypes(container) {
+    const inputs = container.querySelectorAll('.subtype-table input');
+    let total = 0;
+    inputs.forEach(input => total += parseFloat(input.value || 0));
+    const mainRow = container.closest("tr");
+    const qtyInput = mainRow.children[2].querySelector("input");
+    qtyInput.value = total;
+    calculateRow(qtyInput);
+  } 
+
+  function initializeInvoice() {
+    const dateStr = new Date().toLocaleDateString('en-GB');
+    document.getElementById("invoiceDate").innerText = dateStr;
+  
+    fetch("https://script.google.com/macros/s/AKfycbwF_ULpVqdVmws_GU5svU9SaY8K0VCZgqmOTp5HL6ARlbjIrrslO9dqRh4Jq4CBet-tAQ/exec")  // Replace with your actual deployed Apps Script Web App URL
+      .then(response => response.json())
+      .then(data => {
+        let last = data.lastInvoice || "00000";
+        let next = (parseInt(last, 10) + 1).toString().padStart(5, '0');
+        document.getElementById("invoiceNo").innerText = next;
+      })
+      .catch(err => {
+        console.error("Failed to fetch invoice number from Sheet:", err);
+        alert("Failed to fetch invoice number. Please check your internet or try again.");
+      });
+  
+    addRow();
+  }
+
+
+
+  function submitInvoice() {
+    const customerName = document.getElementById("customerName").value.trim();
+    const address = document.getElementById("Address").value.trim();
+  
+    if (!customerName || !address) {
+      alert("Please enter Customer Name and Address before submitting the invoice.");
+      return;
+    }
+  // Increment and store invoice number
+
+  // Hide submit button, show post-submit buttons
+    document.getElementById("submitBtn").style.display = "none";
+    document.getElementById("afterSubmitButtons").style.display = "block";
+    document.getElementById("staffButtons").style.display = "none";
+
+
+  // Remove the "Action" column from the table header
+    const headerRow = document.querySelector("thead tr");
+    if (headerRow && headerRow.children.length === 6) {
+      headerRow.removeChild(headerRow.children[5]); // Remove 6th <th>
+    }
+
+  // Remove the "Action" column from each item row
+    const itemRows = document.querySelectorAll("#itemRows tr");
+    itemRows.forEach(row => {
+      if (row.children.length === 6) {
+        row.removeChild(row.children[5]); // Remove 6th <td>
+      }
+    });
+
+  // Make all inputs readonly
+    document.querySelectorAll("input").forEach(input => {
+      input.setAttribute("readonly", true);
+    });
+  }
+
+    function enableEditing() {
+      document.getElementById("submitBtn").style.display = "inline-block";
+      document.getElementById("afterSubmitButtons").style.display = "none";
+
+  // Make all inputs editable again
+      document.querySelectorAll("input").forEach(input => {
+        input.removeAttribute("readonly");
+      });
+
+  // Re-add the Action column header if missing
+      const headerRow = document.querySelector("thead tr");
+      if (headerRow && headerRow.children.length === 5) {
+        const th = document.createElement("th");
+        th.textContent = "Action";
+        headerRow.appendChild(th);
+      }
+
+  // Re-add the Action buttons for each row if missing
+      const rows = document.querySelectorAll("#itemRows tr");
+      rows.forEach(row => {
+        if (row.children.length === 5) {
+          const actionTd = document.createElement("td");
+          actionTd.innerHTML = '<button onclick="this.closest(\'tr\').remove(); updateTotals();">Remove</button>';
+          row.appendChild(actionTd);
+        }
+      });
+      document.getElementById("staffButtons").style.display = "block";
+      if (selectedBiller) {
+        document.getElementById("billerName").innerText = selectedBiller;
+        document.getElementById("billedBy").style.display = "block";
+      }
+    }
+    
+    function newInvoice() {
+      location.reload();
+    }
+  function calculateRow(input) {
+    const row = input.closest("tr");
+    const qty = parseFloat(row.children[2].querySelector("input").value || 0);
+    const rate = parseFloat(row.children[3].querySelector("input").value || 0);
+    const amount = qty * rate;
+    row.children[4].querySelector("input").value = formatIndianCurrency(amount);
+    updateTotals();
+  }
+  function formatIndianCurrency(amount) {
+    const parts = amount.toFixed(2).split(".");
+    let num = parts[0];
+    const decimalPart = parts[1];
+
+    let lastThree = num.slice(-3);
+    let rest = num.slice(0, -3);
+
+    if (rest !== '') {
+      rest = rest.replace(/\B(?=(\d{2})+(?!\d))/g, ",");
+      lastThree = ',' + lastThree;
+    }
+
+    return rest + lastThree + '.' + decimalPart;
+  }
+
+  function updateTotals() {
+    let subtotal = 0;
+    document.querySelectorAll(".amount").forEach(input => {
+      subtotal += parseFloat((input.value || "0").replace(/,/g, ""));
+    });
+ 
+    const grand = subtotal;
+
+    document.getElementById("grandTotal").innerText = formatIndianCurrency(grand);
+
+    const paid = parseFloat(document.getElementById("amountPaid").value || "0");
+    const remaining = grand - paid;
+    document.getElementById("amountInWords").value = convertNumberToWords(Math.round(remaining)) + " only";
+
+    updateRemainingBalance();
+  }
+  function updateRemainingBalance() {
+    let subtotal = 0;
+    document.querySelectorAll(".amount").forEach(input => {
+      subtotal += parseFloat((input.value || "0").replace(/,/g, ""));
+    });
+
+    const grand = subtotal;
+    document.getElementById("grandTotal").innerText = formatIndianCurrency(grand);
+
+    const paid = parseFloat(document.getElementById("amountPaid").value || "0");
+    const remaining = grand - paid;
+
+    document.getElementById("remainingBalance").innerText = formatIndianCurrency(remaining);
+    document.getElementById("amountInWords").value = convertNumberToWords(Math.round(remaining)) + " only";
+  }
+
+
+  function displaySavedInvoices() {
+    const data = JSON.parse(localStorage.getItem("savedInvoices") || "[]");
+    const container = document.getElementById("savedInvoicesTable");
+    container.innerHTML = '';
+
+    if (data.length === 0) {
+      container.innerHTML = "<p>No saved invoices yet.</p>";
+      return;
+    }
+
+    let table = '<table border="1" cellpadding="6" cellspacing="0"><tr>';
+    const headers = Object.keys(data[0]);
+    headers.forEach(h => table += `<th>${h}</th>`);
+    table += '</tr>';
+
+    data.forEach(entry => {
+      table += '<tr>';
+      headers.forEach(h => {
+        table += `<td>${entry[h]}</td>`;
+      });
+      table += '</tr>';
+    });
+
+    table += '</table>';
+    container.innerHTML = table;
+  }
+
+  function exportToExcel() {
+    const data = JSON.parse(localStorage.getItem("savedInvoices") || "[]");
+    if (data.length === 0) return alert("No data to export!");
+
+    const ws = XLSX.utils.json_to_sheet(data);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Invoices");
+    XLSX.writeFile(wb, "Saved_Invoices.xlsx");
+  }
+
+  function clearSavedInvoices() {
+    if (confirm("Are you sure you want to delete all saved invoices?")) {
+      localStorage.removeItem("savedInvoices");
+      displaySavedInvoices();
+    }
+  }
+
+// Show saved data on page load
+  window.onload = function () {
+    initializeInvoice(); // your existing function
+    displaySavedInvoices();
+  };
+  const customerNames = [
+  "Sai Krishna", "Meenakshi Enterprises", "Gowtham Traders", "Sri Lakshmi Agencies",
+  "Dharani Enterprises", "Shiva Traders", "Sri Venkateshwara Stationery",
+  "Rama Book Depot", "Surya Agencies", "Shivani Distributors","Harsha",
+  // Add more names as needed
+];
+
+function showCustomerDropdown() {
+  const input = document.getElementById("customerName");
+  const dropdown = document.getElementById("customerDropdown");
+  dropdown.innerHTML = '';
+  customerNames.forEach(name => {
+    const div = document.createElement("div");
+    div.textContent = name;
+    div.onclick = () => {
+      input.value = name;
+      dropdown.style.display = "none";
+      document.title = `${name} Invoice`;
+    };
+    dropdown.appendChild(div);
+  });
+  dropdown.style.display = "block";
+}
+
+function filterCustomerDropdown() {
+  const input = document.getElementById("customerName");
+  const dropdown = document.getElementById("customerDropdown");
+  const filter = input.value.toLowerCase();
+  dropdown.innerHTML = '';
+  customerNames.filter(name => name.toLowerCase().includes(filter)).forEach(name => {
+    const div = document.createElement("div");
+    div.textContent = name;
+    div.onclick = () => {
+      input.value = name;
+      dropdown.style.display = "none";
+      document.title = `${name} Invoice`;
+    };
+    dropdown.appendChild(div);
+  });
+  dropdown.style.display = "block";
+}
+
+// Hide dropdown when clicking outside
+document.addEventListener("click", function (e) {
+  if (!e.target.closest("#customerName") && !e.target.closest("#customerDropdown")) {
+    document.getElementById("customerDropdown").style.display = "none";
+  }
+});
+
+
+  function convertNumberToWords(amount) {
+    const a = [
+      '', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine',
+      'Ten', 'Eleven', 'Twelve', 'Thirteen', 'Fourteen', 'Fifteen', 'Sixteen',
+      'Seventeen', 'Eighteen', 'Nineteen'
+    ];
+    const b = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'];
+
+    function inWords(num) {
+      if ((num = num.toString()).length > 9) return 'Overflow';
+      const n = ('000000000' + num).substr(-9).match(/^(\d{2})(\d{2})(\d{2})(\d{1})(\d{2})$/);
+      if (!n) return;
+      let str = '';
+      str += (n[1] != 0) ? (a[Number(n[1])] || b[n[1][0]] + ' ' + a[n[1][1]]) + ' Crore ' : '';
+      str += (n[2] != 0) ? (a[Number(n[2])] || b[n[2][0]] + ' ' + a[n[2][1]]) + ' Lakh ' : '';
+      str += (n[3] != 0) ? (a[Number(n[3])] || b[n[3][0]] + ' ' + a[n[3][1]]) + ' Thousand ' : '';
+      str += (n[4] != 0) ? (a[Number(n[4])] || b[n[4][0]] + ' ' + a[n[4][1]]) + ' Hundred ' : '';
+      str += (n[5] != 0) ? ((str != '') ? 'and ' : '') + (a[Number(n[5])] || b[n[5][0]] + ' ' + a[n[5][1]]) + ' ' : '';
+      return str.trim();
+    }
+
+    return inWords(amount);
+  }
+  document.getElementById("customerName").addEventListener("input", function () {
+    const name = this.value.trim();
+    if (name) {
+      document.title = `${name} Invoice`;
+    } else {
+      document.title = "Invoice - Bannu Enterprises";
+    }
+  });
+
+  
+
+
+
+</script>
+<script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+<script>
+  async function saveInvoice() {
+      // Cache DOM elements
+    const submitBtn = document.getElementById("submitBtn");
+    const invoiceNo = document.getElementById("invoiceNo").innerText.trim();
+    const date = document.getElementById("invoiceDate").innerText.trim();
+    const customerName = document.getElementById("customerName").value.trim();
+    const address = document.getElementById("Address").value.trim();
+    const amountPaid = parseFloat(document.getElementById("amountPaid").value || 0);
+    
+    // UI State Management
+    const originalBtnText = submitBtn.innerText;
+    submitBtn.innerText = "Generating PDF...";
+    submitBtn.disabled = true;
+    
+    // Create loading overlay
+    const loadingIndicator = document.createElement('div');
+    loadingIndicator.style.position = 'fixed';
+    loadingIndicator.style.top = '0';
+    loadingIndicator.style.left = '0';
+    loadingIndicator.style.width = '100%';
+    loadingIndicator.style.height = '100%';
+    loadingIndicator.style.backgroundColor = 'rgba(0,0,0,0.5)';
+    loadingIndicator.style.display = 'flex';
+    loadingIndicator.style.justifyContent = 'center';
+    loadingIndicator.style.alignItems = 'center';
+    loadingIndicator.style.zIndex = '9999';
+    loadingIndicator.innerHTML = `
+      <div style="background:white; padding:20px; border-radius:5px; text-align:center;">
+        <div style="margin-bottom:10px;">Processing invoice, please wait...</div>
+        <div class="spinner"></div>
+      </div>
+    `;
+    document.body.appendChild(loadingIndicator);
+    
+    try {
+      // Collect invoice items data
+      const rawRows = document.querySelectorAll("#itemRows tr");
+      const validRows = [];
+      let runningTotal = 0;
+    
+      rawRows.forEach(row => {
+        const item = row.children[0]?.querySelector("input")?.value.trim();
+        const qty = parseFloat(row.children[2]?.querySelector("input")?.value || 0);
+        const rate = parseFloat(row.children[3]?.querySelector("input")?.value || 0);
+        const amount = parseFloat((row.children[4]?.querySelector("input")?.value || "0").replace(/,/g, ""));
+        
+        if (item && !/^\d+$/.test(item) && qty > 0 && !isNaN(amount)) {
+          runningTotal += amount;
+          validRows.push({ item, qty, rate, amount });
+        }
+      });
+    
+      if (validRows.length === 0) {
+        alert("No valid item rows to save.");
+        return;
+      }
+    
+      // Prepare data for Google Sheets
+      const items = validRows.map((row, index) => {
+        const isLast = index === validRows.length - 1;
+        return {
+          InvoiceNo: invoiceNo,
+          Date: date,
+          CustomerName: customerName,
+          Address: address,
+          Item: row.item,
+          Quantity: row.qty,
+          Price: row.rate,
+          Amount: row.amount.toFixed(2),
+          GrandTotal: isLast ? runningTotal.toFixed(2) : "0.00",
+          AmountPaid: isLast ? amountPaid.toFixed(2) : "0.00",
+          RemainingBalance: isLast ? (runningTotal - amountPaid).toFixed(2) : "0.00",
+          BilledBy: typeof selectedBiller !== 'undefined' ? selectedBiller : ''
+        };
+      });
+    
+      // Clone invoice for PDF generation (off-screen)
+      const invoiceElement = document.getElementById("invoiceBox");
+      const clone = invoiceElement.cloneNode(true);
+      clone.style.position = 'absolute';
+      clone.style.top = '-9999px';
+      clone.style.left = '0';
+      clone.style.width = '794px'; // A4 width in pixels
+      clone.style.background = '#fff';
+      document.body.appendChild(clone);
+    
+      // Calculate total height and number of pages needed
+      const pageHeight = 1122; // A4 height in pixels (at 96dpi)
+      const totalHeight = clone.scrollHeight;
+      const numPages = Math.ceil(totalHeight / pageHeight);
+    
+      // Create PDF
+      const { jsPDF } = window.jspdf;
+      const pdf = new jsPDF({
+        orientation: 'portrait',
+        unit: 'px',
+        format: [794, 1122], // A4 dimensions in pixels
+        compress: true
+      });
+    
+      // Capture each page
+      for (let i = 0; i < numPages; i++) {
+        const canvas = await html2canvas(clone, {
+          scale: 1,
+          useCORS: true,
+          backgroundColor: "#ffffff",
+          windowWidth: clone.scrollWidth,
+          windowHeight: clone.scrollHeight,
+          logging: false,
+          ignoreElements: (el) => el.style.display === 'none' || el.classList.contains('no-print'),
+          y: i * pageHeight,
+          height: pageHeight,
+          scrollY: -i * pageHeight
+        });
+    
+        // Add page to PDF (except first page which is automatically created)
+        if (i > 0) {
+          pdf.addPage([794, 1122], 'portrait');
+        }
+    
+        // Add image to current page
+        pdf.addImage(canvas.toDataURL('image/jpeg', 0.85), 'JPEG', 0, 0, 794, pageHeight);
+      }
+    
+      // Clean up clone
+      document.body.removeChild(clone);
+    
+      // Upload to Google Sheets
+      await fetch("https://script.google.com/macros/s/AKfycbyggO5UHpLsJMpb45GizNreGXTRyjrfH82rKFqR59gJGuPblMWTWjgMtMJiPVlSkyUtFw/exec", {
+        method: "POST",
+        mode: "no-cors",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(items)
+      });
+    
+      // Upload PDF to Google Drive
+      const pdfBlob = pdf.output('blob');
+      const reader = new FileReader();
+      reader.onloadend = async function() {
+        const base64pdf = reader.result.split(',')[1];
+        
+        await fetch("https://script.google.com/macros/s/AKfycbxq-ifgxz-wcANqWN7NI2ngoxoocNBLsSCV1Db28kSb6fAuo-3h586PhsY6uE9vpUcM0w/exec", {
+          method: "POST",
+          mode: "no-cors",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            invoiceNo,
+            customerName,
+            date,
+            total: runningTotal.toFixed(2),
+            paid: amountPaid.toFixed(2),
+            balance: (runningTotal - amountPaid).toFixed(2),
+            filename: `Invoice_${invoiceNo}_${customerName}.pdf`,
+            pdf: base64pdf
+          })
+        });
+    
+        loadingIndicator.innerHTML = `
+          <div style="background:white; padding:20px; border-radius:5px; text-align:center;">
+            <div style="color:green; margin-bottom:10px;">✅ Invoice saved successfully!</div>
+            <button id="closeLoadingBtn" 
+                    style="padding:5px 10px; background:#003366; color:white; border:none; cursor:pointer;">
+              Close
+            </button>
+          </div>
+        `;
+        
+        document.getElementById('closeLoadingBtn').addEventListener('click', function() {
+          document.body.removeChild(loadingIndicator);
+        });
+      };
+      
+      reader.readAsDataURL(pdfBlob);
+    
+    } catch (err) {
+      console.error("Error saving invoice:", err);
+      loadingIndicator.innerHTML = `
+        <div style="background:white; padding:20px; border-radius:5px; text-align:center;">
+          <div style="color:red; margin-bottom:10px;">❌ Error saving invoice</div>
+          <div style="font-size:12px; margin-bottom:10px;">${err.message}</div>
+          <button id="closeErrorBtn" 
+                  style="padding:5px 10px; background:#003366; color:white; border:none; cursor:pointer;">
+            Close
+          </button>
+        </div>
+      `;
+      
+      document.getElementById('closeErrorBtn').addEventListener('click', function() {
+        document.body.removeChild(loadingIndicator);
+      });
+    } finally {
+      submitBtn.innerText = originalBtnText;
+      submitBtn.disabled = false;
+    }
+  }
+</script>
+<script>
+  async function downloadInvoice() {
+    const invoiceElement = document.getElementById("invoiceBox");
+
+    // Clone invoice to ensure full content is captured
+    const clone = invoiceElement.cloneNode(true);
+    clone.style.position = 'fixed';
+    clone.style.top = '0';
+    clone.style.left = '0';
+    clone.style.zIndex = '-1';
+    clone.style.width = '794px'; // A4 width in px @96dpi
+    clone.style.background = '#fff';
+    document.body.appendChild(clone);
+
+    const canvas = await html2canvas(clone, {
+      scale: 2,
+      useCORS: true,
+      backgroundColor: "#ffffff",
+      windowWidth: clone.scrollWidth,
+      windowHeight: clone.scrollHeight
+    });
+
+    document.body.removeChild(clone);
+
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF({
+      orientation: 'portrait',
+      unit: 'mm',
+      format: 'a4'
+    });
+
+    const imgWidth = 210; // mm for A4
+    const imgHeight = (canvas.height * imgWidth) / canvas.width;
+    pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, 0, imgWidth, imgHeight);
+
+    const customerName = document.getElementById("customerName").value.trim() || 'Invoice';
+    const invoiceNo = document.getElementById("invoiceNo").innerText.trim() || '000';
+    const fileName = `${customerName}_Invoice_${invoiceNo}.pdf`;
+
+    pdf.save(fileName);
+  }
+</script>
+<script>
+  async function shareInvoiceViaWhatsApp() {
+    const phoneInput = document.getElementById("PhoneNumber");
+    const phoneNumber = phoneInput.value.trim().replace(/\D/g, ''); // Remove non-numeric
+
+    if (!phoneNumber || phoneNumber.length < 10) {
+      alert("Please enter a valid 10-digit phone number.");
+      return;
+    }
+
+    const invoiceElement = document.getElementById("invoiceBox");
+
+    // Clone invoice for full capture
+    const clone = invoiceElement.cloneNode(true);
+    clone.style.position = 'fixed';
+    clone.style.top = '0';
+    clone.style.left = '0';
+    clone.style.zIndex = '-1';
+    clone.style.width = '794px';
+    clone.style.background = '#fff';
+    document.body.appendChild(clone);
+
+    const canvas = await html2canvas(clone, {
+      scale: 2,
+      useCORS: true,
+      backgroundColor: "#ffffff",
+      windowWidth: clone.scrollWidth,
+      windowHeight: clone.scrollHeight
+    });
+
+    document.body.removeChild(clone);
+
+    // Convert to image blob
+    canvas.toBlob(function (blob) {
+      const reader = new FileReader();
+      reader.onloadend = function () {
+        const base64data = reader.result;
+        const imgDataUrl = base64data;
+
+        // Since direct file sending is restricted, we use this workaround
+        const message = `Dear Customer, please find your invoice attached. (Preview below 👇)`;
+
+        // Construct WhatsApp share link (text + image link in preview)
+        const whatsappURL = `https://wa.me/91${phoneNumber}?text=${encodeURIComponent(message)}&image=${encodeURIComponent(imgDataUrl)}`;
+
+        // On mobile, this opens WhatsApp app
+        window.open(whatsappURL, '_blank');
+      };
+      reader.readAsDataURL(blob);
+    }, 'image/jpeg');
+  }
+</script>
