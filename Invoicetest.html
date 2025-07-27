@@ -1193,33 +1193,23 @@ document.addEventListener("click", function (e) {
 <script>
   async function shareInvoiceViaWhatsApp() {
     const phoneInput = document.getElementById("PhoneNumber");
-    const phoneNumber = phoneInput.value.trim().replace(/\D/g, ''); // Remove non-numeric
+    const phoneNumber = phoneInput.value.trim().replace(/\D/g, '');
 
     if (!phoneNumber || phoneNumber.length < 10) {
       alert("Please enter a valid 10-digit phone number.");
       return;
     }
 
-    // First generate the PDF (you'll need to implement this part)
-    const pdfUrl = await generatePdfInvoice(); // You need to implement this function
-    
-    // Create the message with the PDF link
-    const message = `Dear Customer, please find your invoice at: ${pdfUrl}`;
-    
-    // Construct WhatsApp share link
-    // For international numbers, we remove the leading 0 and add the country code
-    const formattedNumber = phoneNumber.startsWith('0') ? phoneNumber.substring(1) : phoneNumber;
-    const whatsappURL = `https://wa.me/${formattedNumber}?text=${encodeURIComponent(message)}`;
-    
-    // This will open WhatsApp on mobile devices if installed
-    window.open(whatsappURL, '_blank');
-  }
+    const pdfUrl = window.latestUploadedInvoiceUrl;
+    if (!pdfUrl) {
+      alert("Invoice not uploaded yet. Please press 'Save Invoice' first.");
+      return;
+    }
 
-  // Example function to generate PDF - you'll need to implement this properly
-  async function generatePdfInvoice() {
-    // This is just a placeholder - implement your actual PDF generation logic
-    // You might use libraries like jsPDF, pdfkit, or a server-side solution
-    // For this example, we'll return a dummy URL
-    return "https://example.com/invoices/your-invoice.pdf";
+    const message = `Dear Customer,\nPlease find your invoice here:\n${pdfUrl}`;
+    const formattedNumber = phoneNumber.startsWith('0') ? phoneNumber.substring(1) : phoneNumber;
+
+    const whatsappURL = `https://wa.me/91${formattedNumber}?text=${encodeURIComponent(message)}`;
+    window.open(whatsappURL, '_blank');
   }
 </script>
