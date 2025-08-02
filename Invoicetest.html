@@ -1208,30 +1208,40 @@ async function shareToWhatsApp() {
         return;
     }
 
-    // Generate invoice as image
+    // 1. Generate invoice as image
     const canvas = await html2canvas(document.getElementById("invoiceBox"));
     canvas.toBlob(async (blob) => {
-        const file = new File([blob], "invoice.jpg", { type: "image/jpeg" });
+        const file = new File([blob], `Bannu_Invoice_${document.getElementById("invoiceNo").innerText}.jpg`, {
+            type: "image/jpeg",
+        });
 
-        // Use iOS Share Sheet
+        // 2. Try iOS/Android Share Sheet (includes WhatsApp)
         if (navigator.share && navigator.canShare({ files: [file] })) {
-            await navigator.share({
-                title: "Bannu Invoice",
-                text: `Invoice for ${phone}`,
-                files: [file],
-            });
-        } else {
-            // Fallback: Download + WhatsApp deep link
-            const url = URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = "invoice.jpg";
-            link.click();
-            setTimeout(() => {
-                window.location.href = `https://wa.me/91${phone}`;
-                alert("Tap 📎 in WhatsApp → attach the downloaded invoice.");
-            }, 1000);
+            try {
+                await navigator.share({
+                    title: "Bannu Invoice",
+                    text: `Invoice for ${phone}`,
+                    files: [file],
+                });
+                return; // Success!
+            } catch (err) {
+                console.log("Share Sheet failed, falling back...");
+            }
         }
-    }, "image/jpeg");
+
+        // 3. Fallback: Download + Open WhatsApp
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = file.name;
+        link.click();
+
+        // 4. Open WhatsApp with deep link
+        setTimeout(() => {
+            window.location.href = `https://wa.me/91${phone}`;
+            alert("Quick steps:\n1. Tap 📎 (ATTACH)\n2. Select 'Photo Library'\n3. Choose the invoice\n4. Press SEND ✅");
+        }, 1000);
+
+    }, "image/jpeg", 0.9);
 }
 </script>
