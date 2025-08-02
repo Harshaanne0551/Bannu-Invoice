@@ -1204,55 +1204,34 @@ document.addEventListener("click", function (e) {
 async function shareToWhatsApp() {
     const phone = document.getElementById("customerPhone").value.replace(/\D/g, '');
     if (!phone || phone.length < 10) {
-        alert("Please enter a valid 10-digit phone number!");
+        alert("Enter a valid 10-digit phone number!");
         return;
     }
 
-    // Show loading spinner
-    const loadingIndicator = document.createElement('div');
-    loadingIndicator.innerHTML = `
-        <div style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); display:flex; justify-content:center; align-items:center; z-index:9999;">
-            <div style="background:white; padding:20px; border-radius:5px; text-align:center;">
-                <div style="margin-bottom:10px;">Preparing Invoice...</div>
-                <div class="spinner"></div>
-            </div>
-        </div>
-    `;
-    document.body.appendChild(loadingIndicator);
+    // Generate invoice as image
+    const canvas = await html2canvas(document.getElementById("invoiceBox"));
+    canvas.toBlob(async (blob) => {
+        const file = new File([blob], "invoice.jpg", { type: "image/jpeg" });
 
-    try {
-        // 1. Generate invoice as image
-        const invoiceElement = document.getElementById("invoiceBox");
-        const canvas = await html2canvas(invoiceElement);
-        const imageBlob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', 0.9));
-        
-        // 2. Download the image (triggers iOS Photos/Android Downloads)
-        const fileUrl = URL.createObjectURL(imageBlob);
-        const link = document.createElement('a');
-        link.href = fileUrl;
-        link.download = `Bannu_Invoice_${document.getElementById("invoiceNo").innerText}.jpg`;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-
-        // 3. Open WhatsApp IMMEDIATELY after download
-        setTimeout(() => {
-            const whatsappUrl = `https://wa.me/91${phone}?text=${encodeURIComponent(
-                "Invoice from Bannu Enterprises (Ref: " + document.getElementById("invoiceNo").innerText + ")"
-            )}`;
-            window.location.href = whatsappUrl; // Force-open WhatsApp
-        }, 1000); // Short delay to ensure download starts first
-
-        // 4. Show instructions for attaching the file
-        setTimeout(() => {
-            document.body.removeChild(loadingIndicator);
-            alert("Quick Steps:\n1. WhatsApp just opened\n2. Tap 📎 (ATTACH)\n3. Choose 'Photo Library'\n4. Select the invoice\n5. Press SEND ✅");
-        }, 2000);
-
-    } catch (error) {
-        document.body.removeChild(loadingIndicator);
-        alert("Error: Could not share invoice. Please try again.");
-        console.error(error);
-    }
+        // Use iOS Share Sheet
+        if (navigator.share && navigator.canShare({ files: [file] })) {
+            await navigator.share({
+                title: "Bannu Invoice",
+                text: `Invoice for ${phone}`,
+                files: [file],
+            });
+        } else {
+            // Fallback: Download + WhatsApp deep link
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = "invoice.jpg";
+            link.click();
+            setTimeout(() => {
+                window.location.href = `https://wa.me/91${phone}`;
+                alert("Tap 📎 in WhatsApp → attach the downloaded invoice.");
+            }, 1000);
+        }
+    }, "image/jpeg");
 }
 </script>
