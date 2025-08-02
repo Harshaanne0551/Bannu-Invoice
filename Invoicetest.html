@@ -1221,34 +1221,37 @@ async function shareToWhatsApp() {
     document.body.appendChild(loadingIndicator);
 
     try {
-        // 1. Generate Invoice as Image
+        // 1. Generate invoice as image
         const invoiceElement = document.getElementById("invoiceBox");
-        const canvas = await html2canvas(invoiceElement, { scale: 1 });
-        const imageDataUrl = canvas.toDataURL('image/jpeg', 0.9);
-
-        // 2. Download Image (iOS will save to Photos)
+        const canvas = await html2canvas(invoiceElement);
+        const imageBlob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', 0.9));
+        
+        // 2. Download the image (triggers iOS Photos/Android Downloads)
+        const fileUrl = URL.createObjectURL(imageBlob);
         const link = document.createElement('a');
-        link.href = imageDataUrl;
+        link.href = fileUrl;
         link.download = `Bannu_Invoice_${document.getElementById("invoiceNo").innerText}.jpg`;
+        document.body.appendChild(link);
         link.click();
+        document.body.removeChild(link);
 
-        // 3. Open WhatsApp with the customer's number
+        // 3. Open WhatsApp IMMEDIATELY after download
         setTimeout(() => {
             const whatsappUrl = `https://wa.me/91${phone}?text=${encodeURIComponent(
                 "Invoice from Bannu Enterprises (Ref: " + document.getElementById("invoiceNo").innerText + ")"
             )}`;
-            window.location.href = whatsappUrl;
-        }, 1000);
+            window.location.href = whatsappUrl; // Force-open WhatsApp
+        }, 1000); // Short delay to ensure download starts first
 
-        // 4. Show instructions for quick attachment
+        // 4. Show instructions for attaching the file
         setTimeout(() => {
             document.body.removeChild(loadingIndicator);
-            alert("Quick Steps to Send:\n1. Tap 'ATTACH' (📎 icon)\n2. Choose 'Photo Library'\n3. Select the latest invoice image\n4. Press SEND ✅");
+            alert("Quick Steps:\n1. WhatsApp just opened\n2. Tap 📎 (ATTACH)\n3. Choose 'Photo Library'\n4. Select the invoice\n5. Press SEND ✅");
         }, 2000);
 
     } catch (error) {
         document.body.removeChild(loadingIndicator);
-        alert("Error: Could not generate invoice. Please try again.");
+        alert("Error: Could not share invoice. Please try again.");
         console.error(error);
     }
 }
