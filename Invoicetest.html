@@ -60,7 +60,13 @@
       text-align: center;
       font-size: 13px;
     }
-
+    #customerPhone {
+      width: 100%;
+      padding: 5px;
+      border: 1px solid #ccc;
+      border-radius: 3px;
+      font-size: 13px;
+    }
     .info-line {
       margin-top: 20px;
       display: flex;
@@ -267,6 +273,7 @@
     <a href="payments.html">Payments</a>
     <a href="SearchCustomer.html">Search Customer</a>
     <a href="SearchPayments.html">Search Payments</a>
+    <a href="Invoicetest.html">test</a>
   </div>
 </div>
 <div class="invoice-box" id="invoiceBox">
@@ -296,7 +303,8 @@
   </div>
 
   <div class="ms-line">Address <input type="text" id="Address" placeholder="Address" /></div>
-  <div class="ms-line">Phone Number <input type="tel" id="PhoneNumber" placeholder="Phone Number" /></div>
+  <div class="ms-line">Phone <input type="text" id="customerPhone" placeholder="Customer Phone Number" /></div>
+
   <table border="1" style="width: 100%; border-collapse: collapse;">
     <thead>
       <tr>
@@ -388,7 +396,8 @@
     <button onclick="saveInvoice()">Save Invoice</button>
     <button onclick="newInvoice()">New Invoice</button>
     <button id="downloadBtn" class="no-print" onclick="downloadInvoice()">Download Invoice</button>
-    <button onclick="shareInvoiceViaWhatsApp()">Share via WhatsApp</button>
+    <button id="whatsappBtn" onclick="shareToWhatsApp()">Send via WhatsApp</button>
+
   </div>
 </div>
 <script>
@@ -1016,6 +1025,7 @@ document.addEventListener("click", function (e) {
           InvoiceNo: invoiceNo,
           Date: date,
           CustomerName: customerName,
+	  CustomerPhone: document.getElementById("customerPhone").value.trim(), // Add this line
           Address: address,
           Item: row.item,
           Quantity: row.qty,
@@ -1191,25 +1201,108 @@ document.addEventListener("click", function (e) {
   }
 </script>
 <script>
-  async function shareInvoiceViaWhatsApp() {
-    const phoneInput = document.getElementById("PhoneNumber");
-    const phoneNumber = phoneInput.value.trim().replace(/\D/g, '');
-
-    if (!phoneNumber || phoneNumber.length < 10) {
-      alert("Please enter a valid 10-digit phone number.");
-      return;
+async function shareToWhatsApp() {
+    const phoneNumber = document.getElementById("customerPhone").value.trim();
+    
+    if (!phoneNumber) {
+        alert("Please enter customer phone number first");
+        return;
     }
-
-    const pdfUrl = window.latestUploadedInvoiceUrl;
-    if (!pdfUrl) {
-      alert("Invoice not uploaded yet. Please press 'Save Invoice' first.");
-      return;
+    
+    const cleanedNumber = phoneNumber.replace(/\D/g, '');
+    if (cleanedNumber.length < 10) {
+        alert("Please enter a valid 10-digit phone number");
+        return;
     }
-
-    const message = `Dear Customer,\nPlease find your invoice here:\n${pdfUrl}`;
-    const formattedNumber = phoneNumber.startsWith('0') ? phoneNumber.substring(1) : phoneNumber;
-
-    const whatsappURL = `https://wa.me/91${formattedNumber}?text=${encodeURIComponent(message)}`;
-    window.open(whatsappURL, '_blank');
-  }
+    
+    // Show loading indicator
+    const loadingIndicator = document.createElement('div');
+    loadingIndicator.style.position = 'fixed';
+    loadingIndicator.style.top = '0';
+    loadingIndicator.style.left = '0';
+    loadingIndicator.style.width = '100%';
+    loadingIndicator.style.height = '100%';
+    loadingIndicator.style.backgroundColor = 'rgba(0,0,0,0.5)';
+    loadingIndicator.style.display = 'flex';
+    loadingIndicator.style.justifyContent = 'center';
+    loadingIndicator.style.alignItems = 'center';
+    loadingIndicator.style.zIndex = '9999';
+    loadingIndicator.innerHTML = `
+        <div style="background:white; padding:20px; border-radius:5px; text-align:center;">
+            <div style="margin-bottom:10px;">Preparing invoice for WhatsApp...</div>
+            <div class="spinner"></div>
+        </div>
+    `;
+    document.body.appendChild(loadingIndicator);
+    
+    try {
+        // Capture the invoice as an image
+        const invoiceElement = document.getElementById("invoiceBox");
+        const canvas = await html2canvas(invoiceElement, {
+            scale: 1,  // Reduced scale for faster processing
+            useCORS: true,
+            backgroundColor: "#ffffff",
+            windowWidth: invoiceElement.scrollWidth,
+            windowHeight: invoiceElement.scrollHeight,
+            logging: false
+        });
+        
+        // Convert canvas to data URL
+        const imageDataUrl = canvas.toDataURL('image/jpeg', 0.85);
+        
+        // For mobile devices
+        if (/Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+            // Create temporary link for download
+            const link = document.createElement('a');
+            link.href = imageDataUrl;
+            link.download = `Bannu_Invoice_${document.getElementById("invoiceNo").innerText}.jpg`;
+            
+            // Show instructions
+            document.body.removeChild(loadingIndicator);
+            if (confirm("On mobile: 1. Download this image 2. Open WhatsApp 3. Send the downloaded image to your customer. Click OK to download.")) {
+                link.click();
+            }
+        } 
+        // For desktop
+        else {
+            // Create a temporary form to send to WhatsApp
+            const form = document.createElement('form');
+            form.method = 'post';
+            form.action = 'https://api.whatsapp.com/send';
+            form.target = '_blank';
+            
+            // Add phone number
+            const phoneInput = document.createElement('input');
+            phoneInput.type = 'hidden';
+            phoneInput.name = 'phone';
+            phoneInput.value = `91${cleanedNumber}`;
+            form.appendChild(phoneInput);
+            
+            // Add text message
+            const textInput = document.createElement('input');
+            textInput.type = 'hidden';
+            textInput.name = 'text';
+            textInput.value = `Here is your invoice from Bannu Enterprises (Invoice #${document.getElementById("invoiceNo").innerText})`;
+            form.appendChild(textInput);
+            
+            // Add image (this part might not work due to WhatsApp restrictions)
+            // Instead, we'll open WhatsApp first, then guide user to attach
+            document.body.appendChild(form);
+            form.submit();
+            
+            // Show instructions after a delay
+            setTimeout(() => {
+                document.body.removeChild(loadingIndicator);
+                alert("After WhatsApp opens, please manually attach the invoice image from your downloads.");
+            }, 2000);
+            
+            // Clean up
+            setTimeout(() => document.body.removeChild(form), 5000);
+        }
+    } catch (error) {
+        console.error("Error sharing to WhatsApp:", error);
+        document.body.removeChild(loadingIndicator);
+        alert("Error sharing invoice. Please try downloading and sending manually.");
+    }
+}
 </script>
