@@ -576,7 +576,7 @@ async function fetchDashboardData(selectedDate) {
     document.getElementById('invoiceCount').textContent = '...';
     
     // Fetch data for selected date
-    const response = await fetch(`https://script.google.com/macros/s/AKfycbw1LzjVQSiLVTePQVSOKL23pQ93tUZE1LRIfJ_58JNNuS8eIypjqWk8OOhT9ys4JpHp5w/exec?date=${selectedDate}`);
+    const response = await fetch(`https://script.google.com/macros/s/AKfycbzvPz557glCbBAPdFBZs3gezX3eA26hbrUYEP2h4UhGz9GtnxLzB-pr7Cz7j335R7aDyQ/exec?date=${selectedDate}`);
     
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
@@ -661,3 +661,4 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 </body>
 </html>
+
