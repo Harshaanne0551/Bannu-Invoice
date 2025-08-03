@@ -663,8 +663,12 @@ function toggleSidebar() {
   } 
 
   function initializeInvoice() {
-    const dateStr = new Date().toLocaleDateString('en-GB');
-    document.getElementById("invoiceDate").innerText = dateStr;
+    const now = new Date();
+    const day = String(now.getDate()).padStart(2, '0');
+    const month = now.toLocaleString('default', { month: 'long' });
+    const year = String(now.getFullYear()).slice(-2);
+    const formattedDate = `${day}/${month}/${year}`;
+    document.getElementById("invoiceDate").innerText = formattedDate;
   
     fetch("https://script.google.com/macros/s/AKfycbwF_ULpVqdVmws_GU5svU9SaY8K0VCZgqmOTp5HL6ARlbjIrrslO9dqRh4Jq4CBet-tAQ/exec")  // Replace with your actual deployed Apps Script Web App URL
       .then(response => response.json())
