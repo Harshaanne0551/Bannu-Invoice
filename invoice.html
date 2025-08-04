@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,9 +5,8 @@
   <title>Invoice - Bannu Enterprises</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <link rel="stylesheet" href="style.css">
-
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <style>
+  <style>
     body {
       font-family: 'Arial', sans-serif;
       font-size: 13px;
@@ -16,9 +14,6 @@
       padding: 30px;
       background: #fff;
     }
-
-  /* Navigation Header */
- 
 
     .invoice-box {
       width: 100%;
@@ -84,7 +79,6 @@
       text-align: center;
     }
 
-
     td input {
       width: 100%;
     }
@@ -109,7 +103,6 @@
       width: 10%;
     }
 
-
     .totals {
       width: 50%;
       margin-left:353px;
@@ -124,10 +117,8 @@
       border: 1px solid #000;
       text-align: right;
       padding: 6px 10px;
-      
       font-family: 'Arial', sans-serif;
     }
-
 
     .total-in-words {
       margin-top: -10px;
@@ -139,7 +130,6 @@
       margin-top: 30px;
       text-align: right;
       font-weight: bold;
-      
     }
 
     input {
@@ -156,7 +146,7 @@
       margin: 0 auto;
     }
 
-     @keyframes spin {
+    @keyframes spin {
       0% { transform: rotate(0deg); }
       100% { transform: rotate(360deg); }
     }
@@ -235,7 +225,6 @@
       vertical-align: top;
     }
 
-    
     @media print {
       body * {
         visibility: hidden;
@@ -249,7 +238,13 @@
         top: 0;
         width: 100%;
       }
-
+    }
+    
+    /* Added for phone number field */
+    #PhoneNumber {
+      background-color: #f0f0f0;
+      color: #333;
+      font-weight: bold;
     }
   </style>
 </head>
@@ -270,6 +265,7 @@
     <a href="Invoicetest.html">test</a>
   </div>
 </div>
+
 <div class="invoice-box" id="invoiceBox">
   <div class="top-bar">
     <div>GST No: 36AHKPA9847Q1ZI</div>
@@ -286,18 +282,19 @@
   <div class="address"># 5-2-904, Rasal Abdullah, Osmangunj, Hyderabad.</div>
   <div class="info-line">
     <div><strong>Invoice No:</strong> <span id="invoiceNo"></span></div>
-    
     <div><strong>Date:</strong> <span id="invoiceDate"></span></div>
   </div>
 
   <div class="ms-line">Name
-  <div class="dropdown-container" style="position: relative;">
-    <input type="text" id="customerName" placeholder="Customer Name" onfocus="showCustomerDropdown()" oninput="filterCustomerDropdown()" autocomplete="off" />
-    <div class="dropdown-list" id="customerDropdown" style="position: absolute; top: 100%; left: 0; width: 100%; max-height: 150px; overflow-y: auto; background: #fff; border: 1px solid #ccc; display: none; z-index: 100;"></div>
+    <div class="dropdown-container" style="position: relative;">
+      <input type="text" id="customerName" placeholder="Customer Name" onfocus="showCustomerDropdown()" oninput="filterCustomerDropdown()" autocomplete="off" />
+      <div class="dropdown-list" id="customerDropdown" style="position: absolute; top: 100%; left: 0; width: 100%; max-height: 150px; overflow-y: auto; background: #fff; border: 1px solid #ccc; display: none; z-index: 100;"></div>
+    </div>
   </div>
 
   <div class="ms-line">Address <input type="text" id="Address" placeholder="Address" /></div>
   <div class="ms-line">Phone <input type="text" id="PhoneNumber" placeholder="PhoneNumber" /></div>
+  
   <table border="1" style="width: 100%; border-collapse: collapse;">
     <thead>
       <tr>
@@ -311,8 +308,7 @@
     </thead>
     <tbody id="itemRows">
       <tr>
-   
-       <td class="dropdown-container">
+        <td class="dropdown-container">
           <input type="text" onfocus="showDropdown(this)" oninput="filterDropdown(this)" placeholder="Select item" />
           <div class="dropdown-list"></div>
         </td>
@@ -321,66 +317,59 @@
         <td><input type="number" oninput="calculateRow(this)" /></td>
         <td><input type="text" class="amount" readonly /></td>
         <td>
-  <button onclick="this.closest('tr').remove(); updateTotals();">Remove</button>
-</td>
+          <button onclick="this.closest('tr').remove(); updateTotals();">Remove</button>
+        </td>
       </tr>
     </tbody>
   </table>
+  
   <button onclick="addRow()">+ Add Row</button>
+  
   <div class="totals">
     <table>
-      
       <tr>
-        <tr>
-          <td colspan="1"><strong>GRAND TOTAL</strong></td>
-          <td colspan="5"><strong>&#8377;<span id="grandTotal">0.00</span></strong></td>
-        </tr>
-        <tr>
-  <td><strong>AMOUNT PAID</strong></td>
-  <td colspan="5" style="text-align: right; font-weight: bold;">
-    &#8377;<input
-      type="number"
-      id="amountPaid"
-      value="0.00"
-      oninput="updateRemainingBalance()"
-      style="width: 100px; border: none; outline: none; text-align: right; font-weight: bold; font-size: 13px;"
-    />
-  </td>
-</tr>
-
-
-<tr>
-        <tr>
-          <td colspan="1"><strong>REMAINING BALANCE</strong></td>
-          <td colspan="5"><strong>&#8377;<span id="remainingBalance">0.00</span></strong></td>
-        </tr>
-
+        <td colspan="1"><strong>GRAND TOTAL</strong></td>
+        <td colspan="5"><strong>&#8377;<span id="grandTotal">0.00</span></strong></td>
       </tr>
-    </tr>
+      <tr>
+        <td><strong>AMOUNT PAID</strong></td>
+        <td colspan="5" style="text-align: right; font-weight: bold;">
+          &#8377;<input
+            type="number"
+            id="amountPaid"
+            value="0.00"
+            oninput="updateRemainingBalance()"
+            style="width: 100px; border: none; outline: none; text-align: right; font-weight: bold; font-size: 13px;"
+          />
+        </td>
+      </tr>
+      <tr>
+        <td colspan="1"><strong>REMAINING BALANCE</strong></td>
+        <td colspan="5"><strong>&#8377;<span id="remainingBalance">0.00</span></strong></td>
+      </tr>
     </table>
   </div>
+  
   <div class="total-in-words">
     Total Amount in Rs. <input type="text" id="amountInWords" readonly style="width: 100%;" />
   </div>
+  
   <div id="staffButtons" style="margin-top: 10px; text-align: center;">
     <strong>Select Biller:</strong><br />
-    
     <button onclick="setBiller('Suhas')">Suhas Anne</button>
     <button onclick="setBiller('Kavitha')">Kavitha Anne</button>
     <button onclick="setBiller('Prasad')">Prasad</button>
     <button onclick="setBiller('Sagar')">Sagar</button>
     <button onclick="setBiller('Harsha')">Harsha Anne</button>
-</div>
+  </div>
 
-<div id="billedBy" style="margin-top: 10px; font-weight: bold; text-align: right; display: none;">
-  Billed by: <span id="billerName"></span>
-</div>
-
+  <div id="billedBy" style="margin-top: 10px; font-weight: bold; text-align: right; display: none;">
+    Billed by: <span id="billerName"></span>
+  </div>
 
   <div class="signature">For Bannu Enterprises</div>
 </div>
 
-  
 <div style="text-align: center; margin-top: 30px;">
   <button id="submitBtn" onclick="submitInvoice()">Submit Invoice</button>
   <div id="afterSubmitButtons" style="display: none;">
@@ -392,75 +381,152 @@
     <button onclick="shareInvoiceViaWhatsApp()" id="shareBtn">Share Invoice</button>
   </div>
 </div>
-<script>
-function toggleSidebar() {
-  const sidebar = document.getElementById("sidebar");
-  const main = document.getElementById("mainContent");
 
-  if (sidebar.style.display === "block") {
-    sidebar.style.display = "none";
-    main.classList.remove("sidebar-open");
-  } else {
-    sidebar.style.display = "block";
-    main.classList.add("sidebar-open");
-  }
-}
-</script>
 <script>
+  // Customer database with names and phone numbers
+  const customerDatabase = [
+    { name: "Harsha Anne", phone: "9390939167", address: "Hythabad" },
+    { name: "Ramesh Anne", phone: "9440607963", address: "Hythabad" },
+    { name: "Kavitha Anne", phone: "9246557759", address: "Hyderabad" },
+    { name: "Suhas Anne", phone: "9676515589", address: "Hyderabad" },
+    { name: "Big Traders", phone: "9876543211", address: "Mumbai" },
+    // Add more customers as needed
+  ];
+
   let selectedBiller = '';
 
   const particularOptions = ["Bannu King Size 112pages","Bannu King Size 160pages","Bannu King Size 176pages","Bannu King Size 184pages","Bannu King Size 192pages",
-"Naveena King Size 112pages","Naveena King Size 160pages","Naveena King Size 192pages",
-"Harsha King Size 112pages","Harsha Binding","Harsha King Size 120pages","Harsha King Size 132pages","Harsha King Size 136pages","Harsha King Size 160pages","Harsha King Size 192pages",
-"Kavitha King Size 112pages","Bannu Notebook","Harsha Notebook","Metro King Size","Divya Chetana King Size","Bannu Special Longbook",
-"Harsha Supreme","Bannu Gold","Bannu Long 160pages","Bannu Friendship","Bannu 240pages small","Bannu 320pages long","Bannu 400pages Long",
-"Bannu Jumbo 144pages","Bannu Jumbo 160pages","Bannu Jumbo 240pages","Bannu Jumbo 320pages","Bannu Jumbo 400pages",
-"Bannu A4 144pages","Bannu A4 160pages","Bannu A4 240pages","Bannu A4 320pages","Bannu A4 400pages",
-"68 Pages Long","100Pages Long",
-"A4 Graph 32pages","A4 graph 68pages","A4 graph 96pages","Drawing Book","Record 96pages","Record 144pages","Record 260pages","96 Page Practical records","144 Page Practical Record",
-"1Q Long Register","2Q Long Register","3Q Long Register","4Q Long Register","5Q Long Register","1Q Attendence Register","2Q Attendence Register","1Q Office Register","2Q Office Register",
-"1Q Short Register","2Q Short Register","3Q Short Register","4Q Short Register","5Q Short Register","1Q Cash RuleLong Register","2Q Cash Rule Long Register","3Q Cash Rule Long Register","4Q Cash Rule Long Register","5Q Cash rule Long Register","1Q Cash Rule Short Register","2Q Cash Rule Short Register","3Q Cash Rule Short Register","4Q Cash Rule Short Register","5Q Cash Rule Short Register",
-"No2 Bill Book","No3 Bill Book","No4 Bill Book","No5 Bill Book","Notepad","Graph Sheets","Maps","A4 Size Paper","King Size Loose Books","Longbook Loose Books","Exam Pads","240 Pages Rough",
-"160pages White Rough","200pages White Rough","300pages White Rough","400pages White Rough","200pages Brown Rough","300pages Brown Rough","400pages Brown Rough",
-"Color Paper","Charts","School Title Kingsize","School Title longbook","A4 Size","Bundle Charge","Citizen Binding","Title Cost","300pages Kingsize","King Size Mix","Rolls","Gift Card","Promisary Note","Bonafide Certificate","Tape 15mm x 1Mts",
-                             "Tape 15mm x 2Mts","Tape 15mm x 5Mts","Tape 20mm x 1Mts","Tape 20mm x 2Mts","Tape 20mm x 5Mts","Tape 12mm x 30Mts","Tape 18mm x 30Mts","Tape 24mm x 30Mts","Tape 48mm x 30Mts Brown","Tape 48mm x 50Mts White","Tape 48mm x 50Mts Brown",
-                             "Tape 72mm x 30Mts Brown","Tape 72mm x 50Mts Brown","Tape 72mm x 50Mts White","Harsha A4","Spiral 120pages Plain","Spiral 220pages Plain","Spiral 220pages S/R","Spiral 320pages Plain","Spiral 420pages Plain","Pocket Size","Finance Book","Ivory Charts","CardBoard","Dot Paper","Exam Paper","School Title Kingsize",    ]
-
+  "Naveena King Size 112pages","Naveena King Size 160pages","Naveena King Size 192pages",
+  "Harsha King Size 112pages","Harsha Binding","Harsha King Size 120pages","Harsha King Size 132pages","Harsha King Size 136pages","Harsha King Size 160pages","Harsha King Size 192pages",
+  "Kavitha King Size 112pages","Bannu Notebook","Harsha Notebook","Metro King Size","Divya Chetana King Size","Bannu Special Longbook",
+  "Harsha Supreme","Bannu Gold","Bannu Long 160pages","Bannu Friendship","Bannu 240pages small","Bannu 320pages long","Bannu 400pages Long",
+  "Bannu Jumbo 144pages","Bannu Jumbo 160pages","Bannu Jumbo 240pages","Bannu Jumbo 320pages","Bannu Jumbo 400pages",
+  "Bannu A4 144pages","Bannu A4 160pages","Bannu A4 240pages","Bannu A4 320pages","Bannu A4 400pages",
+  "68 Pages Long","100Pages Long",
+  "A4 Graph 32pages","A4 graph 68pages","A4 graph 96pages","Drawing Book","Record 96pages","Record 144pages","Record 260pages","96 Page Practical records","144 Page Practical Record",
+  "1Q Long Register","2Q Long Register","3Q Long Register","4Q Long Register","5Q Long Register","1Q Attendence Register","2Q Attendence Register","1Q Office Register","2Q Office Register",
+  "1Q Short Register","2Q Short Register","3Q Short Register","4Q Short Register","5Q Short Register","1Q Cash RuleLong Register","2Q Cash Rule Long Register","3Q Cash Rule Long Register","4Q Cash Rule Long Register","5Q Cash rule Long Register","1Q Cash Rule Short Register","2Q Cash Rule Short Register","3Q Cash Rule Short Register","4Q Cash Rule Short Register","5Q Cash Rule Short Register",
+  "No2 Bill Book","No3 Bill Book","No4 Bill Book","No5 Bill Book","Notepad","Graph Sheets","Maps","A4 Size Paper","King Size Loose Books","Longbook Loose Books","Exam Pads","240 Pages Rough",
+  "160pages White Rough","200pages White Rough","300pages White Rough","400pages White Rough","200pages Brown Rough","300pages Brown Rough","400pages Brown Rough",
+  "Color Paper","Charts","School Title Kingsize","School Title longbook","A4 Size","Bundle Charge","Citizen Binding","Title Cost","300pages Kingsize","King Size Mix","Rolls","Gift Card","Promisary Note","Bonafide Certificate","Tape 15mm x 1Mts",
+                               "Tape 15mm x 2Mts","Tape 15mm x 5Mts","Tape 20mm x 1Mts","Tape 20mm x 2Mts","Tape 20mm x 5Mts","Tape 12mm x 30Mts","Tape 18mm x 30Mts","Tape 24mm x 30Mts","Tape 48mm x 30Mts Brown","Tape 48mm x 50Mts White","Tape 48mm x 50Mts Brown",
+                               "Tape 72mm x 30Mts Brown","Tape 72mm x 50Mts Brown","Tape 72mm x 50Mts White","Harsha A4","Spiral 120pages Plain","Spiral 220pages Plain","Spiral 220pages S/R","Spiral 320pages Plain","Spiral 420pages Plain","Pocket Size","Finance Book","Ivory Charts","CardBoard","Dot Paper","Exam Paper","School Title Kingsize"];
 
   const subtypes = ["S/R", "B/R", "F/R", "D/R", "M/R", "C/R", "U/R", "O/R", "MS/R","BIG C/R"];
   const productsWithSubtypes = ["Bannu King Size 112pages","Bannu King Size 160pages","Bannu King Size 176pages","Bannu King Size 184pages","Bannu King Size 192pages",
-"Naveena King Size 112pages","Naveena King Size 160pages","Naveena King Size 192pages",
-"Harsha King Size 112pages","Harsha Binding","Harsha King Size 120pages","Harsha King Size 132pages","Harsha King Size 136pages","Harsha King Size 160pages","Harsha King Size 192pages",
-"Kavitha King Size 112pages","School Title A Grade Kingsize","Citizen Binding","Bannu Notebook","Harsha Notebook","Metro King Size","Divya Chetana King Size","School Title Kingsize",];
+  "Naveena King Size 112pages","Naveena King Size 160pages","Naveena King Size 192pages",
+  "Harsha King Size 112pages","Harsha Binding","Harsha King Size 120pages","Harsha King Size 132pages","Harsha King Size 136pages","Harsha King Size 160pages","Harsha King Size 192pages",
+  "Kavitha King Size 112pages","School Title A Grade Kingsize","Citizen Binding","Bannu Notebook","Harsha Notebook","Metro King Size","Divya Chetana King Size","School Title Kingsize"];
+  
   const altSubtypesMap = {
-  "King Size Mix":["B/R+M/R","C/R+F/R","Three rule+F/R","D/R+Three rule","F/R+MS/R"],
-  "300pages Kingsize":["plain","S/R"],
-  "Record 144pages":["Phy","Che"],
-  "Record 96pages":["Phy","Che"],
-  "Record 260pages":["Phy","Che"],
-  "Bannu Special Longbook": ["Plain", "S/R"],
-  "Bannu Gold": ["Plain", "S/R", "B/R", "O/R"],
-  "Harsha Supreme": ["Plain", "S/R"],
-  "Bannu Friendship": ["Plain", "S/R", "B/R", "O/R"],
-  "Bannu Long 160pages": ["Plain", "S/R","B/R","O/R"],
-  "Bannu 240pages small": ["Plain", "S/R"],
-  "Bannu 320pages long": ["Plain", "S/R"],
-  "Bannu Jumbo 144pages": ["Plain", "S/R"],
-  "Bannu Jumbo 160pages": ["Plain", "S/R"],
-  "Bannu Jumbo 240pages": ["Plain", "S/R"],
-  "Bannu Jumbo 320pages": ["Plain", "S/R"],
-  "Bannu A4 144pages": ["Plain", "S/R"],
-  "Bannu A4 240pages": ["Plain", "S/R"],
-  "Bannu A4 320pages": ["Plain", "S/R"],
-  "White Rough 160pages":["Plain","S/R"],
-  "White Rough 200pages":["Plain","S/R"],
-  "White Rough 300pages":["Plain","S/R"],
-  "White Rough 400pages":["Plain","S/R"],
-  "A4 Size":["Plain","S/R","O/R"],
-  "School Title Longbook": ["Plain", "S/R", "B/R", "O/R"],
+    "King Size Mix":["B/R+M/R","C/R+F/R","Three rule+F/R","D/R+Three rule","F/R+MS/R"],
+    "300pages Kingsize":["plain","S/R"],
+    "Record 144pages":["Phy","Che"],
+    "Record 96pages":["Phy","Che"],
+    "Record 260pages":["Phy","Che"],
+    "Bannu Special Longbook": ["Plain", "S/R"],
+    "Bannu Gold": ["Plain", "S/R", "B/R", "O/R"],
+    "Harsha Supreme": ["Plain", "S/R"],
+    "Bannu Friendship": ["Plain", "S/R", "B/R", "O/R"],
+    "Bannu Long 160pages": ["Plain", "S/R","B/R","O/R"],
+    "Bannu 240pages small": ["Plain", "S/R"],
+    "Bannu 320pages long": ["Plain", "S/R"],
+    "Bannu Jumbo 144pages": ["Plain", "S/R"],
+    "Bannu Jumbo 160pages": ["Plain", "S/R"],
+    "Bannu Jumbo 240pages": ["Plain", "S/R"],
+    "Bannu Jumbo 320pages": ["Plain", "S/R"],
+    "Bannu A4 144pages": ["Plain", "S/R"],
+    "Bannu A4 240pages": ["Plain", "S/R"],
+    "Bannu A4 320pages": ["Plain", "S/R"],
+    "White Rough 160pages":["Plain","S/R"],
+    "White Rough 200pages":["Plain","S/R"],
+    "White Rough 300pages":["Plain","S/R"],
+    "White Rough 400pages":["Plain","S/R"],
+    "A4 Size":["Plain","S/R","O/R"],
+    "School Title Longbook": ["Plain", "S/R", "B/R", "O/R"],
   };
 
   const allProductsWithAltSubtypes = Object.keys(altSubtypesMap);
+
+  // Customer dropdown functions
+  function showCustomerDropdown() {
+    const input = document.getElementById("customerName");
+    const dropdown = document.getElementById("customerDropdown");
+    dropdown.innerHTML = '';
+    
+    customerDatabase.forEach(customer => {
+      const div = document.createElement("div");
+      div.textContent = customer.name;
+      div.onclick = () => {
+        input.value = customer.name;
+        document.getElementById("PhoneNumber").value = customer.phone;
+        document.getElementById("Address").value = customer.address || '';
+        dropdown.style.display = "none";
+        document.title = `${customer.name} Invoice`;
+      };
+      dropdown.appendChild(div);
+    });
+    
+    dropdown.style.display = "block";
+  }
+
+  function filterCustomerDropdown() {
+    const input = document.getElementById("customerName");
+    const dropdown = document.getElementById("customerDropdown");
+    const filter = input.value.toLowerCase();
+    
+    dropdown.innerHTML = '';
+    
+    customerDatabase
+      .filter(customer => customer.name.toLowerCase().includes(filter))
+      .forEach(customer => {
+        const div = document.createElement("div");
+        div.textContent = customer.name;
+        div.onclick = () => {
+          input.value = customer.name;
+          document.getElementById("PhoneNumber").value = customer.phone;
+          document.getElementById("Address").value = customer.address || '';
+          dropdown.style.display = "none";
+          document.title = `${customer.name} Invoice`;
+        };
+        dropdown.appendChild(div);
+      });
+    
+    dropdown.style.display = "block";
+  }
+
+  // Hide dropdown when clicking outside
+  document.addEventListener("click", function (e) {
+    if (!e.target.closest("#customerName") && !e.target.closest("#customerDropdown")) {
+      document.getElementById("customerDropdown").style.display = "none";
+    }
+  });
+
+  // Rest of your existing functions remain the same...
+  // [All other existing functions like createDropdownCell, addRow, setBiller, showDropdown, etc.]
+  
+  function initializeInvoice() {
+    const now = new Date();
+    const day = String(now.getDate()).padStart(2, '0');
+    const month = now.toLocaleString('default', { month: 'long' });
+    const year = String(now.getFullYear()).slice(-2);
+    const formattedDate = `${day}/${month}/${year}`;
+    document.getElementById("invoiceDate").innerText = formattedDate;
+  
+    fetch("https://script.google.com/macros/s/AKfycbwF_ULpVqdVmws_GU5svU9SaY8K0VCZgqmOTp5HL6ARlbjIrrslO9dqRh4Jq4CBet-tAQ/exec")
+      .then(response => response.json())
+      .then(data => {
+        let last = data.lastInvoice || "00000";
+        let next = (parseInt(last, 10) + 1).toString().padStart(5, '0');
+        document.getElementById("invoiceNo").innerText = next;
+      })
+      .catch(err => {
+        console.error("Failed to fetch invoice number from Sheet:", err);
+        alert("Failed to fetch invoice number. Please check your internet or try again.");
+      });
+  
+    addRow();
+  }
 
   function createDropdownCell() {
     const td = document.createElement('td');
@@ -508,6 +574,7 @@ function toggleSidebar() {
 
     document.getElementById("itemRows").appendChild(row);
   }
+
   function setBiller(name) {
     selectedBiller = name;
     document.getElementById("billerName").innerText = name;
@@ -528,7 +595,7 @@ function toggleSidebar() {
         if (productsWithSubtypes.includes(opt)) {
           insertSubtypesTable(container, input);
         } else if (allProductsWithAltSubtypes.includes(opt)) {
-          insertAltSubtypesTable(container, input, altSubtypesMap[opt]); // âœ… Works now
+          insertAltSubtypesTable(container, input, altSubtypesMap[opt]);
         } else {
           removeSubtypes(container);
         }
@@ -554,7 +621,7 @@ function toggleSidebar() {
         if (productsWithSubtypes.includes(opt)) {
           insertSubtypesTable(container, input);
         } else if (allProductsWithAltSubtypes.includes(opt)) {
-          insertAltSubtypesTable(container, input, altSubtypesMap[opt]); // âœ… Works now
+          insertAltSubtypesTable(container, input, altSubtypesMap[opt]);
         } else {
           removeSubtypes(container);
         }
@@ -570,6 +637,7 @@ function toggleSidebar() {
       document.querySelectorAll('.dropdown-list').forEach(dl => dl.style.display = 'none');
     }
   });
+
   function insertAltSubtypesTable(container, inputElement, subtypesList) {
     removeSubtypes(container);
     const table = document.createElement('table');
@@ -662,31 +730,6 @@ function toggleSidebar() {
     calculateRow(qtyInput);
   } 
 
-  function initializeInvoice() {
-    const now = new Date();
-    const day = String(now.getDate()).padStart(2, '0');
-    const month = now.toLocaleString('default', { month: 'long' });
-    const year = String(now.getFullYear()).slice(-2);
-    const formattedDate = `${day}/${month}/${year}`;
-    document.getElementById("invoiceDate").innerText = formattedDate;
-  
-    fetch("https://script.google.com/macros/s/AKfycbwF_ULpVqdVmws_GU5svU9SaY8K0VCZgqmOTp5HL6ARlbjIrrslO9dqRh4Jq4CBet-tAQ/exec")  // Replace with your actual deployed Apps Script Web App URL
-      .then(response => response.json())
-      .then(data => {
-        let last = data.lastInvoice || "00000";
-        let next = (parseInt(last, 10) + 1).toString().padStart(5, '0');
-        document.getElementById("invoiceNo").innerText = next;
-      })
-      .catch(err => {
-        console.error("Failed to fetch invoice number from Sheet:", err);
-        alert("Failed to fetch invoice number. Please check your internet or try again.");
-      });
-  
-    addRow();
-  }
-
-
-
   function submitInvoice() {
     const customerName = document.getElementById("customerName").value.trim();
     const address = document.getElementById("Address").value.trim();
@@ -695,70 +738,62 @@ function toggleSidebar() {
       alert("Please enter Customer Name and Address before submitting the invoice.");
       return;
     }
-  // Increment and store invoice number
 
-  // Hide submit button, show post-submit buttons
     document.getElementById("submitBtn").style.display = "none";
     document.getElementById("afterSubmitButtons").style.display = "block";
     document.getElementById("staffButtons").style.display = "none";
 
-
-  // Remove the "Action" column from the table header
     const headerRow = document.querySelector("thead tr");
     if (headerRow && headerRow.children.length === 6) {
-      headerRow.removeChild(headerRow.children[5]); // Remove 6th <th>
+      headerRow.removeChild(headerRow.children[5]);
     }
 
-  // Remove the "Action" column from each item row
     const itemRows = document.querySelectorAll("#itemRows tr");
     itemRows.forEach(row => {
       if (row.children.length === 6) {
-        row.removeChild(row.children[5]); // Remove 6th <td>
+        row.removeChild(row.children[5]);
       }
     });
 
-  // Make all inputs readonly
     document.querySelectorAll("input").forEach(input => {
       input.setAttribute("readonly", true);
     });
   }
 
-    function enableEditing() {
-      document.getElementById("submitBtn").style.display = "inline-block";
-      document.getElementById("afterSubmitButtons").style.display = "none";
+  function enableEditing() {
+    document.getElementById("submitBtn").style.display = "inline-block";
+    document.getElementById("afterSubmitButtons").style.display = "none";
 
-  // Make all inputs editable again
-      document.querySelectorAll("input").forEach(input => {
-        input.removeAttribute("readonly");
-      });
+    document.querySelectorAll("input").forEach(input => {
+      input.removeAttribute("readonly");
+    });
 
-  // Re-add the Action column header if missing
-      const headerRow = document.querySelector("thead tr");
-      if (headerRow && headerRow.children.length === 5) {
-        const th = document.createElement("th");
-        th.textContent = "Action";
-        headerRow.appendChild(th);
-      }
-
-  // Re-add the Action buttons for each row if missing
-      const rows = document.querySelectorAll("#itemRows tr");
-      rows.forEach(row => {
-        if (row.children.length === 5) {
-          const actionTd = document.createElement("td");
-          actionTd.innerHTML = '<button onclick="this.closest(\'tr\').remove(); updateTotals();">Remove</button>';
-          row.appendChild(actionTd);
-        }
-      });
-      document.getElementById("staffButtons").style.display = "block";
-      if (selectedBiller) {
-        document.getElementById("billerName").innerText = selectedBiller;
-        document.getElementById("billedBy").style.display = "block";
-      }
+    const headerRow = document.querySelector("thead tr");
+    if (headerRow && headerRow.children.length === 5) {
+      const th = document.createElement("th");
+      th.textContent = "Action";
+      headerRow.appendChild(th);
     }
-    
-    function newInvoice() {
-      location.reload();
+
+    const rows = document.querySelectorAll("#itemRows tr");
+    rows.forEach(row => {
+      if (row.children.length === 5) {
+        const actionTd = document.createElement("td");
+        actionTd.innerHTML = '<button onclick="this.closest(\'tr\').remove(); updateTotals();">Remove</button>';
+        row.appendChild(actionTd);
+      }
+    });
+    document.getElementById("staffButtons").style.display = "block";
+    if (selectedBiller) {
+      document.getElementById("billerName").innerText = selectedBiller;
+      document.getElementById("billedBy").style.display = "block";
     }
+  }
+  
+  function newInvoice() {
+    location.reload();
+  }
+
   function calculateRow(input) {
     const row = input.closest("tr");
     const qty = parseFloat(row.children[2].querySelector("input").value || 0);
@@ -767,6 +802,7 @@ function toggleSidebar() {
     row.children[4].querySelector("input").value = formatIndianCurrency(amount);
     updateTotals();
   }
+
   function formatIndianCurrency(amount) {
     const parts = amount.toFixed(2).split(".");
     let num = parts[0];
@@ -799,6 +835,7 @@ function toggleSidebar() {
 
     updateRemainingBalance();
   }
+
   function updateRemainingBalance() {
     let subtotal = 0;
     document.querySelectorAll(".amount").forEach(input => {
@@ -814,7 +851,6 @@ function toggleSidebar() {
     document.getElementById("remainingBalance").innerText = formatIndianCurrency(remaining);
     document.getElementById("amountInWords").value = convertNumberToWords(Math.round(remaining)) + " only";
   }
-
 
   function displaySavedInvoices() {
     const data = JSON.parse(localStorage.getItem("savedInvoices") || "[]");
@@ -860,61 +896,6 @@ function toggleSidebar() {
     }
   }
 
-// Show saved data on page load
-  window.onload = function () {
-    initializeInvoice(); // your existing function
-    displaySavedInvoices();
-  };
-  const customerNames = [
-  "Sai Krishna", "Meenakshi Enterprises", "Gowtham Traders", "Sri Lakshmi Agencies",
-  "Dharani Enterprises", "Shiva Traders", "Sri Venkateshwara Stationery",
-  "Rama Book Depot", "Surya Agencies", "Shivani Distributors","Harsha",
-  // Add more names as needed
-];
-
-function showCustomerDropdown() {
-  const input = document.getElementById("customerName");
-  const dropdown = document.getElementById("customerDropdown");
-  dropdown.innerHTML = '';
-  customerNames.forEach(name => {
-    const div = document.createElement("div");
-    div.textContent = name;
-    div.onclick = () => {
-      input.value = name;
-      dropdown.style.display = "none";
-      document.title = `${name} Invoice`;
-    };
-    dropdown.appendChild(div);
-  });
-  dropdown.style.display = "block";
-}
-
-function filterCustomerDropdown() {
-  const input = document.getElementById("customerName");
-  const dropdown = document.getElementById("customerDropdown");
-  const filter = input.value.toLowerCase();
-  dropdown.innerHTML = '';
-  customerNames.filter(name => name.toLowerCase().includes(filter)).forEach(name => {
-    const div = document.createElement("div");
-    div.textContent = name;
-    div.onclick = () => {
-      input.value = name;
-      dropdown.style.display = "none";
-      document.title = `${name} Invoice`;
-    };
-    dropdown.appendChild(div);
-  });
-  dropdown.style.display = "block";
-}
-
-// Hide dropdown when clicking outside
-document.addEventListener("click", function (e) {
-  if (!e.target.closest("#customerName") && !e.target.closest("#customerDropdown")) {
-    document.getElementById("customerDropdown").style.display = "none";
-  }
-});
-
-
   function convertNumberToWords(amount) {
     const a = [
       '', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine',
@@ -938,6 +919,7 @@ document.addEventListener("click", function (e) {
 
     return inWords(amount);
   }
+
   document.getElementById("customerName").addEventListener("input", function () {
     const name = this.value.trim();
     if (name) {
@@ -947,18 +929,7 @@ document.addEventListener("click", function (e) {
     }
   });
 
-  
-
-
-
-</script>
-<script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
-<script>
   async function saveInvoice() {
-      // Cache DOM elements
     const submitBtn = document.getElementById("submitBtn");
     const invoiceNo = document.getElementById("invoiceNo").innerText.trim();
     const date = document.getElementById("invoiceDate").innerText.trim();
@@ -966,12 +937,10 @@ document.addEventListener("click", function (e) {
     const address = document.getElementById("Address").value.trim();
     const amountPaid = parseFloat(document.getElementById("amountPaid").value || 0);
     
-    // UI State Management
     const originalBtnText = submitBtn.innerText;
     submitBtn.innerText = "Generating PDF...";
     submitBtn.disabled = true;
     
-    // Create loading overlay
     const loadingIndicator = document.createElement('div');
     loadingIndicator.style.position = 'fixed';
     loadingIndicator.style.top = '0';
@@ -992,7 +961,6 @@ document.addEventListener("click", function (e) {
     document.body.appendChild(loadingIndicator);
     
     try {
-      // Collect invoice items data
       const rawRows = document.querySelectorAll("#itemRows tr");
       const validRows = [];
       let runningTotal = 0;
@@ -1014,7 +982,6 @@ document.addEventListener("click", function (e) {
         return;
       }
     
-      // Prepare data for Google Sheets
       const items = validRows.map((row, index) => {
         const isLast = index === validRows.length - 1;
         return {
@@ -1033,31 +1000,27 @@ document.addEventListener("click", function (e) {
         };
       });
     
-      // Clone invoice for PDF generation (off-screen)
       const invoiceElement = document.getElementById("invoiceBox");
       const clone = invoiceElement.cloneNode(true);
       clone.style.position = 'absolute';
       clone.style.top = '-9999px';
       clone.style.left = '0';
-      clone.style.width = '794px'; // A4 width in pixels
+      clone.style.width = '794px';
       clone.style.background = '#fff';
       document.body.appendChild(clone);
     
-      // Calculate total height and number of pages needed
-      const pageHeight = 1122; // A4 height in pixels (at 96dpi)
+      const pageHeight = 1122;
       const totalHeight = clone.scrollHeight;
       const numPages = Math.ceil(totalHeight / pageHeight);
     
-      // Create PDF
       const { jsPDF } = window.jspdf;
       const pdf = new jsPDF({
         orientation: 'portrait',
         unit: 'px',
-        format: [794, 1122], // A4 dimensions in pixels
+        format: [794, 1122],
         compress: true
       });
     
-      // Capture each page
       for (let i = 0; i < numPages; i++) {
         const canvas = await html2canvas(clone, {
           scale: 1,
@@ -1072,19 +1035,15 @@ document.addEventListener("click", function (e) {
           scrollY: -i * pageHeight
         });
     
-        // Add page to PDF (except first page which is automatically created)
         if (i > 0) {
           pdf.addPage([794, 1122], 'portrait');
         }
     
-        // Add image to current page
         pdf.addImage(canvas.toDataURL('image/jpeg', 0.85), 'JPEG', 0, 0, 794, pageHeight);
       }
     
-      // Clean up clone
       document.body.removeChild(clone);
     
-      // Upload to Google Sheets
       await fetch("https://script.google.com/macros/s/AKfycbyggO5UHpLsJMpb45GizNreGXTRyjrfH82rKFqR59gJGuPblMWTWjgMtMJiPVlSkyUtFw/exec", {
         method: "POST",
         mode: "no-cors",
@@ -1092,7 +1051,6 @@ document.addEventListener("click", function (e) {
         body: JSON.stringify(items)
       });
     
-      // Upload PDF to Google Drive
       const pdfBlob = pdf.output('blob');
       const reader = new FileReader();
       reader.onloadend = async function() {
@@ -1152,18 +1110,16 @@ document.addEventListener("click", function (e) {
       submitBtn.disabled = false;
     }
   }
-</script>
-<script>
+
   async function downloadInvoice() {
     const invoiceElement = document.getElementById("invoiceBox");
 
-    // Clone invoice to ensure full content is captured
     const clone = invoiceElement.cloneNode(true);
     clone.style.position = 'fixed';
     clone.style.top = '0';
     clone.style.left = '0';
     clone.style.zIndex = '-1';
-    clone.style.width = '794px'; // A4 width in px @96dpi
+    clone.style.width = '794px';
     clone.style.background = '#fff';
     document.body.appendChild(clone);
 
@@ -1184,7 +1140,7 @@ document.addEventListener("click", function (e) {
       format: 'a4'
     });
 
-    const imgWidth = 210; // mm for A4
+    const imgWidth = 210;
     const imgHeight = (canvas.height * imgWidth) / canvas.width;
     pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, 0, imgWidth, imgHeight);
 
@@ -1194,56 +1150,76 @@ document.addEventListener("click", function (e) {
 
     pdf.save(fileName);
   }
-</script>
-<script>
-async function shareInvoiceViaWhatsApp() {
-  const phoneNumber = document.getElementById("PhoneNumber").value.trim().replace(/\D/g, '');
-  const invoiceNo = document.getElementById("invoiceNo").innerText.trim();
-  const shareButton = document.getElementById("shareBtn");
-  const originalText = shareButton.innerText;
-  
-  // Validate inputs
-  if (!phoneNumber || phoneNumber.length < 10) {
-    alert("Please enter a valid 10-digit phone number");
-    return;
-  }
 
-  if (!invoiceNo) {
-    alert("Invoice number missing");
-    return;
-  }
-
-  // Show loading state
-  shareButton.innerText = "Processing...";
-  shareButton.disabled = true;
-
-  try {
-    const response = await fetch(`https://script.google.com/macros/s/AKfycbyFtXzpIZlvv1YT_jYNcOj5Nu5KBAD2qXmAC-BoiTnzNC-UKfjDaC1aVt2NO5ARoXMH-g/exec?invoiceNo=${invoiceNo}`);
+  async function shareInvoiceViaWhatsApp() {
+    const phoneNumber = document.getElementById("PhoneNumber").value.trim().replace(/\D/g, '');
+    const invoiceNo = document.getElementById("invoiceNo").innerText.trim();
+    const shareButton = document.getElementById("shareBtn");
+    const originalText = shareButton.innerText;
     
-    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-    
-    const data = await response.json();
-    
-    if (data.error) {
-      alert(`Error: ${data.error}`);
-    } else if (data.link) {
-      const message = `Hello, here is your Bannu Enterprises invoice: ${data.link}`;
-      
-      // Solution 1: Use api.whatsapp.com which works better for non-contacts
-      const whatsappUrl = `https://api.whatsapp.com/send?phone=${phoneNumber}&text=${encodeURIComponent(message)}`;
-      
-      // Open in new tab
-      window.open(whatsappUrl, '_blank');
-    } else {
-      alert("No PDF link found in response");
+    if (!phoneNumber || phoneNumber.length < 10) {
+      alert("Please enter a valid 10-digit phone number");
+      return;
     }
-  } catch (error) {
-    console.error("Error sharing invoice:", error);
-    alert("Failed to share invoice. Please try again or contact support.");
-  } finally {
-    // Reset button state
-    shareButton.innerText = originalText;
-    shareButton.disabled = false;
+
+    if (!invoiceNo) {
+      alert("Invoice number missing");
+      return;
+    }
+
+    shareButton.innerText = "Processing...";
+    shareButton.disabled = true;
+
+    try {
+      const response = await fetch(`https://script.google.com/macros/s/AKfycbyFtXzpIZlvv1YT_jYNcOj5Nu5KBAD2qXmAC-BoiTnzNC-UKfjDaC1aVt2NO5ARoXMH-g/exec?invoiceNo=${invoiceNo}`);
+      
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+      
+      const data = await response.json();
+      
+      if (data.error) {
+        alert(`Error: ${data.error}`);
+        return;
+      } 
+      
+      if (!data.link) {
+        alert("No PDF link found in response");
+        return;
+      }
+
+      const customerName = document.getElementById("customerName").value.trim() || "Customer";
+      
+      const message = `*Bannu Enterprises Invoice* 📄
+
+*Invoice No:* ${invoiceNo}
+*Customer:* ${customerName}
+
+Your invoice is ready!
+
+📌 *PRESS HERE TO VIEW YOUR INVOICE:*
+${data.link}
+
+*Options:*
+👉 Tap above link to *View* 
+👉 Long-press to *Download*
+
+Thank you for your business! 🙏
+*Bannu Enterprises*`;
+
+      const whatsappUrl = `https://api.whatsapp.com/send?phone=91${phoneNumber}&text=${encodeURIComponent(message)}`;
+      window.open(whatsappUrl, '_blank');
+
+    } catch (error) {
+      console.error("Error sharing invoice:", error);
+      alert("Failed to share invoice. Please try again or contact support.");
+    } finally {
+      shareButton.innerText = originalText;
+      shareButton.disabled = false;
+    }
   }
-}
 </script>
+<script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+</body>
+</html>
