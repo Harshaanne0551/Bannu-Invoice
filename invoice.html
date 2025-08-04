@@ -1079,7 +1079,7 @@
       reader.onloadend = async function() {
         const base64pdf = reader.result.split(',')[1];
         
-        await fetch("https://script.google.com/macros/s/AKfycbzuaA0al1fbPmIReATBiwrPyZ74LEl1AbsFuLWrfAhQ3zMugOx-mK93a3y8F8jdQR9mLA/exec", {
+        await fetch("https://script.google.com/macros/s/AKfycbyozn3f0q8i7CPSi6rjw0MKuF9ZsjgKjuUekPHOMW-BmQd_x-pijdJHaAoIYWPfA2Tv8w/exec", {
           method: "POST",
           mode: "no-cors",
           headers: { "Content-Type": "application/json" },
@@ -1090,6 +1090,7 @@
             total: runningTotal.toFixed(2),
             paid: amountPaid.toFixed(2),
             balance: (runningTotal - amountPaid).toFixed(2),
+            BilledBy: typeof selectedBiller !== 'undefined' ? selectedBiller : '',
             PaymentBy: selectedPayment || '',
             filename: `Invoice_${invoiceNo}_${customerName}.pdf`,
             pdf: base64pdf
