@@ -353,7 +353,11 @@
   <div class="total-in-words">
     Total Amount in Rs. <input type="text" id="amountInWords" readonly style="width: 100%;" />
   </div>
-  
+  <div id="Payment-Method" style="margin-top: 10px; text-align: center;">
+    <button onclick="setPayment('Cash')">Cash</button>
+    <button onclick="setPayment('UPI')">UPI</button>
+    <button onclick="setPayment('Cheque')">Cheque</button>
+  </div>
   <div id="staffButtons" style="margin-top: 10px; text-align: center;">
     <strong>Select Biller:</strong><br />
     <button onclick="setBiller('Suhas')">Suhas Anne</button>
@@ -362,7 +366,10 @@
     <button onclick="setBiller('Sagar')">Sagar</button>
     <button onclick="setBiller('Harsha')">Harsha Anne</button>
   </div>
-
+  <!-- Add this just above the billedBy div -->
+<div id="paymentBy" style="margin-top: 10px; font-weight: bold; text-align: right; display: none;">
+  Payment Method: <span id="paymentName"></span>
+</div>
   <div id="billedBy" style="margin-top: 10px; font-weight: bold; text-align: right; display: none;">
     Billed by: <span id="billerName"></span>
   </div>
@@ -394,6 +401,7 @@
   ];
 
   let selectedBiller = '';
+  let selectedPayment='';
 
   const particularOptions = ["Bannu King Size 112pages","Bannu King Size 160pages","Bannu King Size 176pages","Bannu King Size 184pages","Bannu King Size 192pages",
   "Naveena King Size 112pages","Naveena King Size 160pages","Naveena King Size 192pages",
@@ -580,6 +588,12 @@
     document.getElementById("billerName").innerText = name;
     document.getElementById("billedBy").style.display = "block";
   }
+  function setPayment(method) {
+    selectedPayment = method;
+    document.getElementById("paymentName").innerText = method;
+    document.getElementById("paymentBy").style.display = "block";
+  }
+
 
   function showDropdown(input) {
     const container = input.parentElement;
@@ -738,11 +752,14 @@
       alert("Please enter Customer Name and Address before submitting the invoice.");
       return;
     }
-
+    if (!selectedPayment) {
+      alert("Please enter Payment Mode before submitting the invoice.");
+      return;
+    }
     document.getElementById("submitBtn").style.display = "none";
     document.getElementById("afterSubmitButtons").style.display = "block";
     document.getElementById("staffButtons").style.display = "none";
-
+    document.getElementById("Payment-Method").style.display = "none";
     const headerRow = document.querySelector("thead tr");
     if (headerRow && headerRow.children.length === 6) {
       headerRow.removeChild(headerRow.children[5]);
@@ -788,8 +805,13 @@
       document.getElementById("billerName").innerText = selectedBiller;
       document.getElementById("billedBy").style.display = "block";
     }
+    document.getElementById("Payment-Method").style.display = "block";
+    if (selectedPayment) {
+      document.getElementById("paymentName").innerText = selectedPayment;
+      document.getElementById("paymentBy").style.display = "block";
+    }
   }
-  
+
   function newInvoice() {
     location.reload();
   }
@@ -996,7 +1018,8 @@
           GrandTotal: isLast ? runningTotal.toFixed(2) : "0.00",
           AmountPaid: isLast ? amountPaid.toFixed(2) : "0.00",
           RemainingBalance: isLast ? (runningTotal - amountPaid).toFixed(2) : "0.00",
-          BilledBy: typeof selectedBiller !== 'undefined' ? selectedBiller : ''
+          BilledBy: typeof selectedBiller !== 'undefined' ? selectedBiller : '',
+          PaymentBy: selectedPayment || ''
         };
       });
     
@@ -1056,7 +1079,7 @@
       reader.onloadend = async function() {
         const base64pdf = reader.result.split(',')[1];
         
-        await fetch("https://script.google.com/macros/s/AKfycbxq-ifgxz-wcANqWN7NI2ngoxoocNBLsSCV1Db28kSb6fAuo-3h586PhsY6uE9vpUcM0w/exec", {
+        await fetch("https://script.google.com/macros/s/AKfycbzuaA0al1fbPmIReATBiwrPyZ74LEl1AbsFuLWrfAhQ3zMugOx-mK93a3y8F8jdQR9mLA/exec", {
           method: "POST",
           mode: "no-cors",
           headers: { "Content-Type": "application/json" },
@@ -1067,8 +1090,10 @@
             total: runningTotal.toFixed(2),
             paid: amountPaid.toFixed(2),
             balance: (runningTotal - amountPaid).toFixed(2),
+            PaymentBy: selectedPayment || '',
             filename: `Invoice_${invoiceNo}_${customerName}.pdf`,
             pdf: base64pdf
+	    
           })
         });
     
