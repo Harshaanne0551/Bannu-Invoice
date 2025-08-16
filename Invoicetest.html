@@ -1,1046 +1,334 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Bannu Enterprises - Dashboard</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <style>
-    :root {
-      --primary-color: #4361ee;
-      --primary-light: #4895ef;
-      --primary-dark: #3a0ca3;
-      --secondary-color: #f8f9fa;
-      --accent-color: #f72585;
-      --text-color: #2b2d42;
-      --light-text: #8d99ae;
-      --border-color: #edf2f4;
-      --success-color: #4cc9f0;
-      --warning-color: #f8961e;
-      --danger-color: #ef233c;
-      --info-color: #7209b7;
-      --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-      --card-hover-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-      --sidebar-width: 280px;
-      --header-height: 70px;
-      --border-radius: 12px;
-      --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-    
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-    }
-    
-    body {
-      background-color: #f8fafc;
-      color: var(--text-color);
-      line-height: 1.6;
-    }
-    
-    /* Header Styles */
-    header {
-      background-color: white;
-      color: var(--text-color);
-      padding: 0 2rem;
-      height: var(--header-height);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      box-shadow: var(--card-shadow);
-      position: sticky;
-      top: 0;
-      z-index: 102;
-      border-bottom: 1px solid var(--border-color);
-    }
-    
-    .logo {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-    
-    .logo-icon {
-      width: 36px;
-      height: 36px;
-      background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
-      border-radius: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: white;
-    }
-    
-    .logo h1 {
-      font-size: 1.5rem;
-      font-weight: 700;
-      background: linear-gradient(to right, var(--primary-color), var(--primary-light));
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-    
-    .user-menu {
-      display: flex;
-      align-items: center;
-      gap: 20px;
-    }
-    
-    .user-menu .notifications {
-      position: relative;
-      color: var(--light-text);
-      cursor: pointer;
-    }
-    
-    .user-menu .notifications .badge {
-      position: absolute;
-      top: -5px;
-      right: -5px;
-      background-color: var(--danger-color);
-      color: white;
-      border-radius: 50%;
-      width: 18px;
-      height: 18px;
-      font-size: 10px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    
-    .user-menu .avatar {
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
-      color: white;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 600;
-      cursor: pointer;
-      border: 2px solid var(--border-color);
-    }
-    
-    /* Sidebar Styles */
-    .sidebar {
-      width: var(--sidebar-width);
-      background-color: white;
-      height: calc(100vh - var(--header-height));
-      position: fixed;
-      top: var(--header-height);
-      left: 0;
-      box-shadow: 2px 0 10px rgba(0, 0, 0, 0.05);
-      transform: translateX(-100%);
-      transition: var(--transition);
-      z-index: 100;
-      overflow-y: auto;
-      border-right: 1px solid var(--border-color);
-    }
-    
-    .sidebar.active {
-      transform: translateX(0);
-    }
-    
-    .sidebar-menu {
-      list-style: none;
-      padding: 1.5rem 0;
-    }
-    
-    .sidebar-menu li {
-      margin-bottom: 4px;
-    }
-    
-    .sidebar-menu a {
-      display: flex;
-      align-items: center;
-      padding: 12px 24px;
-      color: var(--light-text);
-      text-decoration: none;
-      transition: var(--transition);
-      font-weight: 500;
-      border-left: 4px solid transparent;
-    }
-    
-    .sidebar-menu a:hover, 
-    .sidebar-menu a.active {
-      background-color: rgba(67, 97, 238, 0.05);
-      color: var(--primary-color);
-      border-left: 4px solid var(--primary-color);
-    }
-    
-    .sidebar-menu i {
-      margin-right: 12px;
-      width: 20px;
-      text-align: center;
-      font-size: 1.1rem;
-    }
-    
-    /* Sidebar Overlay */
-    .sidebar-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.3);
-      backdrop-filter: blur(2px);
-      z-index: 99;
-      opacity: 0;
-      visibility: hidden;
-      transition: var(--transition);
-    }
-    
-    .sidebar-overlay.active {
-      opacity: 1;
-      visibility: visible;
-    }
-    
-    /* Main Content Styles */
-    .main-content {
-      margin-left: 0;
-      padding: 2rem;
-      transition: var(--transition);
-      min-height: calc(100vh - var(--header-height));
-    }
-    
-    @media (min-width: 1024px) {
-      .main-content {
-        margin-left: var(--sidebar-width);
-      }
-    }
-    
-    .page-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 2rem;
-      flex-wrap: wrap;
-      gap: 1.5rem;
-    }
-    
-    .page-title h2 {
-      font-size: 1.8rem;
-      font-weight: 700;
-      color: var(--text-color);
-      margin-bottom: 0.5rem;
-    }
-    
-    .page-title p {
-      color: var(--light-text);
-      font-size: 0.95rem;
-    }
-    
-    /* Dashboard Cards */
-    .cards-container {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-      gap: 24px;
-      margin-bottom: 2.5rem;
-    }
-    
-    .card {
-      background-color: white;
-      border-radius: var(--border-radius);
-      padding: 1.75rem;
-      box-shadow: var(--card-shadow);
-      transition: var(--transition);
-      cursor: pointer;
-      border: 1px solid var(--border-color);
-      position: relative;
-      overflow: hidden;
-    }
-    
-    .card:hover {
-      transform: translateY(-5px);
-      box-shadow: var(--card-hover-shadow);
-    }
-    
-    .card::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 4px;
-      height: 100%;
-      background: linear-gradient(to bottom, var(--primary-color), var(--primary-light));
-    }
-    
-    .card-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      margin-bottom: 1.25rem;
-    }
-    
-    .card-title {
-      font-size: 0.95rem;
-      color: var(--light-text);
-      font-weight: 500;
-    }
-    
-    .card-icon {
-      width: 44px;
-      height: 44px;
-      border-radius: 10px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: white;
-      background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
-      box-shadow: 0 4px 6px rgba(67, 97, 238, 0.2);
-    }
-    
-    .card-icon.green {
-      background: linear-gradient(135deg, #4cc9f0, #4895ef);
-    }
-    
-    .card-icon.yellow {
-      background: linear-gradient(135deg, #f8961e, #f3722c);
-    }
-    
-    .card-icon.red {
-      background: linear-gradient(135deg, #ef233c, #d90429);
-    }
-    
-    .card-icon.purple {
-      background: linear-gradient(135deg, #7209b7, #560bad);
-    }
-    
-    .card-icon.teal {
-      background: linear-gradient(135deg, #4cc9f0, #4895ef);
-    }
-    
-    .card-value {
-      font-size: 1.8rem;
-      font-weight: 700;
-      margin-bottom: 0.5rem;
-      color: var(--text-color);
-    }
-    
-    .card-footer {
-      font-size: 0.85rem;
-      color: var(--light-text);
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-    
-    .card-footer i {
-      font-size: 0.7rem;
-    }
-    
-    .positive-change {
-      color: #4cc9f0;
-    }
-    
-    .negative-change {
-      color: #ef233c;
-    }
-    
-    /* Recent Invoices */
-    .recent-invoices {
-      background-color: white;
-      border-radius: var(--border-radius);
-      padding: 1.75rem;
-      box-shadow: var(--card-shadow);
-      border: 1px solid var(--border-color);
-    }
-    
-    .invoices-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 1.5rem;
-      padding-bottom: 1rem;
-      border-bottom: 1px solid var(--border-color);
-    }
-    
-    .invoices-title {
-      font-size: 1.3rem;
-      font-weight: 600;
-      color: var(--text-color);
-    }
-    
-    .invoices-table-container {
-      max-height: 400px;
-      overflow-y: auto;
-      border: 1px solid var(--border-color);
-      border-radius: var(--border-radius);
-    }
-    
-    .invoices-table {
-      width: 100%;
-      border-collapse: collapse;
-    }
-    
-    .invoices-table th, 
-    .invoices-table td {
-      padding: 14px 16px;
-      text-align: left;
-      border-bottom: 1px solid var(--border-color);
-    }
-    
-    .invoices-table th {
-      background-color: var(--primary-color);
-      color: white;
-      font-weight: 500;
-      position: sticky;
-      top: 0;
-      z-index: 10;
-    }
-    
-    .invoices-table tr:last-child td {
-      border-bottom: none;
-    }
-    
-    .invoices-table tr:hover {
-      background-color: rgba(67, 97, 238, 0.03);
-    }
-    
-    .status {
-      display: inline-flex;
-      align-items: center;
-      padding: 4px 10px;
-      border-radius: 20px;
-      font-size: 0.8rem;
-      font-weight: 500;
-    }
-    
-    .status-paid {
-      background-color: rgba(76, 201, 240, 0.1);
-      color: #4cc9f0;
-    }
-    
-    .status-pending {
-      background-color: rgba(248, 150, 30, 0.1);
-      color: #f8961e;
-    }
-    
-    /* Button Styles */
-    .btn {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      padding: 0.6rem 1.2rem;
-      border: none;
-      border-radius: 8px;
-      font-size: 0.9rem;
-      font-weight: 500;
-      cursor: pointer;
-      transition: var(--transition);
-      gap: 8px;
-    }
-    
-    .btn i {
-      font-size: 0.8rem;
-    }
-    
-    .btn-primary {
-      background: linear-gradient(to right, var(--primary-color), var(--primary-light));
-      color: white;
-      box-shadow: 0 4px 6px rgba(67, 97, 238, 0.2);
-    }
-    
-    .btn-primary:hover {
-      background: linear-gradient(to right, var(--primary-light), var(--primary-color));
-      transform: translateY(-2px);
-      box-shadow: 0 6px 8px rgba(67, 97, 238, 0.3);
-    }
-    
-    .btn-secondary {
-      background-color: white;
-      color: var(--primary-color);
-      border: 1px solid var(--primary-color);
-    }
-    
-    .btn-secondary:hover {
-      background-color: rgba(67, 97, 238, 0.05);
-      transform: translateY(-2px);
-    }
-    
-    .btn-sm {
-      padding: 0.4rem 0.8rem;
-      font-size: 0.8rem;
-    }
-    
-    /* Mobile Menu Toggle */
-    .mobile-menu-toggle {
-      display: none;
-      position: fixed;
-      top: 15px;
-      left: 15px;
-      background: var(--primary-color);
-      color: white;
-      border: none;
-      padding: 10px;
-      border-radius: 10px;
-      z-index: 101;
-      width: 44px;
-      height: 44px;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-      transition: var(--transition);
-    }
-    
-    .mobile-menu-toggle:hover {
-      background: var(--primary-light);
-      transform: scale(1.05);
-    }
-    
-    /* Date Picker Styles */
-    .date-picker-container {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      background: white;
-      padding: 0.6rem 1rem;
-      border-radius: 8px;
-      box-shadow: var(--card-shadow);
-      border: 1px solid var(--border-color);
-    }
-    
-    .date-picker-container label {
-      font-size: 0.9rem;
-      color: var(--light-text);
-      font-weight: 500;
-    }
-    
-    .date-picker-container input[type="date"] {
-      padding: 0.5rem;
-      border: 1px solid var(--border-color);
-      border-radius: 6px;
-      font-family: inherit;
-      color: var(--text-color);
-      font-weight: 500;
-    }
-    
-    #dateDisplay {
-      font-weight: 600;
-      color: var(--primary-color);
-    }
-    
-    /* Mobile Responsiveness */
-    @media (max-width: 1023px) {
-      header {
-        padding: 0 1.5rem;
-      }
-      
-      .sidebar {
-        width: 300px;
-        top: var(--header-height);
-        height: calc(100vh - var(--header-height));
-      }
-      
-      .main-content {
-        padding: 1.5rem;
-      }
-      
-      .cards-container {
-        grid-template-columns: 1fr 1fr;
-        gap: 16px;
-      }
-      
-      .mobile-menu-toggle {
-        display: flex;
-      }
-      
-      .page-header {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 1rem;
-      }
-      
-      .date-picker-container {
-        width: 100%;
-        justify-content: space-between;
-      }
-    }
-    
-    @media (max-width: 640px) {
-      .cards-container {
-        grid-template-columns: 1fr;
-      }
-      
-      .sidebar {
-        width: 85%;
-      }
-      
-      header {
-        padding: 0 1rem;
-      }
-      
-      .main-content {
-        padding: 1.25rem;
-      }
-    }
-    
-    @media (min-width: 1024px) {
-      .mobile-menu-toggle {
-        display: none;
-      }
-    }
-    
-    /* Show sidebar by default on desktop */
-    @media (min-width: 1024px) {
-      .sidebar {
-        transform: translateX(0);
-      }
-    }
-    
-    /* Hide sidebar by default on mobile */
-    @media (max-width: 1023px) {
-      .sidebar {
-        transform: translateX(-100%);
-      }
-      .sidebar.active {
-        transform: translateX(0);
-      }
-    }
-    
-    /* Text center utility class */
-    .text-center {
-      text-align: center;
-    }
-    
-    /* Animation for cards */
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(20px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    
-    .card {
-      animation: fadeIn 0.5s ease forwards;
-    }
-    
-    .card:nth-child(1) { animation-delay: 0.1s; }
-    .card:nth-child(2) { animation-delay: 0.2s; }
-    .card:nth-child(3) { animation-delay: 0.3s; }
-    .card:nth-child(4) { animation-delay: 0.4s; }
-    .card:nth-child(5) { animation-delay: 0.5s; }
-    .card:nth-child(6) { animation-delay: 0.6s; }
-    
-    /* Loading skeleton */
-    .skeleton {
-      background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
-      background-size: 200% 100%;
-      animation: shimmer 1.5s infinite;
-      border-radius: 4px;
-      color: transparent;
-    }
-    
-    @keyframes shimmer {
-      0% { background-position: 200% 0; }
-      100% { background-position: -200% 0; }
-    }
-    
-    /* Badge for new features */
-    .new-badge {
-      background-color: var(--accent-color);
-      color: white;
-      font-size: 0.7rem;
-      padding: 2px 6px;
-      border-radius: 10px;
-      margin-left: 8px;
-      display: inline-block;
-      vertical-align: middle;
-    }
-    
-    /* Tooltip */
-    .tooltip {
-      position: relative;
-      display: inline-block;
-    }
-    
-    .tooltip .tooltiptext {
-      visibility: hidden;
-      width: 120px;
-      background-color: #333;
-      color: #fff;
-      text-align: center;
-      border-radius: 6px;
-      padding: 5px;
-      position: absolute;
-      z-index: 1;
-      bottom: 125%;
-      left: 50%;
-      margin-left: -60px;
-      opacity: 0;
-      transition: opacity 0.3s;
-      font-size: 0.8rem;
-    }
-    
-    .tooltip:hover .tooltiptext {
-      visibility: visible;
-      opacity: 1;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ceremony Invitation</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a2a6c, #2c3e50);
+            color: #f8f9fa;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: rgba(25, 25, 35, 0.85);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            width: 100%;
+            max-width: 500px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .header {
+            background: linear-gradient(90deg, #2c3e50, #1a2a6c);
+            text-align: center;
+            padding: 30px 20px;
+            position: relative;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            color: #f8f9fa;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+            letter-spacing: 1px;
+        }
+        
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            max-width: 80%;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+        
+        .lotus {
+            font-size: 3rem;
+            margin: 15px 0;
+            color: #e91e63;
+            text-shadow: 0 0 10px rgba(233, 30, 99, 0.5);
+            animation: pulse 3s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 0.8; }
+            50% { transform: scale(1.05); opacity: 1; }
+            100% { transform: scale(1); opacity: 0.8; }
+        }
+        
+        .content {
+            padding: 30px;
+        }
+        
+        .message-container {
+            background: rgba(30, 30, 40, 0.7);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+            border-left: 4px solid #e91e63;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .message-container p {
+            font-size: 1.2rem;
+            line-height: 1.8;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        
+        .details {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin: 25px 0;
+            background: rgba(40, 40, 50, 0.6);
+            padding: 20px;
+            border-radius: 15px;
+            border-top: 2px solid rgba(233, 30, 99, 0.3);
+        }
+        
+        .detail-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .detail-item i {
+            font-size: 1.5rem;
+            color: #e91e63;
+            min-width: 30px;
+            text-align: center;
+        }
+        
+        .detail-text {
+            flex: 1;
+        }
+        
+        .detail-text h3 {
+            font-size: 1.1rem;
+            margin-bottom: 5px;
+            color: #e91e63;
+        }
+        
+        .detail-text p {
+            font-size: 1rem;
+            opacity: 0.9;
+        }
+        
+        .location-link {
+            display: block;
+            background: rgba(233, 30, 99, 0.2);
+            color: #f8bbd0;
+            padding: 15px;
+            border-radius: 10px;
+            text-decoration: none;
+            text-align: center;
+            margin: 20px 0;
+            transition: all 0.3s;
+            border: 1px dashed rgba(233, 30, 99, 0.4);
+            word-break: break-all;
+        }
+        
+        .location-link:hover {
+            background: rgba(233, 30, 99, 0.3);
+            transform: translateY(-2px);
+        }
+        
+        .input-group {
+            margin-bottom: 25px;
+        }
+        
+        .input-group label {
+            display: block;
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+            color: #e91e63;
+        }
+        
+        .input-group input {
+            width: 100%;
+            padding: 15px;
+            border-radius: 10px;
+            border: none;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 1.1rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s;
+        }
+        
+        .input-group input:focus {
+            outline: none;
+            border-color: #e91e63;
+            background: rgba(255, 255, 255, 0.15);
+            box-shadow: 0 0 0 2px rgba(233, 30, 99, 0.2);
+        }
+        
+        .input-group input::placeholder {
+            color: rgba(255, 255, 255, 0.4);
+        }
+        
+        .btn {
+            background: linear-gradient(90deg, #e91e63, #c2185b);
+            color: white;
+            border: none;
+            width: 100%;
+            padding: 16px;
+            border-radius: 10px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 4px 15px rgba(233, 30, 99, 0.3);
+        }
+        
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(233, 30, 99, 0.4);
+        }
+        
+        .btn:active {
+            transform: translateY(0);
+        }
+        
+        .footer {
+            text-align: center;
+            padding: 20px;
+            font-size: 0.9rem;
+            opacity: 0.7;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .whatsapp-icon {
+            font-size: 1.5rem;
+        }
+        
+        @media (max-width: 500px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .header p {
+                font-size: 1rem;
+            }
+            
+            .message-container p {
+                font-size: 1.1rem;
+            }
+        }
+    </style>
 </head>
 <body>
-  <div class="sidebar-overlay" onclick="toggleSidebar()"></div>
-  <button class="mobile-menu-toggle" onclick="toggleSidebar()">
-    <i class="fas fa-bars"></i>
-  </button>
-
-  <!-- Header -->
-  <header>
-    <div class="logo">
-      <div class="logo-icon">
-        <i class="fas fa-book-open"></i>
-      </div>
-      <h1>Bannu Enterprises</h1>
-    </div>
-    <div class="user-menu">
-      <div class="notifications tooltip">
-        <i class="fas fa-bell"></i>
-        <span class="badge">3</span>
-        <span class="tooltiptext">3 new notifications</span>
-      </div>
-      <div class="avatar tooltip" onclick="window.location.href='profile.html'">
-        A
-        <span class="tooltiptext">Account Settings</span>
-      </div>
-    </div>
-  </header>
-  
-  <!-- Sidebar -->
-  <div class="sidebar">
-    <ul class="sidebar-menu">
-      <li><a href="index.html" class="active"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
-      <li><a href="invoice.html"><i class="fas fa-file-invoice"></i> Create Invoice <span class="new-badge">NEW</span></a></li>
-      <li><a href="payments.html"><i class="fas fa-money-bill-wave"></i> Payments</a></li>
-      <li><a href="SearchCustomer.html"><i class="fas fa-search"></i> Customer Search</a></li>
-      <li><a href="SearchPayments.html"><i class="fas fa-chart-bar"></i>Search Payments</a></li>
-      <li><a href="#"><i class="fas fa-cog"></i> Settings</a></li>
-      <li><a href="#"><i class="fas fa-question-circle"></i> Help & Support</a></li>
-    </ul>
-  </div>
-  
-  <!-- Main Content -->
-  <div class="main-content">
-    <div class="page-header">
-      <div class="page-title">
-        <h2>Dashboard Overview</h2>
-        <p>Track your business performance and key metrics</p>
-      </div>
-      <div class="date-picker-container">
-        <label for="datePicker"><i class="fas fa-calendar-alt"></i> Select Date: </label>
-        <input type="date" id="datePicker" onchange="updateDateDisplay(this.value)">
-        <div id="dateDisplay"></div>
-      </div>
-    </div>
-    
-    <!-- Dashboard Cards -->
-    <div class="cards-container">
-      <div class="card" onclick="window.location.href='Daysales.html?date=' + document.getElementById('datePicker').value;">
-        <div class="card-header">
-          <div class="card-title">Day's Sales</div>
-          <div class="card-icon">
-            <i class="fas fa-rupee-sign"></i>
-          </div>
+    <div class="container">
+        <div class="header">
+            <div class="lotus">
+                <i class="fas fa-pray"></i>
+            </div>
+            <h1>Ceremony Invitation</h1>
+            <p>In loving memory of our beloved parents</p>
         </div>
-        <div class="card-value" id="todaySales">₹<span class="skeleton">0.00</span></div>
-        <div class="card-footer">
-          <i class="fas fa-calendar-day"></i>
-          <span id="todaySalesChange">Loading...</span>
+        
+        <div class="content">
+            <div class="message-container">
+                <p>
+                    మా తల్లి తండ్రి గారి పెద్ద కర్మ 20-august-2025 నాడు జరపబడుచునది కావున మీరందరు కుటుంబం తో వచ్చి వారి ఆత్మ కి శాంతి చేకూర్చగలరు అని కోరుతున్నాము
+                </p>
+            </div>
+            
+            <div class="details">
+                <div class="detail-item">
+                    <i class="fas fa-calendar-day"></i>
+                    <div class="detail-text">
+                        <h3>Date</h3>
+                        <p>20th August, 2025</p>
+                    </div>
+                </div>
+                
+                <div class="detail-item">
+                    <i class="fas fa-clock"></i>
+                    <div class="detail-text">
+                        <h3>Time</h3>
+                        <p>Morning 10:00 AM onwards</p>
+                    </div>
+                </div>
+                
+                <div class="detail-item">
+                    <i class="fas fa-map-marker-alt"></i>
+                    <div class="detail-text">
+                        <h3>Venue</h3>
+                        <p>Family Residence, Hyderabad</p>
+                    </div>
+                </div>
+            </div>
+            
+            <a href="https://maps.app.goo.gl/zvbSKgTHiz2vRyZh9" class="location-link" target="_blank">
+                <i class="fas fa-map-marked-alt"></i> View Location on Google Maps
+            </a>
+            
+            <div class="input-group">
+                <label for="PhoneNumber"><i class="fas fa-phone"></i> Enter Phone Number</label>
+                <input type="tel" id="PhoneNumber" placeholder="10-digit phone number">
+            </div>
+            
+            <button class="btn" onclick="sendWhatsAppInvite()">
+                <i class="fab fa-whatsapp whatsapp-icon"></i> Send Invitation via WhatsApp
+            </button>
         </div>
-      </div>
-      
-      <div class="card">
-        <div class="card-header">
-          <div class="card-title">Amount Received</div>
-          <div class="card-icon green">
-            <i class="fas fa-hand-holding-usd"></i>
-          </div>
+        
+        <div class="footer">
+            <p>With heartfelt gratitude, Bannu Enterprises Family</p>
         </div>
-        <div class="card-value" id="amountReceived">₹<span class="skeleton">0.00</span></div>
-        <div class="card-footer">
-          <i class="fas fa-clock"></i>
-          Today's payments
-        </div>
-      </div>
-      
-      <div class="card">
-        <div class="card-header">
-          <div class="card-title">Pending Balance</div>
-          <div class="card-icon yellow">
-            <i class="fas fa-clock"></i>
-          </div>
-        </div>
-        <div class="card-value" id="pendingBalance">₹<span class="skeleton">0.00</span></div>
-        <div class="card-footer">
-          <i class="fas fa-exclamation-circle"></i>
-          Unpaid invoices
-        </div>
-      </div>
-      
-      <div class="card">
-        <div class="card-header">
-          <div class="card-title">Recent Invoices</div>
-          <div class="card-icon red">
-            <i class="fas fa-file-invoice"></i>
-          </div>
-        </div>
-        <div class="card-value" id="invoiceCount"><span class="skeleton">0</span></div>
-        <div class="card-footer">
-          <i class="fas fa-file-alt"></i>
-          Generated today
-        </div>
-      </div>
-      
-      <div class="card">
-        <div class="card-header">
-          <div class="card-title">Cash Payments</div>
-          <div class="card-icon teal">
-            <i class="fas fa-money-bill-wave"></i>
-          </div>
-        </div>
-        <div class="card-value" id="cashPayments">₹<span class="skeleton">0.00</span></div>
-        <div class="card-footer">
-          <i class="fas fa-wallet"></i>
-          Today's cash payments
-        </div>
-      </div>
-      
-      <div class="card">
-        <div class="card-header">
-          <div class="card-title">UPI Payments</div>
-          <div class="card-icon purple">
-            <i class="fas fa-mobile-alt"></i>
-          </div>
-        </div>
-        <div class="card-value" id="upiPayments">₹<span class="skeleton">0.00</span></div>
-        <div class="card-footer">
-          <i class="fas fa-qrcode"></i>
-          Today's UPI payments
-        </div>
-      </div>
     </div>
     
-    <!-- Recent Invoices -->
-    <div class="recent-invoices">
-      <div class="invoices-header">
-        <div class="invoices-title">Recent Invoices</div>
-        <div>
-          <a href="invoice.html" class="btn btn-primary">
-            <i class="fas fa-plus"></i> New Invoice
-          </a>
-          <a href="SearchPayments.html" class="btn btn-secondary">
-            <i class="fas fa-search"></i> Search
-          </a>
-        </div>
-      </div>
-      <div class="invoices-table-container">
-        <table class="invoices-table">
-          <thead>
-            <tr>
-              <th>Invoice No</th>
-              <th>Customer</th>
-              <th>Date</th>
-              <th>Amount</th>
-              <th>Paid</th>
-              <th>Balance</th>
-              <th>BilledBy</th>
-              <th>Status</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          <tbody id="recentInvoicesBody">
-            <tr>
-              <td colspan="9" class="text-center">
-                <div class="skeleton" style="height: 300px; width: 100%;"></div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-  </div>
-
-  <script>
-    // Format date for display (dd/mm/yyyy)
-    function formatDisplayDate(dateString) {
-      const date = new Date(dateString);
-      if (isNaN(date)) return 'Invalid Date';
-      
-      const day = String(date.getDate()).padStart(2, '0');
-      const month = String(date.getMonth() + 1).padStart(2, '0');
-      const year = date.getFullYear();
-      return `${day}/${month}/${year}`;
-    }
-
-    // Convert date to yyyy-mm-dd (HTML input format)
-    function formatInputDate(date) {
-      const day = String(date.getDate()).padStart(2, '0');
-      const month = String(date.getMonth() + 1).padStart(2, '0');
-      const year = date.getFullYear();
-      return `${year}-${month}-${day}`;
-    }
-
-    // Format currency with Indian numbering system
-    function formatCurrency(amount) {
-      return new Intl.NumberFormat('en-IN', {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2
-      }).format(amount);
-    }
-
-    // Update date display and fetch data
-    function updateDateDisplay(isoDate) {
-      const displayDate = formatDisplayDate(isoDate);
-      document.getElementById('dateDisplay').textContent = displayDate;
-      
-      // Convert to dd/MM/yyyy format for the API
-      const parts = isoDate.split('-');
-      const apiDate = `${parts[2]}/${parts[1]}/${parts[0]}`;
-      fetchDashboardData(apiDate);
-    }
-
-    // Initialize with today's date in correct format
-    function initializeDatePicker() {
-      const today = new Date();
-      const todayFormatted = formatInputDate(today);
-      document.getElementById('datePicker').value = todayFormatted;
-      document.getElementById('dateDisplay').textContent = formatDisplayDate(todayFormatted);
-      return todayFormatted;
-    }
-
-    // Toggle sidebar visibility on mobile
-    function toggleSidebar() {
-      const sidebar = document.querySelector('.sidebar');
-      const overlay = document.querySelector('.sidebar-overlay');
-      const toggleBtn = document.querySelector('.mobile-menu-toggle');
-      
-      sidebar.classList.toggle('active');
-      overlay.classList.toggle('active');
-      
-      // Change icon based on state
-      if (sidebar.classList.contains('active')) {
-        toggleBtn.innerHTML = '<i class="fas fa-times"></i>';
-      } else {
-        toggleBtn.innerHTML = '<i class="fas fa-bars"></i>';
-      }
-    }
-
-    // Close sidebar when clicking on a menu item (optional)
-    document.querySelectorAll('.sidebar-menu a').forEach(item => {
-      item.addEventListener('click', () => {
-        if (window.innerWidth < 769) {
-          toggleSidebar();
-        }
-      });
-    });
-
-    // Fetch dashboard data from Google Apps Script
-    async function fetchDashboardData(selectedDate) {
-      try {
-        // Show loading state for all cards
-        document.getElementById('todaySales').textContent = 'Loading...';
-        document.getElementById('amountReceived').textContent = 'Loading...';
-        document.getElementById('pendingBalance').textContent = 'Loading...';
-        document.getElementById('invoiceCount').textContent = '...';
-        document.getElementById('cashPayments').textContent = 'Loading...';
-        document.getElementById('upiPayments').textContent = 'Loading...';
-        
-        // Fetch data for selected date
-        const response = await fetch(`https://script.google.com/macros/s/AKfycbzHjer8Bx_s_IQ01QoAtRNQKuOQnljeOBj2K9B86Ns-26ghWlYTVtxzrx5sRuEc9Sw3ww/exec?date=${selectedDate}`);
-        
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
+    <script>
+        function sendWhatsAppInvite() {
+            const phoneInput = document.getElementById("PhoneNumber");
+            let phoneNumber = phoneInput.value.trim().replace(/\D/g, '');
+            
+            if (!phoneNumber || phoneNumber.length < 10) {
+                alert("Please enter a valid 10-digit phone number");
+                return;
+            }
+            
+            const message = `మా తల్లి తండ్రి గారి పెద్ద కర్మ సమారాధన* 🙏
+ *తేదీ:* 20-ఆగస్ట్-2025
+ *స్థలం:* 
+ https://maps.app.goo.gl/zvbSKgTHiz2vRyZh9
+ *"తల్లిదండ్రులు ఎప్పటికీ మన హృదయాలలో జీవిస్తారు. వారి ఆత్మలకు శాంతి చేకూరాలని ప్రార్థిస్తున్నాము."*
+ *మీరు మరియు మీ కుటుంబ సభ్యులందరూ హాజరయ్యి వారి ఆత్మలకు శాంతి కలిగించగలరని ఆశిస్తున్నాము.*
+ *కృతజ్ఞతలు,*`;
+            
+            const whatsappUrl = `https://api.whatsapp.com/send?phone=91${phoneNumber}&text=${encodeURIComponent(message)}`;
+            
+            window.open(whatsappUrl, '_blank');
         }
         
-        const data = await response.json();
-        console.log("Dashboard data:", data); // For debugging
-        
-        if (data.status === "success") {
-          // Update all dashboard cards
-          document.getElementById('todaySales').textContent = `₹${formatCurrency(data.data.todaySales)}`;
-          document.getElementById('amountReceived').textContent = `₹${formatCurrency(data.data.amountReceived)}`;
-          document.getElementById('pendingBalance').textContent = `₹${formatCurrency(data.data.pendingBalance)}`;
-          document.getElementById('invoiceCount').textContent = data.data.invoiceCount;
-          document.getElementById('cashPayments').textContent = `₹${formatCurrency(data.data.cashPayments || 0)}`;
-          document.getElementById('upiPayments').textContent = `₹${formatCurrency(data.data.upiPayments || 0)}`;
-          document.getElementById('todaySalesChange').textContent = `${selectedDate} sales`;
-          
-          // Update recent invoices table
-          const tbody = document.getElementById('recentInvoicesBody');
-          tbody.innerHTML = '';
-          
-          if (data.data.recentInvoices.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="9" class="text-center">No invoices found for selected date</td></tr>';
-          } else {
-            data.data.recentInvoices.forEach(invoice => {
-              const row = document.createElement('tr');
-              row.innerHTML = `
-                <td>${invoice.invoiceNo}</td>
-                <td>${invoice.customerName}</td>
-                <td>${invoice.date}</td>
-                <td>₹${formatCurrency(invoice.total)}</td>
-                <td>₹${formatCurrency(invoice.paid)}</td>
-                <td>₹${formatCurrency(invoice.balance)}</td>
-                <td>${invoice.BilledBy || '—'}</td>
-                <td class="${invoice.balance > 0 ? 'status-pending' : 'status-paid'}">
-                  ${invoice.balance > 0 ? 'Pending' : 'Paid'}
-                </td>
-                <td>
-                  <button class="btn btn-secondary btn-sm" 
-                       onclick="window.open('${invoice.pdfUrl}', '_blank')"
-                       ${!invoice.pdfUrl ? 'disabled' : ''}>
-                    <i class="fas fa-eye"></i> View
-                  </button>
-                </td>
-              `;
-              tbody.appendChild(row);
-            });
-          }
-        } else {
-          throw new Error(data.message || 'Unknown server error');
-        }
-      } catch (error) {
-        console.error('Error fetching dashboard data:', error);
-        // Show error to user
-        document.getElementById('todaySales').textContent = 'Error';
-        document.getElementById('amountReceived').textContent = 'Error';
-        document.getElementById('pendingBalance').textContent = 'Error';
-        document.getElementById('cashPayments').textContent = 'Error';
-        document.getElementById('upiPayments').textContent = 'Error';
-        document.getElementById('todaySalesChange').textContent = 'Failed to load data';
-        document.getElementById('invoiceCount').textContent = '--';
-        
-        const tbody = document.getElementById('recentInvoicesBody');
-        tbody.innerHTML = '<tr><td colspan="9" class="text-center">Error loading invoices. Please try again.</td></tr>';
-      }
-    }
-
-    // Initialize the dashboard when page loads
-    document.addEventListener('DOMContentLoaded', function() {
-      // Initialize sidebar state
-      const sidebar = document.querySelector('.sidebar');
-      const overlay = document.querySelector('.sidebar-overlay');
-      const toggleBtn = document.querySelector('.mobile-menu-toggle');
-      
-      // Show sidebar by default on desktop
-      if (window.innerWidth >= 769) {
-        sidebar.classList.add('active');
-      }
-      
-      // Load data for current date initially
-      const today = initializeDatePicker();
-      fetchDashboardData(today);
-      
-      // Add date picker change handler
-      document.getElementById('datePicker').addEventListener('change', function() {
-        updateDateDisplay(this.value);
-      });
-      
-      // Add click handler for Today's Sales card
-      document.getElementById('todaySales').addEventListener('click', function() {
-        window.location.href = 'Daysales.html?date=' + document.getElementById('datePicker').value;
-      });
-    });
-  </script>
+        // Add Enter key functionality
+        document.getElementById("PhoneNumber").addEventListener("keyup", function(event) {
+            if (event.key === "Enter") {
+                sendWhatsAppInvite();
+            }
+        });
+    </script>
 </body>
 </html>
