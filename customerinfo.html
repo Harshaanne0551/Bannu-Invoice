@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -7,6 +6,7 @@
   <title>Invoice Dashboard - Bannu Enterprises</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
+    /* Your existing CSS remains the same */
     * {
       margin: 0;
       padding: 0;
@@ -224,10 +224,36 @@
       cursor: pointer;
       margin-right: 5px;
       transition: background-color 0.3s;
+      font-size: 12px;
     }
 
     .action-btn:hover {
       background-color: #002244;
+    }
+
+    .action-btn.edit {
+      background-color: #3498db;
+    }
+
+    .action-btn.save {
+      background-color: #2ecc71;
+    }
+
+    .action-btn.cancel {
+      background-color: #e74c3c;
+    }
+
+    .amount-input {
+      width: 80px;
+      padding: 4px 8px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      text-align: right;
+      font-size: 12px;
+    }
+
+    .editable-cell {
+      background-color: #fffacd;
     }
 
     .no-data {
@@ -250,6 +276,25 @@
       background-color: #ffeaea;
       border-radius: 6px;
       margin: 10px 0;
+    }
+
+    .success-message {
+      text-align: center;
+      padding: 10px;
+      color: #2ecc71;
+      background-color: #e8f8ef;
+      border-radius: 4px;
+      margin: 10px 0;
+      display: none;
+    }
+
+    .debug-info {
+      background: #f8f9fa;
+      padding: 10px;
+      border-radius: 4px;
+      margin: 10px 0;
+      font-size: 12px;
+      color: #666;
     }
 
     @media (max-width: 768px) {
@@ -277,6 +322,17 @@
       
       .search-container {
         flex-direction: column;
+      }
+      
+      .action-btn {
+        padding: 4px 8px;
+        font-size: 11px;
+        margin-bottom: 2px;
+      }
+      
+      .amount-input {
+        width: 60px;
+        font-size: 11px;
       }
     }
   </style>
@@ -328,6 +384,9 @@
         <div class="card-description">Bills with remaining balances</div>
       </div>
     </div>
+
+    <div id="success-message" class="success-message"></div>
+    <div id="debug-info" class="debug-info" style="display: none;"></div>
     
     <div class="data-section active" id="total-section">
       <h2 class="section-title">All Invoices</h2>
@@ -440,11 +499,12 @@
     const cards = document.querySelectorAll('.card');
     const dataSections = document.querySelectorAll('.data-section');
     const searchBtn = document.getElementById('searchBtn');
-    const partialSearchBtn = document.getElementById('partial-search-btn');
-    const balanceSearchBtn = document.getElementById('balance-search-btn');
     
     // Global variables
     let allInvoices = [];
+    let currentDisplayedData = [];
+    let editingRowId = null;
+    let currentTableType = 'total';
     
     // Safe element access function
     function getElementSafe(id) {
@@ -462,8 +522,35 @@
       }
     }
     
+    // Show debug info
+    function showDebugInfo(info) {
+      const debugElement = getElementSafe('debug-info');
+      if (debugElement) {
+        debugElement.innerHTML = `<strong>Debug Info:</strong> ${info}`;
+        debugElement.style.display = 'block';
+      }
+    }
+    
+    // Show success message
+    function showSuccess(message) {
+      const successElement = getElementSafe('success-message');
+      if (successElement) {
+        successElement.textContent = message;
+        successElement.style.display = 'block';
+        setTimeout(() => {
+          successElement.style.display = 'none';
+        }, 3000);
+      }
+    }
+
+    // Find original index in allInvoices array
+    function findOriginalIndex(invoiceNo) {
+      return allInvoices.findIndex(invoice => invoice['Invoice No'] == invoiceNo);
+    }
+    
     // Initialize dashboard
     document.addEventListener('DOMContentLoaded', function() {
+      console.log('Dashboard initialized');
       // Load all data initially
       fetchAllData();
       
@@ -471,6 +558,7 @@
       cards.forEach(card => {
         card.addEventListener('click', function() {
           const type = this.getAttribute('data-type');
+          currentTableType = type;
           
           // Update active card
           cards.forEach(c => c.classList.remove('active'));
@@ -483,14 +571,15 @@
           
           // Load data for the selected section
           if (type === 'total') {
-            renderTable('total-table-body', allInvoices);
+            currentDisplayedData = allInvoices;
+            renderTable('total-table-body', allInvoices, 'total');
           } else if (type === 'partial') {
-            const partialData = allInvoices.filter(invoice => 
+            currentDisplayedData = allInvoices.filter(invoice => 
               parseFloat(invoice.Paid || 0) > 0 && parseFloat(invoice.Balance || 0) > 0);
-            renderTable('partial-table-body', partialData);
+            renderTable('partial-table-body', currentDisplayedData, 'partial');
           } else if (type === 'balance') {
-            const balanceData = allInvoices.filter(invoice => parseFloat(invoice.Balance || 0) > 0);
-            renderTable('balance-table-body', balanceData);
+            currentDisplayedData = allInvoices.filter(invoice => parseFloat(invoice.Balance || 0) > 0);
+            renderTable('balance-table-body', currentDisplayedData, 'balance');
           }
         });
       });
@@ -499,36 +588,11 @@
       if (searchBtn) {
         searchBtn.addEventListener('click', function() {
           const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-          const filteredData = allInvoices.filter(invoice => {
+          currentDisplayedData = allInvoices.filter(invoice => {
             const customerName = invoice['Customer Name'] || invoice['CustomerName'] || '';
             return customerName.toLowerCase().includes(searchTerm);
           });
-          renderTable('total-table-body', filteredData);
-        });
-      }
-      
-      if (partialSearchBtn) {
-        partialSearchBtn.addEventListener('click', function() {
-          const searchTerm = document.getElementById('partial-search-input').value.toLowerCase();
-          const filteredData = allInvoices.filter(invoice => {
-            const customerName = invoice['Customer Name'] || invoice['CustomerName'] || '';
-            return parseFloat(invoice.Paid || 0) > 0 && 
-                   parseFloat(invoice.Balance || 0) > 0 &&
-                   customerName.toLowerCase().includes(searchTerm);
-          });
-          renderTable('partial-table-body', filteredData);
-        });
-      }
-      
-      if (balanceSearchBtn) {
-        balanceSearchBtn.addEventListener('click', function() {
-          const searchTerm = document.getElementById('balance-search-input').value.toLowerCase();
-          const filteredData = allInvoices.filter(invoice => {
-            const customerName = invoice['Customer Name'] || invoice['CustomerName'] || '';
-            return parseFloat(invoice.Balance || 0) > 0 &&
-                   customerName.toLowerCase().includes(searchTerm);
-          });
-          renderTable('balance-table-body', filteredData);
+          renderTable('total-table-body', currentDisplayedData, 'total');
         });
       }
     });
@@ -541,13 +605,16 @@
       setDisplaySafe(loadingElement, 'block');
       setDisplaySafe(errorElement, 'none');
       
-      const scriptUrl = 'https://script.google.com/macros/s/AKfycbwsK_G9H68w9N66WQbC1OBqJXma4yCv9qCUYEV5XbDqcj4XNfuFeZMznea-i8AfYXEkdA/exec';
+      const scriptUrl = 'https://script.google.com/macros/s/AKfycbz20VBaaHMqUEJZpmtlIzMw5gsRGCVFjrhRbdCN818FNUGtKUzQYoWh2Ir63ehFvEsxag/exec';
       
-      console.log('Fetching data from:', scriptUrl);
+      console.log('Fetching all data from:', scriptUrl);
+      showDebugInfo('Fetching data from: ' + scriptUrl);
       
+      // Fetch all data without customer filter
       fetch(scriptUrl)
         .then(res => {
           console.log('Response status:', res.status);
+          showDebugInfo(`Response status: ${res.status}`);
           if (!res.ok) {
             throw new Error(`HTTP error! status: ${res.status}`);
           }
@@ -555,25 +622,35 @@
         })
         .then(data => {
           console.log('Data received:', data);
+          showDebugInfo(`Received ${data ? data.length : 0} records`);
           setDisplaySafe(loadingElement, 'none');
           
-          if (!data || !data.length) {
+          if (!data || data.length === 0) {
             const noDataElement = getElementSafe('total-no-data');
             setDisplaySafe(noDataElement, 'block');
+            showDebugInfo('No data received from server');
             return;
           }
           
+          // Check if data has error property
+          if (data.error) {
+            throw new Error(data.error);
+          }
+          
           allInvoices = data;
+          currentDisplayedData = data;
           updateCardValues(data);
-          renderTable('total-table-body', data);
+          renderTable('total-table-body', data, 'total');
+          showDebugInfo(`Successfully loaded ${data.length} invoices`);
         })
         .catch(err => {
           console.error('Fetch error:', err);
           setDisplaySafe(loadingElement, 'none');
           setDisplaySafe(errorElement, 'block');
           if (errorElement) {
-            errorElement.innerHTML = `Error loading data: ${err.message}.<br>Please check if doGet function is deployed and accessible.`;
+            errorElement.innerHTML = `Error loading data: ${err.message}`;
           }
+          showDebugInfo(`Error: ${err.message}`);
         });
     }
 
@@ -591,10 +668,12 @@
       if (totalInvoicesElement) totalInvoicesElement.textContent = totalInvoices;
       if (partialPaymentsElement) partialPaymentsElement.textContent = partialPayments;
       if (balanceCountElement) balanceCountElement.textContent = balanceCount;
+      
+      console.log(`Cards updated - Total: ${totalInvoices}, Partial: ${partialPayments}, Balance: ${balanceCount}`);
     }
 
     // Render table with data
-    function renderTable(tableBodyId, data) {
+    function renderTable(tableBodyId, data, tableType) {
       const tableBody = getElementSafe(tableBodyId);
       const noDataElement = getElementSafe(tableBodyId.replace('body', 'no-data'));
       
@@ -609,27 +688,207 @@
       
       setDisplaySafe(noDataElement, 'none');
       
-      tableBody.innerHTML = data.map(invoice => {
-        const invoiceNo = invoice['Invoice No'] || invoice['InvoiceNo'] || 'N/A';
-        const customerName = invoice['Customer Name'] || invoice['CustomerName'] || 'N/A';
-        const pdfLink = invoice['PDF Link'] || invoice['PDFLink'] || '';
+      console.log('Rendering table with data:', data);
+      
+      tableBody.innerHTML = data.map((invoice, displayIndex) => {
+        const invoiceNo = invoice['Invoice No'] || 'N/A';
+        const customerName = invoice['Customer Name'] || 'N/A';
+        const pdfLink = invoice['PDF Link'] || '';
+        const total = parseFloat(invoice.Total || 0);
+        const paid = parseFloat(invoice.Paid || 0);
+        const balance = parseFloat(invoice.Balance || 0);
+        const originalIndex = findOriginalIndex(invoiceNo);
+        const rowId = `row-${tableType}-${displayIndex}`;
         
         return `
-          <tr>
+          <tr id="${rowId}">
             <td>${invoiceNo}</td>
             <td>${customerName}</td>
             <td>${invoice.Date || 'N/A'}</td>
-            <td>₹${parseFloat(invoice.Total || 0).toLocaleString()}</td>
-            <td>₹${parseFloat(invoice.Paid || 0).toLocaleString()}</td>
-            <td>₹${parseFloat(invoice.Balance || 0).toLocaleString()}</td>
+            <td>₹${total.toLocaleString()}</td>
+            <td id="paid-${tableType}-${displayIndex}">₹${paid.toLocaleString()}</td>
+            <td id="balance-${tableType}-${displayIndex}">₹${balance.toLocaleString()}</td>
             <td>${invoice.PaymentBy || 'N/A'}</td>
             <td>${invoice.BilledBy || 'N/A'}</td>
             <td>
               <button class="action-btn" onclick="viewInvoice('${pdfLink}')">View</button>
+              <button class="action-btn edit" onclick="enableEdit('${tableType}', ${displayIndex}, ${originalIndex})">Edit</button>
+              <button class="action-btn save" onclick="saveChanges('${tableType}', ${displayIndex}, ${originalIndex})" style="display:none;">Save</button>
+              <button class="action-btn cancel" onclick="cancelEdit('${tableType}', ${displayIndex})" style="display:none;">Cancel</button>
             </td>
           </tr>
         `;
       }).join('');
+    }
+
+    // Enable edit mode for a row
+    function enableEdit(tableType, displayIndex, originalIndex) {
+      console.log('Enabling edit for:', {tableType, displayIndex, originalIndex});
+      
+      if (editingRowId !== null) {
+        const [prevType, prevIndex] = editingRowId.split('-');
+        cancelEdit(prevType, parseInt(prevIndex));
+      }
+      
+      editingRowId = `${tableType}-${displayIndex}`;
+      
+      const paidCell = getElementSafe(`paid-${tableType}-${displayIndex}`);
+      const balanceCell = getElementSafe(`balance-${tableType}-${displayIndex}`);
+      const row = getElementSafe(`row-${tableType}-${displayIndex}`);
+      
+      if (!paidCell || !balanceCell || !row) {
+        console.error('Could not find required elements for editing');
+        return;
+      }
+      
+      const editBtn = row.querySelector('.action-btn.edit');
+      const saveBtn = row.querySelector('.action-btn.save');
+      const cancelBtn = row.querySelector('.action-btn.cancel');
+      
+      if (paidCell && balanceCell) {
+        const invoiceData = tableType === 'total' ? allInvoices[originalIndex] : currentDisplayedData[displayIndex];
+        const paidValue = parseFloat(invoiceData.Paid || 0);
+        const balanceValue = parseFloat(invoiceData.Balance || 0);
+        
+        paidCell.innerHTML = `<input type="number" class="amount-input" id="paid-input-${tableType}-${displayIndex}" value="${paidValue}" step="0.01">`;
+        balanceCell.innerHTML = `<input type="number" class="amount-input" id="balance-input-${tableType}-${displayIndex}" value="${balanceValue}" step="0.01" disabled>`;
+        
+        paidCell.classList.add('editable-cell');
+        balanceCell.classList.add('editable-cell');
+        
+        if (editBtn) editBtn.style.display = 'none';
+        if (saveBtn) saveBtn.style.display = 'inline-block';
+        if (cancelBtn) cancelBtn.style.display = 'inline-block';
+        
+        // Auto-update balance when paid changes
+        const paidInput = getElementSafe(`paid-input-${tableType}-${displayIndex}`);
+        const balanceInput = getElementSafe(`balance-input-${tableType}-${displayIndex}`);
+        const total = parseFloat(invoiceData.Total || 0);
+        
+        if (paidInput && balanceInput) {
+          paidInput.addEventListener('input', function() {
+            const newPaid = parseFloat(this.value) || 0;
+            const newBalance = total - newPaid;
+            balanceInput.value = newBalance.toFixed(2);
+          });
+        }
+      }
+    }
+
+    // Cancel edit mode
+    function cancelEdit(tableType, displayIndex) {
+      console.log('Canceling edit for:', {tableType, displayIndex});
+      
+      const paidCell = getElementSafe(`paid-${tableType}-${displayIndex}`);
+      const balanceCell = getElementSafe(`balance-${tableType}-${displayIndex}`);
+      const row = getElementSafe(`row-${tableType}-${displayIndex}`);
+      
+      if (!paidCell || !balanceCell || !row) return;
+      
+      const editBtn = row.querySelector('.action-btn.edit');
+      const saveBtn = row.querySelector('.action-btn.save');
+      const cancelBtn = row.querySelector('.action-btn.cancel');
+      
+      if (paidCell && balanceCell) {
+        const invoiceData = tableType === 'total' ? allInvoices[findOriginalIndex(row.cells[0].textContent)] : currentDisplayedData[displayIndex];
+        const paidValue = parseFloat(invoiceData.Paid || 0);
+        const balanceValue = parseFloat(invoiceData.Balance || 0);
+        
+        paidCell.innerHTML = `₹${paidValue.toLocaleString()}`;
+        balanceCell.innerHTML = `₹${balanceValue.toLocaleString()}`;
+        
+        paidCell.classList.remove('editable-cell');
+        balanceCell.classList.remove('editable-cell');
+        
+        if (editBtn) editBtn.style.display = 'inline-block';
+        if (saveBtn) saveBtn.style.display = 'none';
+        if (cancelBtn) cancelBtn.style.display = 'none';
+      }
+      
+      if (editingRowId === `${tableType}-${displayIndex}`) {
+        editingRowId = null;
+      }
+    }
+
+    // Save changes to Google Sheets
+    function saveChanges(tableType, displayIndex, originalIndex) {
+      console.log('Saving changes for:', {tableType, displayIndex, originalIndex});
+      
+      const paidInput = getElementSafe(`paid-input-${tableType}-${displayIndex}`);
+      const balanceInput = getElementSafe(`balance-input-${tableType}-${displayIndex}`);
+      
+      if (!paidInput || !balanceInput) {
+        alert('Error: Could not find input fields');
+        return;
+      }
+      
+      const newPaid = parseFloat(paidInput.value) || 0;
+      const newBalance = parseFloat(balanceInput.value) || 0;
+      
+      // Validate that Paid is not negative
+      if (newPaid < 0) {
+        alert('Error: Paid amount cannot be negative');
+        return;
+      }
+      
+      // Validate that Paid doesn't exceed Total
+      const invoiceData = tableType === 'total' ? allInvoices[originalIndex] : currentDisplayedData[displayIndex];
+      const total = parseFloat(invoiceData.Total || 0);
+      if (newPaid > total) {
+        alert('Error: Paid amount cannot exceed Total amount');
+        return;
+      }
+      
+      // Update local data
+      const invoiceToUpdate = allInvoices[originalIndex];
+      invoiceToUpdate.Paid = newPaid;
+      invoiceToUpdate.Balance = newBalance;
+      
+      // Update Google Sheets
+      updateInvoiceInSheets(invoiceToUpdate, tableType, displayIndex, originalIndex);
+    }
+
+    // Update invoice in Google Sheets
+    function updateInvoiceInSheets(invoiceData, tableType, displayIndex, originalIndex) {
+      const scriptUrl = 'https://script.google.com/macros/s/AKfycbz20VBaaHMqUEJZpmtlIzMw5gsRGCVFjrhRbdCN818FNUGtKUzQYoWh2Ir63ehFvEsxag/exec';
+      
+      // Prepare data for update
+      const updateData = {
+        "Invoice No": invoiceData['Invoice No'],
+        "Paid": invoiceData.Paid,
+        "Total": invoiceData.Total
+      };
+      
+      console.log('Sending update data:', updateData);
+      showDebugInfo(`Updating invoice ${updateData['Invoice No']} with Paid: ${updateData.Paid}`);
+      
+      fetch(scriptUrl, {
+        method: 'POST',
+	mode:'no-cors',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(updateData)
+      })
+      .then(response => {
+        console.log('Update response status:', response.status);
+        return response.json();
+      })
+      .then(data => {
+        console.log('Update response data:', data);
+        if (data.success) {
+          showSuccess('Invoice updated successfully!');
+          cancelEdit(tableType, displayIndex);
+          updateCardValues(allInvoices);
+          showDebugInfo('Invoice successfully updated in Google Sheets');
+          
+          // Refresh the data to get the latest from Google Sheets
+          fetchAllData();
+        } else {
+          throw new Error(data.error || 'Unknown error');
+        }
+      })
+      
     }
 
     // View invoice PDF
