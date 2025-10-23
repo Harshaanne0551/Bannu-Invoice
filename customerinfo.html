@@ -1,0 +1,645 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Invoice Dashboard - Bannu Enterprises</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      background-color: #f5f7fa;
+      color: #333;
+      line-height: 1.6;
+    }
+
+    .nav-header {
+      background-color: #003366;
+      color: white;
+      padding: 15px 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .logo i {
+      font-size: 24px;
+    }
+
+    .logo h1 {
+      font-size: 22px;
+      font-weight: 600;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 25px;
+    }
+
+    .nav-links a {
+      color: white;
+      text-decoration: none;
+      font-weight: 500;
+      padding: 8px 12px;
+      border-radius: 4px;
+      transition: background-color 0.3s;
+    }
+
+    .nav-links a:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 30px auto;
+      padding: 0 20px;
+    }
+
+    .dashboard-title {
+      text-align: center;
+      margin-bottom: 30px;
+      color: #003366;
+    }
+
+    .cards-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 25px;
+      margin-bottom: 40px;
+    }
+
+    .card {
+      background: white;
+      border-radius: 10px;
+      padding: 25px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+      transition: transform 0.3s, box-shadow 0.3s;
+      cursor: pointer;
+      border-top: 4px solid #003366;
+    }
+
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+    }
+
+    .card.active {
+      border-top-color: #ff9900;
+      background-color: #f9f9f9;
+    }
+
+    .card-icon {
+      font-size: 28px;
+      margin-bottom: 15px;
+      color: #003366;
+    }
+
+    .card-title {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 10px;
+      color: #003366;
+    }
+
+    .card-value {
+      font-size: 32px;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+
+    .card-description {
+      font-size: 14px;
+      color: #666;
+    }
+
+    .card.total-invoices {
+      border-top-color: #3498db;
+    }
+
+    .card.half-amounts {
+      border-top-color: #f39c12;
+    }
+
+    .card.balances {
+      border-top-color: #e74c3c;
+    }
+
+    .data-section {
+      background: white;
+      border-radius: 10px;
+      padding: 25px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+      margin-bottom: 30px;
+      display: none;
+    }
+
+    .data-section.active {
+      display: block;
+    }
+
+    .section-title {
+      font-size: 22px;
+      color: #003366;
+      margin-bottom: 20px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #eee;
+    }
+
+    .search-container {
+      margin-bottom: 20px;
+      display: flex;
+      gap: 10px;
+    }
+
+    .search-container input {
+      flex: 1;
+      padding: 12px 15px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-size: 16px;
+    }
+
+    .search-container button {
+      background-color: #003366;
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 16px;
+      transition: background-color 0.3s;
+    }
+
+    .search-container button:hover {
+      background-color: #002244;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+      font-size: 14px;
+    }
+
+    th, td {
+      border: 1px solid #ddd;
+      padding: 12px;
+      text-align: left;
+    }
+
+    th {
+      background-color: #003366;
+      color: white;
+      font-weight: 600;
+    }
+
+    tr:nth-child(even) {
+      background-color: #f9f9f9;
+    }
+
+    tr:hover {
+      background-color: #f1f1f1;
+    }
+
+    .action-btn {
+      padding: 6px 12px;
+      background-color: #003366;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-right: 5px;
+      transition: background-color 0.3s;
+    }
+
+    .action-btn:hover {
+      background-color: #002244;
+    }
+
+    .no-data {
+      text-align: center;
+      padding: 20px;
+      color: #666;
+      font-style: italic;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 20px;
+      color: #003366;
+    }
+
+    .error {
+      text-align: center;
+      padding: 20px;
+      color: #e74c3c;
+      background-color: #ffeaea;
+      border-radius: 6px;
+      margin: 10px 0;
+    }
+
+    @media (max-width: 768px) {
+      .nav-header {
+        flex-direction: column;
+        gap: 15px;
+      }
+      
+      .nav-links {
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+      
+      .cards-container {
+        grid-template-columns: 1fr;
+      }
+      
+      table {
+        font-size: 12px;
+      }
+      
+      th, td {
+        padding: 8px;
+      }
+      
+      .search-container {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Navigation Header -->
+  <div class="nav-header">
+    <div class="logo">
+      <i class="fas fa-book-open"></i>
+      <h1>Bannu Enterprises</h1>
+    </div>
+    <div class="nav-links">
+      <a href="index.html">Dashboard</a>
+      <a href="invoice.html">Invoice</a>
+      <a href="payments.html">Payments</a>
+      <a href="SearchCustomer.html">Search Customer</a>
+      <a href="SearchPayments.html">Search Payments</a>
+    </div>
+  </div>
+
+  <div class="container">
+    <h1 class="dashboard-title">Invoice Dashboard</h1>
+    
+    <div class="cards-container">
+      <div class="card total-invoices active" data-type="total">
+        <div class="card-icon">
+          <i class="fas fa-file-invoice"></i>
+        </div>
+        <div class="card-title">Total Invoices</div>
+        <div class="card-value" id="total-invoices-count">0</div>
+        <div class="card-description">All customer invoices</div>
+      </div>
+      
+      <div class="card half-amounts" data-type="partial">
+        <div class="card-icon">
+          <i class="fas fa-money-bill-wave"></i>
+        </div>
+        <div class="card-title">Partial Payments</div>
+        <div class="card-value" id="partial-payments-count">0</div>
+        <div class="card-description">Customers with partial payments</div>
+      </div>
+      
+      <div class="card balances" data-type="balance">
+        <div class="card-icon">
+          <i class="fas fa-balance-scale"></i>
+        </div>
+        <div class="card-title">Outstanding Balances</div>
+        <div class="card-value" id="balance-count">0</div>
+        <div class="card-description">Bills with remaining balances</div>
+      </div>
+    </div>
+    
+    <div class="data-section active" id="total-section">
+      <h2 class="section-title">All Invoices</h2>
+      <div class="search-container">
+        <input type="text" id="searchInput" placeholder="Search by customer name...">
+        <button id="searchBtn">Search</button>
+      </div>
+      <div id="total-table-container">
+        <div id="total-error" class="error" style="display:none;"></div>
+        <table id="total-table">
+          <thead>
+            <tr>
+              <th>Invoice No</th>
+              <th>Customer Name</th>
+              <th>Date</th>
+              <th>Total</th>
+              <th>Paid</th>
+              <th>Balance</th>
+              <th>Payment By</th>
+              <th>Billed By</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="total-table-body">
+            <!-- Data will be populated here -->
+          </tbody>
+        </table>
+        <div id="total-no-data" class="no-data" style="display:none;">
+          No invoices found. Try a different search term.
+        </div>
+        <div id="total-loading" class="loading" style="display:none;">
+          Loading invoices...
+        </div>
+      </div>
+    </div>
+    
+    <div class="data-section" id="partial-section">
+      <h2 class="section-title">Partial Payments</h2>
+      <div class="search-container">
+        <input type="text" id="partial-search-input" placeholder="Search by customer name...">
+        <button id="partial-search-btn">Search</button>
+      </div>
+      <div id="partial-table-container">
+        <div id="partial-error" class="error" style="display:none;"></div>
+        <table id="partial-table">
+          <thead>
+            <tr>
+              <th>Invoice No</th>
+              <th>Customer Name</th>
+              <th>Date</th>
+              <th>Total</th>
+              <th>Paid</th>
+              <th>Balance</th>
+              <th>Payment By</th>
+              <th>Billed By</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="partial-table-body">
+            <!-- Data will be populated here -->
+          </tbody>
+        </table>
+        <div id="partial-no-data" class="no-data" style="display:none;">
+          No partial payments found. Try a different search term.
+        </div>
+        <div id="partial-loading" class="loading" style="display:none;">
+          Loading partial payments...
+        </div>
+      </div>
+    </div>
+    
+    <div class="data-section" id="balance-section">
+      <h2 class="section-title">Outstanding Balances</h2>
+      <div class="search-container">
+        <input type="text" id="balance-search-input" placeholder="Search by customer name...">
+        <button id="balance-search-btn">Search</button>
+      </div>
+      <div id="balance-table-container">
+        <div id="balance-error" class="error" style="display:none;"></div>
+        <table id="balance-table">
+          <thead>
+            <tr>
+              <th>Invoice No</th>
+              <th>Customer Name</th>
+              <th>Date</th>
+              <th>Total</th>
+              <th>Paid</th>
+              <th>Balance</th>
+              <th>Payment By</th>
+              <th>Billed By</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="balance-table-body">
+            <!-- Data will be populated here -->
+          </tbody>
+        </table>
+        <div id="balance-no-data" class="no-data" style="display:none;">
+          No outstanding balances found. Try a different search term.
+        </div>
+        <div id="balance-loading" class="loading" style="display:none;">
+          Loading outstanding balances...
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // DOM elements
+    const cards = document.querySelectorAll('.card');
+    const dataSections = document.querySelectorAll('.data-section');
+    const searchBtn = document.getElementById('searchBtn');
+    const partialSearchBtn = document.getElementById('partial-search-btn');
+    const balanceSearchBtn = document.getElementById('balance-search-btn');
+    
+    // Global variables
+    let allInvoices = [];
+    
+    // Safe element access function
+    function getElementSafe(id) {
+      const element = document.getElementById(id);
+      if (!element) {
+        console.warn(`Element with id '${id}' not found`);
+      }
+      return element;
+    }
+    
+    // Safe style manipulation
+    function setDisplaySafe(element, displayValue) {
+      if (element && element.style) {
+        element.style.display = displayValue;
+      }
+    }
+    
+    // Initialize dashboard
+    document.addEventListener('DOMContentLoaded', function() {
+      // Load all data initially
+      fetchAllData();
+      
+      // Add event listeners to cards
+      cards.forEach(card => {
+        card.addEventListener('click', function() {
+          const type = this.getAttribute('data-type');
+          
+          // Update active card
+          cards.forEach(c => c.classList.remove('active'));
+          this.classList.add('active');
+          
+          // Show corresponding section
+          dataSections.forEach(section => section.classList.remove('active'));
+          const section = getElementSafe(`${type}-section`);
+          if (section) section.classList.add('active');
+          
+          // Load data for the selected section
+          if (type === 'total') {
+            renderTable('total-table-body', allInvoices);
+          } else if (type === 'partial') {
+            const partialData = allInvoices.filter(invoice => 
+              parseFloat(invoice.Paid || 0) > 0 && parseFloat(invoice.Balance || 0) > 0);
+            renderTable('partial-table-body', partialData);
+          } else if (type === 'balance') {
+            const balanceData = allInvoices.filter(invoice => parseFloat(invoice.Balance || 0) > 0);
+            renderTable('balance-table-body', balanceData);
+          }
+        });
+      });
+      
+      // Add event listeners to search buttons
+      if (searchBtn) {
+        searchBtn.addEventListener('click', function() {
+          const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+          const filteredData = allInvoices.filter(invoice => {
+            const customerName = invoice['Customer Name'] || invoice['CustomerName'] || '';
+            return customerName.toLowerCase().includes(searchTerm);
+          });
+          renderTable('total-table-body', filteredData);
+        });
+      }
+      
+      if (partialSearchBtn) {
+        partialSearchBtn.addEventListener('click', function() {
+          const searchTerm = document.getElementById('partial-search-input').value.toLowerCase();
+          const filteredData = allInvoices.filter(invoice => {
+            const customerName = invoice['Customer Name'] || invoice['CustomerName'] || '';
+            return parseFloat(invoice.Paid || 0) > 0 && 
+                   parseFloat(invoice.Balance || 0) > 0 &&
+                   customerName.toLowerCase().includes(searchTerm);
+          });
+          renderTable('partial-table-body', filteredData);
+        });
+      }
+      
+      if (balanceSearchBtn) {
+        balanceSearchBtn.addEventListener('click', function() {
+          const searchTerm = document.getElementById('balance-search-input').value.toLowerCase();
+          const filteredData = allInvoices.filter(invoice => {
+            const customerName = invoice['Customer Name'] || invoice['CustomerName'] || '';
+            return parseFloat(invoice.Balance || 0) > 0 &&
+                   customerName.toLowerCase().includes(searchTerm);
+          });
+          renderTable('balance-table-body', filteredData);
+        });
+      }
+    });
+
+    // Fetch all data from Google Sheets
+    function fetchAllData() {
+      const loadingElement = getElementSafe('total-loading');
+      const errorElement = getElementSafe('total-error');
+      
+      setDisplaySafe(loadingElement, 'block');
+      setDisplaySafe(errorElement, 'none');
+      
+      const scriptUrl = 'https://script.google.com/macros/s/AKfycbwsK_G9H68w9N66WQbC1OBqJXma4yCv9qCUYEV5XbDqcj4XNfuFeZMznea-i8AfYXEkdA/exec';
+      
+      console.log('Fetching data from:', scriptUrl);
+      
+      fetch(scriptUrl)
+        .then(res => {
+          console.log('Response status:', res.status);
+          if (!res.ok) {
+            throw new Error(`HTTP error! status: ${res.status}`);
+          }
+          return res.json();
+        })
+        .then(data => {
+          console.log('Data received:', data);
+          setDisplaySafe(loadingElement, 'none');
+          
+          if (!data || !data.length) {
+            const noDataElement = getElementSafe('total-no-data');
+            setDisplaySafe(noDataElement, 'block');
+            return;
+          }
+          
+          allInvoices = data;
+          updateCardValues(data);
+          renderTable('total-table-body', data);
+        })
+        .catch(err => {
+          console.error('Fetch error:', err);
+          setDisplaySafe(loadingElement, 'none');
+          setDisplaySafe(errorElement, 'block');
+          if (errorElement) {
+            errorElement.innerHTML = `Error loading data: ${err.message}.<br>Please check if doGet function is deployed and accessible.`;
+          }
+        });
+    }
+
+    // Update card values with real data
+    function updateCardValues(data) {
+      const totalInvoices = data.length;
+      const partialPayments = data.filter(invoice => 
+        parseFloat(invoice.Paid || 0) > 0 && parseFloat(invoice.Balance || 0) > 0).length;
+      const balanceCount = data.filter(invoice => parseFloat(invoice.Balance || 0) > 0).length;
+      
+      const totalInvoicesElement = getElementSafe('total-invoices-count');
+      const partialPaymentsElement = getElementSafe('partial-payments-count');
+      const balanceCountElement = getElementSafe('balance-count');
+      
+      if (totalInvoicesElement) totalInvoicesElement.textContent = totalInvoices;
+      if (partialPaymentsElement) partialPaymentsElement.textContent = partialPayments;
+      if (balanceCountElement) balanceCountElement.textContent = balanceCount;
+    }
+
+    // Render table with data
+    function renderTable(tableBodyId, data) {
+      const tableBody = getElementSafe(tableBodyId);
+      const noDataElement = getElementSafe(tableBodyId.replace('body', 'no-data'));
+      
+      if (!tableBody) return;
+      
+      tableBody.innerHTML = '';
+      
+      if (!data || data.length === 0) {
+        setDisplaySafe(noDataElement, 'block');
+        return;
+      }
+      
+      setDisplaySafe(noDataElement, 'none');
+      
+      tableBody.innerHTML = data.map(invoice => {
+        const invoiceNo = invoice['Invoice No'] || invoice['InvoiceNo'] || 'N/A';
+        const customerName = invoice['Customer Name'] || invoice['CustomerName'] || 'N/A';
+        const pdfLink = invoice['PDF Link'] || invoice['PDFLink'] || '';
+        
+        return `
+          <tr>
+            <td>${invoiceNo}</td>
+            <td>${customerName}</td>
+            <td>${invoice.Date || 'N/A'}</td>
+            <td>₹${parseFloat(invoice.Total || 0).toLocaleString()}</td>
+            <td>₹${parseFloat(invoice.Paid || 0).toLocaleString()}</td>
+            <td>₹${parseFloat(invoice.Balance || 0).toLocaleString()}</td>
+            <td>${invoice.PaymentBy || 'N/A'}</td>
+            <td>${invoice.BilledBy || 'N/A'}</td>
+            <td>
+              <button class="action-btn" onclick="viewInvoice('${pdfLink}')">View</button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    // View invoice PDF
+    function viewInvoice(pdfLink) {
+      if (pdfLink && pdfLink !== 'N/A') {
+        window.open(pdfLink, '_blank');
+      } else {
+        alert('No PDF available for this invoice');
+      }
+    }
+  </script>
+</body>
+</html>
