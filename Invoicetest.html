@@ -273,20 +273,33 @@
   </div>
 
   <div class="address">Sy No 22 and 23 Hythabad, Shabad Mandal, Ranga Reddy, Telangana - 509217</div>
-  <div class="info-line">
-    <div><strong>Invoice No:</strong> <span id="invoiceNo"></span></div>
-    <div><strong>Date:</strong> <span id="invoiceDate"></span></div>
+<div class="info-line">
+  <div>
+    <strong>Invoice No:</strong> <span id="invoiceNo"></span><br>
+    <strong>With reference to Purchase Order:</strong> IN-PO-25011532
   </div>
+  <div><strong>Date:</strong> <span id="invoiceDate"></span></div>
+</div>
 
   <div class="ms-line">Name
     <div class="dropdown-container" style="position: relative;">
-      <input type="text" id="customerName" placeholder="Customer Name" onfocus="showCustomerDropdown()" oninput="filterCustomerDropdown()" autocomplete="off" />
+      <input type="text" id="customerName" value="Inventre Educare Services Private Limited" readonly />
       <div class="dropdown-list" id="customerDropdown" style="position: absolute; top: 100%; left: 0; width: 100%; max-height: 150px; overflow-y: auto; background: #fff; border: 1px solid #ccc; display: none; z-index: 100;"></div>
     </div>
   </div>
 
-  <div class="ms-line">Address <input type="text" id="Address" placeholder="Address" /></div>
-  <div class="ms-line">Phone <input type="text" id="PhoneNumber" placeholder="PhoneNumber" /></div>
+  <div class="ms-line">
+  Address<br>
+  <strong>
+    Plot No: P-6/3,<br>
+    IDA Nacharam, Road No: 15,<br>
+    Hyderabad, Telangana
+  </strong>
+</div>
+	<div class="ms-line">
+  GST No: <strong>36AAMCP1199C1ZA</strong>
+</div>
+  
   
   <table border="1" style="width: 100%; border-collapse: collapse;">
     <thead>
@@ -902,10 +915,7 @@
       alert("Please enter Customer Name and Address before submitting the invoice.");
       return;
     }
-    if (!selectedPayment) {
-      alert("Please enter Payment Mode before submitting the invoice.");
-      return;
-    }
+    
     document.getElementById("submitBtn").style.display = "none";
     document.getElementById("afterSubmitButtons").style.display = "block";
     document.getElementById("staffButtons").style.display = "none";
@@ -1168,8 +1178,7 @@
           GrandTotal: isLast ? runningTotal.toFixed(2) : "0.00",
           AmountPaid: isLast ? amountPaid.toFixed(2) : "0.00",
           RemainingBalance: isLast ? (runningTotal - amountPaid).toFixed(2) : "0.00",
-          BilledBy: typeof selectedBiller !== 'undefined' ? selectedBiller : '',
-          PaymentBy: selectedPayment || ''
+          
         };
       });
     
