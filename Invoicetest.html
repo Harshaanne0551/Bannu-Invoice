@@ -151,6 +151,12 @@
       0% { transform: rotate(0deg); }
       100% { transform: rotate(360deg); }
     }
+    .payment-terms {
+      margin-top: 15px;
+      font-size: 13px;
+      font-weight: bold;
+      text-align: left;
+    }
     button {
       margin-top: 10px;
       padding: 3px 6px;
@@ -340,26 +346,15 @@
   <div class="total-in-words">
     Total Amount in Rs. <input type="text" id="amountInWords" readonly style="width: 100%;" />
   </div>
-  <div id="Payment-Method" style="margin-top: 10px; text-align: center;">
-    <button onclick="setPayment('Cash')">Cash</button>
-    <button onclick="setPayment('UPI')">UPI</button>
-    <button onclick="setPayment('Cheque')">Cheque</button>
-  </div>
-  <div id="staffButtons" style="margin-top: 10px; text-align: center;">
-    <strong>Select Biller:</strong><br />
-    <button onclick="setBiller('Suhas')">Suhas Anne</button>
-    <button onclick="setBiller('Kavitha')">Kavitha Anne</button>
-    <button onclick="setBiller('Prasad')">Prasad</button>
-    <button onclick="setBiller('Sagar')">Sagar</button>
-    <button onclick="setBiller('Harsha')">Harsha Anne</button>
-  </div>
-  <!-- Add this just above the billedBy div -->
-<div id="paymentBy" style="margin-top: 10px; font-weight: bold; text-align: right; display: none;">
-  Payment Method: <span id="paymentName"></span>
+
+  <div class="payment-terms">
+  <strong>Payment Terms:</strong><br>
+  25% at the time of Performa Invoice<br>
+  25% at the time of Delivery<br>
+  50% within 90 days after Delivery
 </div>
-  <div id="billedBy" style="margin-top: 10px; font-weight: bold; text-align: right; display: none;">
-    Billed by: <span id="billerName"></span>
-  </div>
+  <!-- Add this just above the billedBy div -->
+
 
   <div class="signature">For Bannu Enterprises</div>
 </div>
