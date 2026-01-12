@@ -54,7 +54,7 @@
 
     .address {
       text-align: center;
-      font-size: 8px;
+      font-size: 15px;
     }
 
     .info-line {
@@ -246,7 +246,18 @@
         width: 100%;
       }
     }
-    
+      .customer-name {
+  font-size: 18px;   /* increased */
+  font-weight: bold;
+	  }
+	  .customer-address strong {
+  font-size: 12px;   /* reduced */
+  font-weight: normal;
+}
+	  .customer-gst strong {
+  font-size: 11px;   /* reduced */
+  font-weight: normal;
+}
     /* Added for phone number field */
     #PhoneNumber {
       background-color: #f0f0f0;
@@ -280,15 +291,17 @@
   </div>
   <div><strong>Date:</strong> <span id="invoiceDate"></span></div>
 </div>
+<input
+  type="text"
+  id="customerName"
+  value="Inventre Educare Services Private Limited"
+  readonly
+  class="customer-name"
+/>
 
-  <div class="ms-line">Name
-    <div class="dropdown-container" style="position: relative;">
-      <input type="text" id="customerName" value="Inventre Educare Services Private Limited" readonly />
-      <div class="dropdown-list" id="customerDropdown" style="position: absolute; top: 100%; left: 0; width: 100%; max-height: 150px; overflow-y: auto; background: #fff; border: 1px solid #ccc; display: none; z-index: 100;"></div>
-    </div>
-  </div>
 
-  <div class="ms-line">
+
+  <div class="ms-line customer-address">
   Address<br>
   <strong>
     Plot No: P-6/3,<br>
@@ -296,7 +309,7 @@
     Hyderabad, Telangana
   </strong>
 </div>
-	<div class="ms-line">
+	<div class="ms-line customer-gst">
   GST No: <strong>36AAMCP1199C1ZA</strong>
 </div>
   
